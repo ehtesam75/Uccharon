@@ -1559,6 +1559,43 @@ input, textarea, select {
     color: var(--text-secondary);
 }
 
+/* ─── Voice Provider Cards ───────────────────────────────── */
+
+.voice-provider-cards {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.voice-provider-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: rgba(var(--accent-primary-rgb), 0.06);
+    border: 1px solid rgba(var(--accent-primary-rgb), 0.18);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.notice-icon {
+    flex-shrink: 0;
+    font-size: 1rem;
+    margin-top: 1px;
+}
+
+/* Recording mode indicator badge */
+.mic-provider-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(var(--accent-primary-rgb), 0.15);
+    color: var(--accent-primary);
+    border-radius: 4px;
+    padding: 1px 6px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
 /* ═══════════════════════════════════════════════════════════
    STATS MODAL
    ═══════════════════════════════════════════════════════════ */

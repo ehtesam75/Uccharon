@@ -321,6 +321,56 @@
                     </select>
                 </div>
 
+                <!-- Voice Input Provider -->
+                <div class="settings-section">
+                    <h3>🎤 Voice Input Provider</h3>
+                    <p class="settings-desc">Choose how your voice is converted to text</p>
+                    <div class="provider-cards voice-provider-cards">
+                        <label class="provider-card" id="voice-provider-browser-card">
+                            <input type="radio" name="voice-provider" value="browser" checked>
+                            <div class="provider-card-content">
+                                <div class="provider-icon">🌐</div>
+                                <div class="provider-name">Browser</div>
+                                <div class="provider-desc">Web Speech API (Free)</div>
+                            </div>
+                        </label>
+                        <label class="provider-card" id="voice-provider-openai-card">
+                            <input type="radio" name="voice-provider" value="openai">
+                            <div class="provider-card-content">
+                                <div class="provider-icon">🤖</div>
+                                <div class="provider-name">OpenAI</div>
+                                <div class="provider-desc">Whisper API</div>
+                            </div>
+                        </label>
+                        <label class="provider-card" id="voice-provider-gemini-card">
+                            <input type="radio" name="voice-provider" value="gemini-stt">
+                            <div class="provider-card-content">
+                                <div class="provider-icon">✦</div>
+                                <div class="provider-name">Gemini</div>
+                                <div class="provider-desc">Audio Understanding</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- OpenAI key for Whisper -->
+                    <div class="form-group" id="openai-key-group" style="margin-top:14px; display:none;">
+                        <label for="openai-api-key">OpenAI API Key <span style="color:var(--text-tertiary);font-weight:400;">(for Whisper)</span></label>
+                        <div class="key-input-wrapper">
+                            <input type="password" id="openai-api-key" placeholder="sk-...">
+                            <button class="toggle-key-vis" data-target="openai-api-key" title="Show/hide key">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <p class="settings-desc" style="margin-top:6px; margin-bottom:0;">Gemini voice uses your existing Gemini API key above.</p>
+                    </div>
+
+                    <!-- Browser fallback notice -->
+                    <div id="voice-browser-notice" class="voice-provider-notice" style="margin-top:12px;">
+                        <span class="notice-icon">ℹ️</span>
+                        <span>No API key needed. Uses your browser's built-in speech recognition. If unavailable, the mic button will be hidden.</span>
+                    </div>
+                </div>
+
                 <button id="save-settings-btn" class="auth-btn primary-btn" style="margin-top:16px;">
                     <span>Save Settings</span>
                 </button>

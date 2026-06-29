@@ -18,14 +18,18 @@
             gemini_api_key: '',
             groq_api_key: '',
             gemini_model: 'gemini-2.0-flash',
-            groq_model: 'llama-3.3-70b-versatile'
+            groq_model: 'llama-3.3-70b-versatile',
+            voice_provider: 'browser',    // 'browser' | 'openai' | 'gemini-stt'
+            openai_api_key: ''             // used for Whisper STT
         },
         conversations: [],
         currentConversation: null,
         currentMessages: [],
         isRecording: false,
         isSending: false,
-        recognition: null,
+        recognition: null,       // Web Speech API instance
+        mediaRecorder: null,     // MediaRecorder for Whisper / Gemini audio
+        audioChunks: [],         // accumulated audio blobs
         previousScores: null
     };
 
@@ -84,9 +88,12 @@
         closeSettings: $('#close-settings'),
         geminiApiKey: $('#gemini-api-key'),
         groqApiKey: $('#groq-api-key'),
+        openaiApiKey: $('#openai-api-key'),
         geminiModelSelect: $('#gemini-model-select'),
         groqModelSelect: $('#groq-model-select'),
         saveSettingsBtn: $('#save-settings-btn'),
+        openaiKeyGroup: $('#openai-key-group'),
+        voiceBrowserNotice: $('#voice-browser-notice'),
 
         // Stats
         statsBtn: $('#stats-btn'),
@@ -245,9 +252,11 @@
             if (data.authenticated) {
                 state.user = data.user;
                 state.settings = { ...state.settings, ...data.settings };
-                // Restore model selections from localStorage
+                // Restore local-only settings from localStorage
                 state.settings.gemini_model = localStorage.getItem('uccharon_gemini_model') || 'gemini-2.0-flash';
                 state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
+                state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
+                state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
                 await loadConversations();
                 showApp();
             }
@@ -288,6 +297,8 @@
             state.settings = { ...state.settings, ...settingsData };
             state.settings.gemini_model = localStorage.getItem('uccharon_gemini_model') || 'gemini-2.0-flash';
             state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
+            state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
+            state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
         } catch (e) { /* ignore */ }
         await loadConversations();
     }
@@ -813,13 +824,17 @@
     // VOICE INPUT
     // ═══════════════════════════════════════════════════════
 
-    function initVoice() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // ─── Voice provider routing ──────────────────────────
 
-        if (!SpeechRecognition) {
-            DOM.micBtn.style.display = 'none';
-            return;
-        }
+    function initVoice() {
+        DOM.micBtn.addEventListener('click', toggleRecording);
+        // Build browser STT once (reused when provider = browser)
+        _initBrowserSpeechRecognition();
+    }
+
+    function _initBrowserSpeechRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return;
 
         state.recognition = new SpeechRecognition();
         state.recognition.continuous = true;
@@ -845,13 +860,10 @@
         };
 
         state.recognition.onend = () => {
-            if (state.isRecording) {
-                // Restart if still in recording mode
+            if (state.isRecording && state.settings.voice_provider === 'browser') {
                 try { state.recognition.start(); } catch (e) { stopRecording(); }
             }
         };
-
-        DOM.micBtn.addEventListener('click', toggleRecording);
     }
 
     function toggleRecording() {
@@ -863,25 +875,220 @@
     }
 
     function startRecording() {
-        try {
-            state.recognition.start();
-            state.isRecording = true;
-            DOM.micBtn.classList.add('recording');
-            DOM.micStatus.style.display = 'flex';
-            DOM.micBtn.querySelector('.mic-icon-off').style.display = 'none';
-            DOM.micBtn.querySelector('.mic-icon-on').style.display = 'block';
-        } catch (e) {
-            showToast('Failed to start recording', 'error');
+        const provider = state.settings.voice_provider || 'browser';
+
+        if (provider === 'browser') {
+            if (!state.recognition) {
+                showToast('Browser speech recognition is not supported. Switch to another provider in Settings.', 'error');
+                return;
+            }
+            try {
+                state.recognition.start();
+            } catch (e) {
+                showToast('Failed to start browser speech recognition.', 'error');
+                return;
+            }
+            _setRecordingUI(true, 'Browser');
+
+        } else if (provider === 'openai') {
+            const apiKey = state.settings.openai_api_key;
+            if (!apiKey) {
+                showToast('Please set your OpenAI API key in Settings to use Whisper.', 'error');
+                openSettings();
+                return;
+            }
+            _startMediaRecorder('openai');
+
+        } else if (provider === 'gemini-stt') {
+            const apiKey = state.settings.gemini_api_key;
+            if (!apiKey) {
+                showToast('Please set your Gemini API key in Settings to use Gemini voice.', 'error');
+                openSettings();
+                return;
+            }
+            _startMediaRecorder('gemini-stt');
         }
     }
 
     function stopRecording() {
-        try { state.recognition.stop(); } catch (e) { /* ignore */ }
-        state.isRecording = false;
-        DOM.micBtn.classList.remove('recording');
-        DOM.micStatus.style.display = 'none';
-        DOM.micBtn.querySelector('.mic-icon-off').style.display = 'block';
-        DOM.micBtn.querySelector('.mic-icon-on').style.display = 'none';
+        const provider = state.settings.voice_provider || 'browser';
+
+        if (provider === 'browser') {
+            try { if (state.recognition) state.recognition.stop(); } catch (e) { /* ignore */ }
+        } else {
+            // Stop MediaRecorder — the onstop handler will fire and send audio to API
+            if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+                state.mediaRecorder.stop();
+            }
+        }
+        _setRecordingUI(false);
+    }
+
+    function _setRecordingUI(isRecording, providerLabel) {
+        state.isRecording = isRecording;
+        if (isRecording) {
+            DOM.micBtn.classList.add('recording');
+            DOM.micStatus.style.display = 'flex';
+            DOM.micBtn.querySelector('.mic-icon-off').style.display = 'none';
+            DOM.micBtn.querySelector('.mic-icon-on').style.display = 'block';
+            // Show which provider is active
+            let badge = DOM.micStatus.querySelector('.mic-provider-badge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'mic-provider-badge';
+                DOM.micStatus.appendChild(badge);
+            }
+            badge.textContent = providerLabel || '';
+        } else {
+            DOM.micBtn.classList.remove('recording');
+            DOM.micStatus.style.display = 'none';
+            DOM.micBtn.querySelector('.mic-icon-off').style.display = 'block';
+            DOM.micBtn.querySelector('.mic-icon-on').style.display = 'none';
+        }
+    }
+
+    // ─── MediaRecorder-based recording (Whisper / Gemini) ──
+
+    function _startMediaRecorder(targetProvider) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                state.audioChunks = [];
+                // Prefer webm/opus; fall back to whatever the browser offers
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                    ? 'audio/webm;codecs=opus'
+                    : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '');
+
+                const options = mimeType ? { mimeType } : {};
+                state.mediaRecorder = new MediaRecorder(stream, options);
+
+                state.mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) state.audioChunks.push(e.data);
+                };
+
+                state.mediaRecorder.onstop = async () => {
+                    // Stop all tracks to release the microphone
+                    stream.getTracks().forEach(t => t.stop());
+                    const blob = new Blob(state.audioChunks, { type: mimeType || 'audio/webm' });
+                    state.audioChunks = [];
+
+                    if (blob.size === 0) return;
+
+                    // Show "Transcribing..." indicator
+                    DOM.micStatus.style.display = 'flex';
+                    const statusSpan = DOM.micStatus.querySelector('span:not(.mic-provider-badge)');
+                    if (statusSpan) statusSpan.textContent = 'Transcribing...';
+                    DOM.micBtn.disabled = true;
+
+                    try {
+                        let transcript = '';
+                        if (targetProvider === 'openai') {
+                            transcript = await _transcribeWithWhisper(blob);
+                        } else if (targetProvider === 'gemini-stt') {
+                            transcript = await _transcribeWithGemini(blob);
+                        }
+
+                        if (transcript) {
+                            DOM.chatInput.value = transcript.trim();
+                            DOM.chatInput.style.height = 'auto';
+                            DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
+                            DOM.chatInput.focus();
+                        }
+                    } catch (err) {
+                        showToast('Transcription failed: ' + err.message, 'error');
+                    } finally {
+                        DOM.micStatus.style.display = 'none';
+                        if (statusSpan) statusSpan.textContent = 'Listening...';
+                        DOM.micBtn.disabled = false;
+                    }
+                };
+
+                state.mediaRecorder.start();
+                const label = targetProvider === 'openai' ? 'Whisper' : 'Gemini';
+                _setRecordingUI(true, label);
+            })
+            .catch(err => {
+                if (err.name === 'NotAllowedError') {
+                    showToast('Microphone access denied. Please allow access in browser settings.', 'error');
+                } else {
+                    showToast('Could not access microphone: ' + err.message, 'error');
+                }
+            });
+    }
+
+    // ─── OpenAI Whisper transcription ────────────────────
+
+    async function _transcribeWithWhisper(audioBlob) {
+        const formData = new FormData();
+        // Whisper requires a filename with a supported extension
+        const ext = audioBlob.type.includes('webm') ? 'webm' : 'mp4';
+        formData.append('file', new File([audioBlob], `recording.${ext}`, { type: audioBlob.type }));
+        formData.append('model', 'whisper-1');
+        formData.append('language', 'en');
+
+        const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${state.settings.openai_api_key}` },
+            body: formData
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Whisper API error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        return data.text || '';
+    }
+
+    // ─── Gemini audio understanding transcription ─────────
+
+    async function _transcribeWithGemini(audioBlob) {
+        const apiKey = state.settings.gemini_api_key;
+        const model = state.settings.gemini_model || 'gemini-2.0-flash';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+        // Convert blob to base64
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        const uint8 = new Uint8Array(arrayBuffer);
+        let binary = '';
+        uint8.forEach(b => binary += String.fromCharCode(b));
+        const base64Data = btoa(binary);
+        const mimeType = audioBlob.type || 'audio/webm';
+
+        const body = {
+            contents: [{
+                role: 'user',
+                parts: [
+                    {
+                        inlineData: {
+                            mimeType: mimeType,
+                            data: base64Data
+                        }
+                    },
+                    {
+                        text: 'Please transcribe this audio recording exactly as spoken. Return ONLY the spoken text, nothing else.'
+                    }
+                ]
+            }],
+            generationConfig: {
+                temperature: 0,
+                maxOutputTokens: 1024
+            }
+        };
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Gemini STT error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
 
     // ═══════════════════════════════════════════════════════
@@ -901,32 +1108,68 @@
     function applySettingsToUI() {
         DOM.geminiApiKey.value = state.settings.gemini_api_key || '';
         DOM.groqApiKey.value = state.settings.groq_api_key || '';
+        DOM.openaiApiKey.value = state.settings.openai_api_key || '';
 
-        // Provider radios
+        // AI Provider radios
         const providerRadio = document.querySelector(`input[name="ai-provider"][value="${state.settings.ai_provider}"]`);
         if (providerRadio) providerRadio.checked = true;
 
         // Model selects
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.0-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
+
+        // Voice Provider radios
+        const vp = state.settings.voice_provider || 'browser';
+        const voiceRadio = document.querySelector(`input[name="voice-provider"][value="${vp}"]`);
+        if (voiceRadio) voiceRadio.checked = true;
+        _updateVoiceProviderUI(vp);
+    }
+
+    /** Show/hide the OpenAI key field and notice based on selected voice provider */
+    function _updateVoiceProviderUI(provider) {
+        const showOpenAI = provider === 'openai' || provider === 'gemini-stt';
+        DOM.openaiKeyGroup.style.display = showOpenAI ? 'block' : 'none';
+        DOM.voiceBrowserNotice.style.display = provider === 'browser' ? 'flex' : 'none';
     }
 
     async function saveSettings() {
         const provider = document.querySelector('input[name="ai-provider"]:checked')?.value || 'gemini';
         const geminiKey = DOM.geminiApiKey.value.trim();
         const groqKey = DOM.groqApiKey.value.trim();
+        const openaiKey = DOM.openaiApiKey.value.trim();
         const geminiModel = DOM.geminiModelSelect.value;
         const groqModel = DOM.groqModelSelect.value;
+        const voiceProvider = document.querySelector('input[name="voice-provider"]:checked')?.value || 'browser';
 
         state.settings.ai_provider = provider;
         state.settings.gemini_api_key = geminiKey;
         state.settings.groq_api_key = groqKey;
+        state.settings.openai_api_key = openaiKey;
         state.settings.gemini_model = geminiModel;
         state.settings.groq_model = groqModel;
+        state.settings.voice_provider = voiceProvider;
+
+        // Validate: if user picks OpenAI Whisper but has no key, warn
+        if (voiceProvider === 'openai' && !openaiKey) {
+            showToast('No OpenAI key found. Voice will fall back to Browser speech recognition.', 'info');
+            state.settings.voice_provider = 'browser';
+            const br = document.querySelector('input[name="voice-provider"][value="browser"]');
+            if (br) br.checked = true;
+            _updateVoiceProviderUI('browser');
+        }
+        if (voiceProvider === 'gemini-stt' && !geminiKey) {
+            showToast('No Gemini key found. Voice will fall back to Browser speech recognition.', 'info');
+            state.settings.voice_provider = 'browser';
+            const br = document.querySelector('input[name="voice-provider"][value="browser"]');
+            if (br) br.checked = true;
+            _updateVoiceProviderUI('browser');
+        }
 
         // Save model selections to localStorage
         localStorage.setItem('uccharon_gemini_model', geminiModel);
         localStorage.setItem('uccharon_groq_model', groqModel);
+        localStorage.setItem('uccharon_voice_provider', state.settings.voice_provider);
+        localStorage.setItem('uccharon_openai_api_key', openaiKey);
 
         try {
             await api('/api/settings/', 'PUT', {
@@ -947,11 +1190,18 @@
         DOM.settingsOverlay.addEventListener('click', closeSettings);
         DOM.saveSettingsBtn.addEventListener('click', saveSettings);
 
-        // Toggle API key visibility
+        // Toggle API key visibility (handles all .toggle-key-vis buttons incl. OpenAI)
         document.querySelectorAll('.toggle-key-vis').forEach(btn => {
             btn.addEventListener('click', () => {
                 const input = document.getElementById(btn.dataset.target);
-                input.type = input.type === 'password' ? 'text' : 'password';
+                if (input) input.type = input.type === 'password' ? 'text' : 'password';
+            });
+        });
+
+        // Show/hide OpenAI key field when voice provider changes
+        document.querySelectorAll('input[name="voice-provider"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                _updateVoiceProviderUI(radio.value);
             });
         });
     }
