@@ -565,12 +565,19 @@
         // 5. Performance Rating
         if (response.performance_rating) {
             const pr = response.performance_rating;
+            // Calculate overall score
+            const overall = (pr.grammar * 0.40) + (pr.naturalness * 0.30) + (pr.vocabulary * 0.20) + (pr.confidence * 0.10);
+            const overallRounded = Number(overall.toFixed(1));
+            
+            // Add to currentScores so backend saves it
+            currentScores.overall = overallRounded;
+
             const scores = [
+                { label: 'Overall', value: overallRounded, key: 'overall' },
                 { label: 'Grammar', value: pr.grammar, key: 'grammar' },
                 { label: 'Vocabulary', value: pr.vocabulary, key: 'vocabulary' },
                 { label: 'Naturalness', value: pr.naturalness, key: 'naturalness' },
                 { label: 'Confidence', value: pr.confidence, key: 'confidence' },
-                { label: 'Pronunciation', value: pr.pronunciation, key: 'pronunciation' },
             ];
 
             let scoresHtml = '<div class="scores-grid">';
@@ -602,30 +609,7 @@
             card.appendChild(createFeedbackSection('📊', 'Performance Rating', scoresHtml));
         }
 
-        // 6. Strength & Weakness
-        if (response.strength || response.weakness) {
-            const swHtml = `
-                <div class="strength-weakness">
-                    ${response.strength ? `
-                        <div class="sw-card strength">
-                            <div class="sw-icon">💪</div>
-                            <div class="sw-label">Strength</div>
-                            <div class="sw-value">${escapeHtml(response.strength)}</div>
-                        </div>
-                    ` : ''}
-                    ${response.weakness ? `
-                        <div class="sw-card weakness">
-                            <div class="sw-icon">⚠️</div>
-                            <div class="sw-label">Weakness</div>
-                            <div class="sw-value">${escapeHtml(response.weakness)}</div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-            card.appendChild(createFeedbackSection('🎭', 'Analysis', swHtml));
-        }
-
-        // 7. Follow-up Question
+        // 6. Follow-up Question
         if (response.follow_up_question) {
             card.appendChild(createFeedbackSection(
                 '💬', 'Let\'s Continue',
@@ -987,11 +971,11 @@
             }
 
             const avgScores = [
+                { label: 'Overall', value: data.averages.overall },
                 { label: 'Grammar', value: data.averages.grammar },
                 { label: 'Vocabulary', value: data.averages.vocabulary },
                 { label: 'Naturalness', value: data.averages.naturalness },
                 { label: 'Confidence', value: data.averages.confidence },
-                { label: 'Pronunciation', value: data.averages.pronunciation },
             ];
 
             let scoresHtml = '';

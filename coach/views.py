@@ -216,7 +216,7 @@ def messages_view(request, convo_id):
                         'vocabulary': m.score_vocabulary,
                         'naturalness': m.score_naturalness,
                         'confidence': m.score_confidence,
-                        'pronunciation': m.score_pronunciation,
+                        'overall': m.score_overall,
                     },
                     'created_at': m.created_at.isoformat(),
                 }
@@ -240,7 +240,7 @@ def messages_view(request, convo_id):
         score_vocabulary=scores.get('vocabulary'),
         score_naturalness=scores.get('naturalness'),
         score_confidence=scores.get('confidence'),
-        score_pronunciation=scores.get('pronunciation'),
+        score_overall=scores.get('overall'),
     )
 
     # Update conversation title from first message
@@ -257,7 +257,7 @@ def messages_view(request, convo_id):
             'vocabulary': msg.score_vocabulary,
             'naturalness': msg.score_naturalness,
             'confidence': msg.score_confidence,
-            'pronunciation': msg.score_pronunciation,
+            'overall': msg.score_overall,
         },
         'created_at': msg.created_at.isoformat(),
     })
@@ -284,7 +284,7 @@ def stats_view(request):
                 'vocabulary': 0,
                 'naturalness': 0,
                 'confidence': 0,
-                'pronunciation': 0,
+                'overall': 0,
             }
         })
 
@@ -295,7 +295,7 @@ def stats_view(request):
             'vocabulary': m.score_vocabulary,
             'naturalness': m.score_naturalness,
             'confidence': m.score_confidence,
-            'pronunciation': m.score_pronunciation,
+            'overall': m.score_overall,
             'created_at': m.created_at.isoformat(),
         })
 
@@ -305,7 +305,7 @@ def stats_view(request):
         'vocabulary': round(sum(s['vocabulary'] or 0 for s in scores_list) / count, 1),
         'naturalness': round(sum(s['naturalness'] or 0 for s in scores_list) / count, 1),
         'confidence': round(sum(s['confidence'] or 0 for s in scores_list) / count, 1),
-        'pronunciation': round(sum(s['pronunciation'] or 0 for s in scores_list) / count, 1),
+        'overall': round(sum(s['overall'] or 0 for s in scores_list) / count, 1),
     }
 
     return JsonResponse({

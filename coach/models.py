@@ -55,7 +55,7 @@ class Message(models.Model):
     score_vocabulary = models.FloatField(null=True, blank=True)
     score_naturalness = models.FloatField(null=True, blank=True)
     score_confidence = models.FloatField(null=True, blank=True)
-    score_pronunciation = models.FloatField(null=True, blank=True)
+    score_overall = models.FloatField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
