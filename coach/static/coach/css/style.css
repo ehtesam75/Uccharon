@@ -1562,7 +1562,74 @@ input, textarea, select {
 /* ─── Voice Provider Cards ───────────────────────────────── */
 
 .voice-provider-cards {
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.voice-provider-cards .provider-card-content {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    text-align: left;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.voice-provider-cards .provider-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0;
+    margin-right: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--accent-primary-rgb), 0.1);
+    color: var(--accent-primary);
+    border-radius: var(--radius-sm);
+}
+
+.voice-provider-cards .provider-info {
+    flex-grow: 1;
+}
+
+.voice-provider-cards .provider-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.voice-provider-cards .provider-desc {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+}
+
+/* Custom Radio Circle */
+.provider-radio-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--text-tertiary);
+    margin-left: 16px;
+    position: relative;
+    transition: all var(--transition-fast);
+}
+
+.provider-card input:checked + .provider-card-content .provider-radio-circle {
+    border-color: var(--accent-primary);
+}
+
+.provider-card input:checked + .provider-card-content .provider-radio-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-primary);
 }
 
 .voice-provider-notice {

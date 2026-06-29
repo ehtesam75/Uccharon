@@ -51,7 +51,7 @@ For every user message, you MUST respond with this exact JSON structure:
 
 RULES:
 1. All scores must be integers from 0-10. 
-2. Grammar mistakes (tense, articles, subject-verb agreement, prepositions, word forms) ONLY affect the grammar score. Do NOT include awkward phrasing here.
+2. Grammar mistakes (tense, articles, subject-verb agreement, prepositions, word forms) ONLY affect the grammar score. Do NOT include awkward phrasing or unnatural English here (IMPORTANT).
 3. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. Put these in sentence_improvements.
 4. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, and vocabulary_improvements.
 5. The native_version should ALWAYS be provided — rewrite their full message naturally.

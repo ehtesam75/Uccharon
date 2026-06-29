@@ -841,12 +841,22 @@
         state.recognition.interimResults = true;
         state.recognition.lang = 'en-US';
 
+        state.recognition.onstart = () => {
+            state.initialInputText = DOM.chatInput.value;
+        };
+
         state.recognition.onresult = (event) => {
             let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
+            for (let i = 0; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript;
             }
-            DOM.chatInput.value = transcript;
+            
+            let prefix = state.initialInputText || '';
+            if (prefix && !prefix.endsWith(' ') && transcript && !transcript.startsWith(' ')) {
+                prefix += ' ';
+            }
+            
+            DOM.chatInput.value = prefix + transcript;
             DOM.chatInput.style.height = 'auto';
             DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
         };
@@ -952,6 +962,7 @@
     function _startMediaRecorder(targetProvider) {
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
+                state.initialInputText = DOM.chatInput.value;
                 state.audioChunks = [];
                 // Prefer webm/opus; fall back to whatever the browser offers
                 const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
@@ -988,7 +999,11 @@
                         }
 
                         if (transcript) {
-                            DOM.chatInput.value = transcript.trim();
+                            let prefix = state.initialInputText || '';
+                            if (prefix && !prefix.endsWith(' ') && transcript && !transcript.startsWith(' ')) {
+                                prefix += ' ';
+                            }
+                            DOM.chatInput.value = prefix + transcript.trim();
                             DOM.chatInput.style.height = 'auto';
                             DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
                             DOM.chatInput.focus();
@@ -1141,6 +1156,15 @@
         const groqModel = DOM.groqModelSelect.value;
         const voiceProvider = document.querySelector('input[name="voice-provider"]:checked')?.value || 'browser';
 
+        if (voiceProvider === 'openai' && !openaiKey) {
+            showToast('OpenAI API key is required for Whisper voice input.', 'error');
+            return;
+        }
+        if (voiceProvider === 'gemini-stt' && !geminiKey) {
+            showToast('Gemini API key is required for Gemini voice input.', 'error');
+            return;
+        }
+
         state.settings.ai_provider = provider;
         state.settings.gemini_api_key = geminiKey;
         state.settings.groq_api_key = groqKey;
@@ -1149,27 +1173,14 @@
         state.settings.groq_model = groqModel;
         state.settings.voice_provider = voiceProvider;
 
-        // Validate: if user picks OpenAI Whisper but has no key, warn
-        if (voiceProvider === 'openai' && !openaiKey) {
-            showToast('No OpenAI key found. Voice will fall back to Browser speech recognition.', 'info');
-            state.settings.voice_provider = 'browser';
-            const br = document.querySelector('input[name="voice-provider"][value="browser"]');
-            if (br) br.checked = true;
-            _updateVoiceProviderUI('browser');
-        }
-        if (voiceProvider === 'gemini-stt' && !geminiKey) {
-            showToast('No Gemini key found. Voice will fall back to Browser speech recognition.', 'info');
-            state.settings.voice_provider = 'browser';
-            const br = document.querySelector('input[name="voice-provider"][value="browser"]');
-            if (br) br.checked = true;
-            _updateVoiceProviderUI('browser');
-        }
-
         // Save model selections to localStorage
         localStorage.setItem('uccharon_gemini_model', geminiModel);
         localStorage.setItem('uccharon_groq_model', groqModel);
         localStorage.setItem('uccharon_voice_provider', state.settings.voice_provider);
         localStorage.setItem('uccharon_openai_api_key', openaiKey);
+
+        DOM.saveSettingsBtn.classList.add('btn-loading');
+        DOM.saveSettingsBtn.disabled = true;
 
         try {
             await api('/api/settings/', 'PUT', {
@@ -1181,6 +1192,9 @@
             closeSettings();
         } catch (err) {
             showToast('Failed to save settings', 'error');
+        } finally {
+            DOM.saveSettingsBtn.classList.remove('btn-loading');
+            DOM.saveSettingsBtn.disabled = false;
         }
     }
 
