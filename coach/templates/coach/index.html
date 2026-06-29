@@ -1,0 +1,348 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uccharon – AI English Speaking Coach</title>
+    <meta name="description" content="Practice spoken English with an AI coach. Get grammar corrections, vocabulary tips, pronunciation guidance, and performance tracking.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'coach/css/style.css' %}">
+</head>
+<body>
+
+    <!-- ═══════════════ AUTH SCREEN ═══════════════ -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-bg-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+        <div class="auth-container">
+            <div class="auth-brand">
+                <div class="auth-logo">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0" y1="0" x2="48" y2="48">
+                                <stop offset="0%" stop-color="#6c5ce7"/>
+                                <stop offset="100%" stop-color="#00cec9"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="24" cy="24" r="22" stroke="url(#logoGrad)" stroke-width="3" fill="none"/>
+                        <path d="M16 20C16 20 19 16 24 16C29 16 32 20 32 20" stroke="url(#logoGrad)" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="18" cy="22" r="2" fill="url(#logoGrad)"/>
+                        <circle cx="30" cy="22" r="2" fill="url(#logoGrad)"/>
+                        <path d="M18 30C18 30 20 34 24 34C28 34 30 30 30 30" stroke="url(#logoGrad)" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M34 12L38 8M14 12L10 8M34 36L38 40M14 36L10 40" stroke="url(#logoGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                    </svg>
+                </div>
+                <h1 class="auth-title">Uccharon</h1>
+                <p class="auth-subtitle">Your AI English Speaking Coach</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-card">
+                <h2 class="auth-card-title">Welcome Back</h2>
+                <p class="auth-card-desc">Sign in to continue your practice</p>
+                <div class="auth-error" id="login-error"></div>
+                <div class="form-group">
+                    <label for="login-username">Username or Email</label>
+                    <input type="text" id="login-username" placeholder="Enter your username or email" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password">
+                </div>
+                <button id="login-btn" class="auth-btn primary-btn">
+                    <span>Sign In</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <p class="auth-switch">Don't have an account? <a href="#" id="show-signup">Create one</a></p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-form" class="auth-card" style="display:none">
+                <h2 class="auth-card-title">Get Started</h2>
+                <p class="auth-card-desc">Create your account to begin practicing</p>
+                <div class="auth-error" id="signup-error"></div>
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" placeholder="Enter your email" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password (min 6 chars)" autocomplete="new-password">
+                </div>
+                <button id="signup-btn" class="auth-btn primary-btn">
+                    <span>Create Account</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <p class="auth-switch">Already have an account? <a href="#" id="show-login">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ MAIN APP ═══════════════ -->
+    <div id="app" class="app" style="display:none">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="logoGrad2" x1="0" y1="0" x2="48" y2="48">
+                                <stop offset="0%" stop-color="#6c5ce7"/>
+                                <stop offset="100%" stop-color="#00cec9"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="24" cy="24" r="22" stroke="url(#logoGrad2)" stroke-width="3" fill="none"/>
+                        <path d="M16 20C16 20 19 16 24 16C29 16 32 20 32 20" stroke="url(#logoGrad2)" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="18" cy="22" r="2" fill="url(#logoGrad2)"/>
+                        <circle cx="30" cy="22" r="2" fill="url(#logoGrad2)"/>
+                        <path d="M18 30C18 30 20 34 24 34C28 34 30 30 30 30" stroke="url(#logoGrad2)" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="sidebar-title">Uccharon</span>
+                </div>
+                <button id="sidebar-toggle" class="sidebar-toggle-btn" title="Toggle sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
+            </div>
+
+            <button id="new-chat-btn" class="new-chat-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                <span>New Conversation</span>
+            </button>
+
+            <div class="sidebar-conversations" id="conversation-list">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user" id="sidebar-user">
+                    <div class="user-avatar" id="user-avatar">U</div>
+                    <div class="user-info">
+                        <span class="user-name" id="user-name">User</span>
+                        <span class="user-email" id="user-email">user@email.com</span>
+                    </div>
+                </div>
+                <div class="sidebar-actions">
+                    <button id="settings-btn" class="sidebar-action-btn" title="Settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    </button>
+                    <button id="stats-btn" class="sidebar-action-btn" title="Performance Stats">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    </button>
+                    <button id="theme-toggle-btn" class="sidebar-action-btn" title="Toggle Theme">
+                        <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                        <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                    </button>
+                    <button id="logout-btn" class="sidebar-action-btn logout-action" title="Logout">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile sidebar toggle -->
+        <button id="mobile-sidebar-toggle" class="mobile-sidebar-toggle">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+
+        <!-- Main Chat Area -->
+        <main class="main-content">
+            <!-- Welcome screen (when no conversation selected) -->
+            <div id="welcome-screen" class="welcome-screen">
+                <div class="welcome-content">
+                    <div class="welcome-icon">
+                        <svg width="80" height="80" viewBox="0 0 48 48" fill="none">
+                            <defs>
+                                <linearGradient id="logoGrad3" x1="0" y1="0" x2="48" y2="48">
+                                    <stop offset="0%" stop-color="#6c5ce7"/>
+                                    <stop offset="100%" stop-color="#00cec9"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="24" cy="24" r="22" stroke="url(#logoGrad3)" stroke-width="2" fill="none" opacity="0.5"/>
+                            <circle cx="24" cy="24" r="16" stroke="url(#logoGrad3)" stroke-width="2" fill="none" opacity="0.3"/>
+                            <path d="M16 20C16 20 19 16 24 16C29 16 32 20 32 20" stroke="url(#logoGrad3)" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="18" cy="22" r="2" fill="url(#logoGrad3)"/>
+                            <circle cx="30" cy="22" r="2" fill="url(#logoGrad3)"/>
+                            <path d="M18 30C18 30 20 34 24 34C28 34 30 30 30 30" stroke="url(#logoGrad3)" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h2 class="welcome-title">Welcome to Uccharon</h2>
+                    <p class="welcome-desc">Start a conversation to practice your English. I'll be your personal speaking coach — correcting grammar, improving vocabulary, and helping you sound more natural.</p>
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🔍</div>
+                            <h3>Grammar Check</h3>
+                            <p>Detailed corrections with explanations</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🗣️</div>
+                            <h3>Native Version</h3>
+                            <p>How a native speaker would say it</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h3>Score Tracking</h3>
+                            <p>Track your improvement over time</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎤</div>
+                            <h3>Voice Input</h3>
+                            <p>Speak directly using your microphone</p>
+                        </div>
+                    </div>
+                    <button id="welcome-new-chat" class="welcome-start-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                        Start Your First Conversation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat area -->
+            <div id="chat-area" class="chat-area" style="display:none">
+                <div class="chat-header">
+                    <h2 class="chat-title" id="chat-title">New Conversation</h2>
+                    <div class="chat-header-actions">
+                        <button id="delete-convo-btn" class="icon-btn" title="Delete conversation">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages populated by JS -->
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea id="chat-input" class="chat-input" placeholder="Type your message in English..." rows="1"></textarea>
+                        <div class="chat-input-actions">
+                            <button id="mic-btn" class="mic-btn" title="Voice input">
+                                <svg class="mic-icon-off" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                <svg class="mic-icon-on" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:none"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2"/></svg>
+                            </button>
+                            <button id="send-btn" class="send-btn" title="Send message">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="mic-status" class="mic-status" style="display:none">
+                        <span class="mic-pulse"></span>
+                        <span>Listening...</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings Drawer -->
+        <div id="settings-overlay" class="settings-overlay" style="display:none"></div>
+        <div id="settings-drawer" class="settings-drawer">
+            <div class="drawer-header">
+                <h2>Settings</h2>
+                <button id="close-settings" class="icon-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="drawer-content">
+                <div class="settings-section">
+                    <h3>AI Provider</h3>
+                    <p class="settings-desc">Select your preferred AI provider</p>
+                    <div class="provider-cards">
+                        <label class="provider-card" id="provider-gemini-card">
+                            <input type="radio" name="ai-provider" value="gemini" checked>
+                            <div class="provider-card-content">
+                                <div class="provider-icon">✦</div>
+                                <div class="provider-name">Gemini</div>
+                                <div class="provider-desc">Google AI</div>
+                            </div>
+                        </label>
+                        <label class="provider-card" id="provider-groq-card">
+                            <input type="radio" name="ai-provider" value="groq">
+                            <div class="provider-card-content">
+                                <div class="provider-icon">⚡</div>
+                                <div class="provider-name">Groq</div>
+                                <div class="provider-desc">Ultra-fast inference</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>API Keys</h3>
+                    <p class="settings-desc">Your keys are stored securely in your profile</p>
+
+                    <div class="form-group" id="gemini-key-group">
+                        <label for="gemini-api-key">Gemini API Key</label>
+                        <div class="key-input-wrapper">
+                            <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key">
+                            <button class="toggle-key-vis" data-target="gemini-api-key" title="Show/hide key">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="groq-key-group">
+                        <label for="groq-api-key">Groq API Key</label>
+                        <div class="key-input-wrapper">
+                            <input type="password" id="groq-api-key" placeholder="Enter your Groq API key">
+                            <button class="toggle-key-vis" data-target="groq-api-key" title="Show/hide key">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Gemini Model</h3>
+                    <p class="settings-desc">Select the Gemini model to use</p>
+                    <select id="gemini-model-select" class="settings-select">
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fast)</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Latest)</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro (Best)</option>
+                    </select>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Groq Model</h3>
+                    <p class="settings-desc">Select the Groq model to use</p>
+                    <select id="groq-model-select" class="settings-select">
+                        <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+                        <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                    </select>
+                </div>
+
+                <button id="save-settings-btn" class="auth-btn primary-btn" style="margin-top:16px;">
+                    <span>Save Settings</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Modal -->
+        <div id="stats-overlay" class="settings-overlay" style="display:none"></div>
+        <div id="stats-modal" class="stats-modal">
+            <div class="drawer-header">
+                <h2>Performance Stats</h2>
+                <button id="close-stats" class="icon-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="stats-content" id="stats-content">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'coach/js/providers.js' %}"></script>
+    <script src="{% static 'coach/js/app.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+import json
+from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+class UserProfile(models.Model):
+    """Extended user profile for preferences and settings."""
+    PROVIDER_CHOICES = [
+        ('gemini', 'Gemini'),
+        ('groq', 'Groq'),
+    ]
+    THEME_CHOICES = [
+        ('dark', 'Dark'),
+        ('light', 'Light'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='dark')
+    ai_provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default='gemini')
+    gemini_api_key = models.CharField(max_length=255, blank=True, default='')
+    groq_api_key = models.CharField(max_length=255, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
+
+
+class Conversation(models.Model):
+    """A conversation session between user and AI coach."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='conversations')
+    title = models.CharField(max_length=255, default='New Conversation')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.user.username})"
+
+
+class Message(models.Model):
+    """A single message exchange — user input + AI response."""
+    conversation = models.ForeignKey(
+        Conversation, on_delete=models.CASCADE, related_name='messages'
+    )
+    user_text = models.TextField()
+    ai_response = models.JSONField(default=dict)
+
+    # Performance scores (0-10 scale, stored per message)
+    score_grammar = models.FloatField(null=True, blank=True)
+    score_vocabulary = models.FloatField(null=True, blank=True)
+    score_naturalness = models.FloatField(null=True, blank=True)
+    score_confidence = models.FloatField(null=True, blank=True)
+    score_pronunciation = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Message in {self.conversation.title} at {self.created_at}"
+
+
+# Auto-create UserProfile when a User is created
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
