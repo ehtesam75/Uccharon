@@ -508,6 +508,21 @@
             ));
         }
 
+        // 1.5 Sentence Improvements
+        if (response.sentence_improvements && response.sentence_improvements.length > 0) {
+            let improvementHtml = '';
+            response.sentence_improvements.forEach(si => {
+                improvementHtml += `
+                    <div class="grammar-item">
+                        <div class="grammar-original">${escapeHtml(si.original)}</div>
+                        <div class="grammar-corrected" style="color: var(--accent-secondary);">${escapeHtml(si.improved)}</div>
+                        <div class="grammar-explanation">${escapeHtml(si.explanation)}</div>
+                    </div>
+                `;
+            });
+            card.appendChild(createFeedbackSection('✨', 'Sentence Improvement', improvementHtml));
+        }
+
         // 2. Native Speaker Version
         if (response.native_version) {
             card.appendChild(createFeedbackSection(
