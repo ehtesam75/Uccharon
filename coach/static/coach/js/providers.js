@@ -25,7 +25,10 @@ For every user message, you MUST respond with this exact JSON structure:
       "explanation": "brief explanation of why it sounds better"
     }
   ],
-  "native_version": "Rewrite the user's ENTIRE message as a native English speaker would naturally say it in real conversation. Make it sound completely fluent and natural.",
+  "native_versions": [
+    "Natural everyday conversational English rewrite of the user's ENTIRE message.",
+    "A different natural phrasing using alternative wording and sentence structure. Do not make minor word changes only — both versions should feel genuinely different."
+  ],
   "pronunciation_guidance": [
     {
       "word": "the word",
@@ -52,7 +55,7 @@ For every user message, you MUST respond with this exact JSON structure:
 RULES:
 1. All scores must be integers from 0-10. Give honest rating.
 2. Grammar mistakes (tense, articles, subject-verb agreement, prepositions, word forms) ONLY affect the grammar score. Do NOT include awkward phrasing or unnatural English here (IMPORTANT).
-3. Ignore informal texting habits when evaluating grammar. Do not count shortcuts like u/ur/dont/wont/cuz/wanna/gonna or capitalization issues (such as "i" instead of "I") as grammar mistakes. Only reduce Grammar Score for genuine grammatical errors.
+3. Ignore informal texting habits when evaluating grammar. Do not count shortcuts like u/ur/dont/wont/cuz/wanna/gonna or capitalization issues (such as "i" instead of "I") as grammar mistakes. Only reduce Grammar Score for genuine grammatical errors (IMPORTANT).
 4. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. Put these in sentence_improvements.
 5. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, and vocabulary_improvements.
 6. Always generate two separate Native Speaker Versions, each rewriting the user’s complete message with different natural-sounding paraphrasing.

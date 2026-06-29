@@ -544,8 +544,20 @@
             card.appendChild(createFeedbackSection('✨', 'Sentence Improvement', improvementHtml));
         }
 
-        // 2. Native Speaker Version
-        if (response.native_version) {
+        // 2. Native Speaker Versions
+        if (response.native_versions && response.native_versions.length > 0) {
+            let versionsHtml = '';
+            response.native_versions.forEach((nv, idx) => {
+                versionsHtml += `
+                    <div class="native-version-item" style="${idx > 0 ? 'margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color);' : ''}">
+                        <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Version ${idx + 1}</div>
+                        <div class="native-version-text">${escapeHtml(nv)}</div>
+                    </div>
+                `;
+            });
+            card.appendChild(createFeedbackSection('🗣️', 'Native Speaker Versions', versionsHtml));
+        } else if (response.native_version) {
+            // Fallback for older conversation history
             card.appendChild(createFeedbackSection(
                 '🗣️', 'Native Speaker Version',
                 `<div class="native-version-text">${escapeHtml(response.native_version)}</div>`
