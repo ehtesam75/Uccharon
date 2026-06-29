@@ -446,13 +446,14 @@ input, textarea, select {
     transition: all var(--transition-slow);
     position: relative;
     z-index: 20;
+    white-space: nowrap;
 }
 
 .sidebar.collapsed {
     width: 0;
     min-width: 0;
     overflow: hidden;
-    border-right: none;
+    border-right-color: transparent;
 }
 
 .sidebar-header {
@@ -659,6 +660,15 @@ input, textarea, select {
     box-shadow: var(--shadow-sm);
 }
 
+.sidebar.collapsed + .mobile-sidebar-toggle {
+    display: flex;
+}
+
+.sidebar.collapsed ~ .main-content .chat-header,
+.sidebar.collapsed ~ .main-content .welcome-screen {
+    padding-left: 64px;
+}
+
 /* ─── Main Content ───────────────────────────────────────── */
 
 .main-content {
@@ -792,6 +802,7 @@ input, textarea, select {
     background: var(--bg-secondary);
     backdrop-filter: blur(20px);
     z-index: 5;
+    transition: padding var(--transition-slow);
 }
 
 .chat-title {
@@ -1679,6 +1690,10 @@ input, textarea, select {
 
     .chat-messages {
         padding: 16px;
+    }
+
+    .chat-header {
+        padding-left: 64px;
     }
 
     .chat-input-container {

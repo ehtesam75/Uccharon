@@ -335,6 +335,11 @@
             const data = await api('/api/conversations/');
             state.conversations = data.conversations;
             renderConversationList();
+            
+            // Auto-select the first conversation if we don't have one selected and we have conversations
+            if (!state.currentConversation && state.conversations.length > 0) {
+                await selectConversation(state.conversations[0]);
+            }
         } catch (e) {
             console.error('Failed to load conversations:', e);
         }
@@ -413,9 +418,14 @@
             state.conversations = state.conversations.filter(c => c.id !== state.currentConversation.id);
             state.currentConversation = null;
             state.currentMessages = [];
-            DOM.chatArea.style.display = 'none';
-            DOM.welcomeScreen.style.display = 'flex';
-            renderConversationList();
+            
+            if (state.conversations.length > 0) {
+                await selectConversation(state.conversations[0]);
+            } else {
+                DOM.chatArea.style.display = 'none';
+                DOM.welcomeScreen.style.display = 'flex';
+                renderConversationList();
+            }
             showToast('Conversation deleted', 'success');
         } catch (err) {
             showToast('Failed to delete conversation', 'error');
@@ -1040,7 +1050,11 @@
         });
 
         DOM.mobileSidebarToggle.addEventListener('click', () => {
-            DOM.sidebar.classList.toggle('mobile-open');
+            if (window.innerWidth <= 768) {
+                DOM.sidebar.classList.toggle('mobile-open');
+            } else {
+                DOM.sidebar.classList.toggle('collapsed');
+            }
         });
 
         // Close mobile sidebar on overlay click
