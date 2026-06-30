@@ -91,6 +91,9 @@
     <!-- ═══════════════ MAIN APP ═══════════════ -->
     <div id="app" class="app" style="display:none">
 
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="sidebar-overlay" style="display:none"></div>
+
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
@@ -288,6 +291,9 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
                         </div>
+                        <div class="api-key-guide">
+                            Get your key from <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
+                        </div>
                     </div>
 
                     <div class="form-group" id="groq-key-group">
@@ -297,6 +303,9 @@
                             <button class="toggle-key-vis" data-target="groq-api-key" title="Show/hide key">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
+                        </div>
+                        <div class="api-key-guide">
+                            Get your key from <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">Groq Console</a>
                         </div>
                     </div>
                 </div>
@@ -361,7 +370,6 @@
                         </label>
                     </div>
 
-                    <!-- OpenAI key for Whisper -->
                     <div class="form-group" id="openai-key-group" style="margin-top:20px; display:none;">
                         <label for="openai-api-key">OpenAI API Key <span style="color:var(--text-tertiary);font-weight:400;">(for Whisper)</span></label>
                         <div class="key-input-wrapper">
@@ -369,6 +377,9 @@
                             <button class="toggle-key-vis" data-target="openai-api-key" title="Show/hide key">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
+                        </div>
+                        <div class="api-key-guide">
+                            Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">OpenAI</a>
                         </div>
                     </div>
 

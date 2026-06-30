@@ -61,6 +61,7 @@
 
         // Sidebar
         sidebar: $('#sidebar'),
+        sidebarOverlay: $('#sidebar-overlay'),
         sidebarToggle: $('#sidebar-toggle'),
         mobileSidebarToggle: $('#mobile-sidebar-toggle'),
         newChatBtn: $('#new-chat-btn'),
@@ -203,6 +204,11 @@
             state.user = data.user;
             await loadUserData();
             showApp();
+            
+            // Automatically create a new chat session on login if they aren't a new user
+            if (state.conversations.length > 0) {
+                await createConversation();
+            }
         } catch (err) {
             showAuthError('login', err.message);
         } finally {
@@ -386,6 +392,7 @@
 
             // Close mobile sidebar
             DOM.sidebar.classList.remove('mobile-open');
+            DOM.sidebarOverlay.classList.remove('active');
         } catch (err) {
             showToast('Failed to create conversation', 'error');
         }
@@ -419,6 +426,7 @@
 
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
+        DOM.sidebarOverlay.classList.remove('active');
     }
 
     async function deleteConversation() {
@@ -1329,17 +1337,20 @@
         DOM.mobileSidebarToggle.addEventListener('click', () => {
             if (window.innerWidth <= 768) {
                 DOM.sidebar.classList.toggle('mobile-open');
+                DOM.sidebarOverlay.classList.toggle('active');
             } else {
                 DOM.sidebar.classList.toggle('collapsed');
             }
         });
 
-        // Close mobile sidebar on overlay click
+        // Close mobile sidebar on overlay click or outside click
         document.addEventListener('click', (e) => {
             if (DOM.sidebar.classList.contains('mobile-open') &&
                 !DOM.sidebar.contains(e.target) &&
-                e.target !== DOM.mobileSidebarToggle) {
+                e.target !== DOM.mobileSidebarToggle &&
+                !DOM.mobileSidebarToggle.contains(e.target)) {
                 DOM.sidebar.classList.remove('mobile-open');
+                DOM.sidebarOverlay.classList.remove('active');
             }
         });
 
