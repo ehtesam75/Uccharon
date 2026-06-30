@@ -259,75 +259,88 @@
                 <div class="settings-section">
                     <h3>AI Provider</h3>
                     <p class="settings-desc">Select your preferred AI provider</p>
-                    <div class="provider-cards">
+                    <div class="provider-cards voice-provider-cards">
                         <label class="provider-card" id="provider-gemini-card">
                             <input type="radio" name="ai-provider" value="gemini" checked>
                             <div class="provider-card-content">
                                 <div class="provider-icon">✦</div>
-                                <div class="provider-name">Gemini</div>
-                                <div class="provider-desc">Google AI</div>
+                                <div class="provider-info">
+                                    <div class="provider-name">Gemini</div>
+                                    <div class="provider-desc">Google AI</div>
+                                </div>
+                                <div class="provider-radio-circle"></div>
                             </div>
                         </label>
                         <label class="provider-card" id="provider-groq-card">
                             <input type="radio" name="ai-provider" value="groq">
                             <div class="provider-card-content">
                                 <div class="provider-icon">⚡</div>
-                                <div class="provider-name">Groq</div>
-                                <div class="provider-desc">Ultra-fast inference</div>
+                                <div class="provider-info">
+                                    <div class="provider-name">Groq</div>
+                                    <div class="provider-desc">Ultra-fast inference</div>
+                                </div>
+                                <div class="provider-radio-circle"></div>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <div class="settings-section">
-                    <h3>API Keys</h3>
-                    <p class="settings-desc">Your keys are stored securely in your profile</p>
-
-                    <div class="form-group" id="gemini-key-group">
-                        <label for="gemini-api-key">Gemini API Key</label>
-                        <div class="key-input-wrapper">
-                            <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key">
-                            <button class="toggle-key-vis" data-target="gemini-api-key" title="Show/hide key">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </button>
-                        </div>
-                        <div class="api-key-guide">
-                            Get your key from <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
+                <!-- Gemini Specific Settings -->
+                <div id="gemini-settings-container">
+                    <div class="settings-section">
+                        <h3>Gemini API Key</h3>
+                        <p class="settings-desc">Your key is stored securely in your profile</p>
+                        <div class="form-group" id="gemini-key-group">
+                            <div class="key-input-wrapper">
+                                <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key">
+                                <button class="toggle-key-vis" data-target="gemini-api-key" title="Show/hide key">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                            <div class="api-key-guide">
+                                Get your key from <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group" id="groq-key-group">
-                        <label for="groq-api-key">Groq API Key</label>
-                        <div class="key-input-wrapper">
-                            <input type="password" id="groq-api-key" placeholder="Enter your Groq API key">
-                            <button class="toggle-key-vis" data-target="groq-api-key" title="Show/hide key">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </button>
-                        </div>
-                        <div class="api-key-guide">
-                            Get your key from <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">Groq Console</a>
-                        </div>
+                    <div class="settings-section">
+                        <h3>Gemini Model</h3>
+                        <p class="settings-desc">Select the Gemini model to use</p>
+                        <select id="gemini-model-select" class="settings-select">
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fast)</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Latest)</option>
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Best)</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="settings-section">
-                    <h3>Gemini Model</h3>
-                    <p class="settings-desc">Select the Gemini model to use</p>
-                    <select id="gemini-model-select" class="settings-select">
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fast)</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Latest)</option>
-                        <option value="gemini-2.5-pro">Gemini 2.5 Pro (Best)</option>
-                    </select>
-                </div>
+                <!-- Groq Specific Settings -->
+                <div id="groq-settings-container" style="display:none;">
+                    <div class="settings-section">
+                        <h3>Groq API Key</h3>
+                        <p class="settings-desc">Your key is stored securely in your profile</p>
+                        <div class="form-group" id="groq-key-group">
+                            <div class="key-input-wrapper">
+                                <input type="password" id="groq-api-key" placeholder="Enter your Groq API key">
+                                <button class="toggle-key-vis" data-target="groq-api-key" title="Show/hide key">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                            <div class="api-key-guide">
+                                Get your key from <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">Groq Console</a>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="settings-section">
-                    <h3>Groq Model</h3>
-                    <p class="settings-desc">Select the Groq model to use</p>
-                    <select id="groq-model-select" class="settings-select">
-                        <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-                        <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
-                        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-                    </select>
+                    <div class="settings-section">
+                        <h3>Groq Model</h3>
+                        <p class="settings-desc">Select the Groq model to use</p>
+                        <select id="groq-model-select" class="settings-select">
+                            <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+                            <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                            <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Voice Input Provider -->

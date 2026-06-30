@@ -1147,8 +1147,10 @@
         DOM.openaiApiKey.value = state.settings.openai_api_key || '';
 
         // AI Provider radios
-        const providerRadio = document.querySelector(`input[name="ai-provider"][value="${state.settings.ai_provider}"]`);
+        const aiProvider = state.settings.ai_provider || 'gemini';
+        const providerRadio = document.querySelector(`input[name="ai-provider"][value="${aiProvider}"]`);
         if (providerRadio) providerRadio.checked = true;
+        _updateAiProviderUI(aiProvider);
 
         // Model selects
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.0-flash';
@@ -1166,6 +1168,14 @@
         DOM.openaiKeyGroup.style.display = provider === 'openai' ? 'block' : 'none';
         DOM.geminiSttNotice.style.display = provider === 'gemini-stt' ? 'flex' : 'none';
         DOM.voiceBrowserNotice.style.display = provider === 'browser' ? 'flex' : 'none';
+    }
+
+    /** Show/hide the AI Provider settings based on selected AI provider */
+    function _updateAiProviderUI(provider) {
+        const geminiContainer = document.getElementById('gemini-settings-container');
+        const groqContainer = document.getElementById('groq-settings-container');
+        if (geminiContainer) geminiContainer.style.display = provider === 'gemini' ? 'block' : 'none';
+        if (groqContainer) groqContainer.style.display = provider === 'groq' ? 'block' : 'none';
     }
 
     async function saveSettings() {
@@ -1237,6 +1247,13 @@
         document.querySelectorAll('input[name="voice-provider"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 _updateVoiceProviderUI(radio.value);
+            });
+        });
+
+        // Show/hide AI Provider settings when AI provider changes
+        document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                _updateAiProviderUI(radio.value);
             });
         });
     }
