@@ -271,6 +271,12 @@
         try {
             const data = await api('/api/auth/signup/', 'POST', { username, email, password });
             state.user = data.user;
+            
+            // Explicitly force defaults for local settings on new signup
+            // so they don't inherit a previous user's settings on the same machine
+            localStorage.setItem('uccharon_voice_provider', 'browser');
+            localStorage.removeItem('uccharon_openai_api_key');
+            
             await loadUserData();
             DOM.authScreen.style.display = 'none';
             DOM.goalModalOverlay.style.display = 'flex';
