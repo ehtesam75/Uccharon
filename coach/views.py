@@ -273,16 +273,29 @@ def stats_view(request):
     """Get user's performance statistics with optional time-range filtering."""
     range_param = request.GET.get('range', 'all')  # daily, weekly, monthly, all
 
-    now = timezone.now()
+    now_local = timezone.localtime(timezone.now())
+    today_start = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+
     if range_param == 'daily':
-        start_date = now - timedelta(days=1)
+        start_date = today_start
     elif range_param == 'weekly':
-        start_date = now - timedelta(days=7)
+        start_date = today_start - timedelta(days=6)
     elif range_param == 'monthly':
-        start_date = now - timedelta(days=30)
+        start_date = today_start - timedelta(days=29)
     else:
         start_date = None
 
+    # For total messages/conversations, count all (not just rated ones) in the time window
+    base_all_msgs = Message.objects.filter(conversation__user=request.user)
+    if start_date:
+        filtered_all_msgs = base_all_msgs.filter(created_at__gte=start_date)
+    else:
+        filtered_all_msgs = base_all_msgs
+        
+    total_messages = filtered_all_msgs.count()
+    total_conversations = filtered_all_msgs.values('conversation').distinct().count()
+
+    # For scores, only look at rated messages
     base_qs = Message.objects.filter(
         conversation__user=request.user,
         score_grammar__isnull=False
@@ -291,9 +304,6 @@ def stats_view(request):
         filtered_qs = base_qs.filter(created_at__gte=start_date).order_by('created_at')
     else:
         filtered_qs = base_qs.order_by('created_at')
-
-    total_messages = Message.objects.filter(conversation__user=request.user).count()
-    total_conversations = Conversation.objects.filter(user=request.user).count()
 
     if not filtered_qs.exists():
         return JsonResponse({
@@ -321,12 +331,14 @@ def stats_view(request):
     # Build per-message scores list
     scores_list = []
     for m in filtered_qs:
+        local_dt = timezone.localtime(m.created_at)
         scores_list.append({
             'grammar': m.score_grammar,
             'vocabulary': m.score_vocabulary,
             'naturalness': m.score_naturalness,
             'confidence': m.score_confidence,
             'overall': m.score_overall,
+            'local_date': local_dt.date().isoformat(),  # Grouping by local date
             'created_at': m.created_at.isoformat(),
         })
 
@@ -339,11 +351,11 @@ def stats_view(request):
         'overall': round(sum(s['overall'] or 0 for s in scores_list) / count, 1),
     }
 
-    # Group scores by day for charting
+    # Group scores by day for charting (using local_date)
     from collections import defaultdict
     daily_map = defaultdict(lambda: {'grammar': [], 'vocabulary': [], 'naturalness': [], 'confidence': [], 'overall': []})
     for s in scores_list:
-        day = s['created_at'][:10]  # YYYY-MM-DD
+        day = s['local_date']
         for key in ('grammar', 'vocabulary', 'naturalness', 'confidence', 'overall'):
             if s[key] is not None:
                 daily_map[day][key].append(s[key])
@@ -370,12 +382,13 @@ def stats_view(request):
                 best_scores[key] = val
 
     # Calculate practice streak (consecutive days with at least one scored message)
+    # Streak should always use all-time data
     all_days = set()
-    for m in base_qs:
-        all_days.add(m.created_at.date())
+    for m in all_scores:
+        all_days.add(timezone.localtime(m.created_at).date())
 
     streak = 0
-    check_date = now.date()
+    check_date = now_local.date()
     # If user hasn't practiced today, start from yesterday
     if check_date not in all_days:
         check_date -= timedelta(days=1)
