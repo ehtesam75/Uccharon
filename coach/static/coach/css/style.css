@@ -1883,19 +1883,21 @@ input, textarea, select {
     }
 
     .settings-drawer {
-        width: 100vw;
-        border-left: none;
+        width: 85vw;
+        max-width: 360px;
+        border-left: 1px solid var(--border-color);
+        border-radius: 0;
         border-top-left-radius: var(--radius-xl);
-        border-top-right-radius: var(--radius-xl);
-        height: 90vh;
-        top: auto;
-        bottom: -100vh;
-        right: 0;
-        transition: bottom var(--transition-normal);
+        border-bottom-left-radius: var(--radius-xl);
+        height: 100vh;
+        top: 0;
+        bottom: auto;
+        right: -100%;
+        transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: -8px 0 30px rgba(0, 0, 0, 0.5);
     }
 
     .settings-drawer.open {
-        bottom: 0;
         right: 0;
     }
     
