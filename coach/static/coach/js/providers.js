@@ -39,7 +39,8 @@ For every user message, you MUST respond with this exact JSON structure:
   "vocabulary_improvements": [
     {
       "original": "the simple/basic word used",
-      "suggestion": "relevant synonyms or similar words",
+      "suggestion": "the improved word",
+      "synonyms": ["synonym1", "synonym2"],
       "context": "brief explanation of when/why to use the suggestion"
     }
   ],

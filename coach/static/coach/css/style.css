@@ -1092,6 +1092,7 @@ input, textarea, select {
 /* Vocabulary */
 .vocab-item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     padding: 10px 14px;
@@ -1125,10 +1126,11 @@ input, textarea, select {
 }
 
 .vocab-context {
-    flex: 1;
+    width: 100%;
     font-size: 0.8rem;
     color: var(--text-secondary);
-    text-align: right;
+    text-align: left;
+    margin-top: 4px;
 }
 
 /* Performance scores */
@@ -2243,18 +2245,17 @@ input, textarea, select {
     }
 
     .vocab-item {
-        flex-wrap: wrap;
         gap: 6px;
-    }
-
-    .vocab-context {
-        text-align: left;
-        width: 100%;
     }
 
     .pronunciation-item {
         flex-wrap: wrap;
         gap: 6px;
+    }
+
+    .pronunciation-tip {
+        width: 100%;
+        margin-top: 4px;
     }
 }
 

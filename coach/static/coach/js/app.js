@@ -644,12 +644,17 @@
         if (response.vocabulary_improvements && response.vocabulary_improvements.length > 0) {
             let vocabHtml = '';
             response.vocabulary_improvements.forEach(vi => {
+                let synonymsHtml = '';
+                if (vi.synonyms && vi.synonyms.length > 0) {
+                    synonymsHtml = `<div class="vocab-synonyms" style="width: 100%; font-size: 0.8rem; color: var(--accent-secondary); margin-top: 4px;">Synonyms: ${escapeHtml(vi.synonyms.join(', '))}</div>`;
+                }
                 vocabHtml += `
                     <div class="vocab-item">
                         <span class="vocab-original">${escapeHtml(vi.original)}</span>
                         <span class="vocab-arrow">→</span>
                         <span class="vocab-suggestion">${escapeHtml(vi.suggestion)}</span>
-                        <span class="vocab-context">${escapeHtml(vi.context)}</span>
+                        ${synonymsHtml}
+                        <div class="vocab-context">${escapeHtml(vi.context)}</div>
                     </div>
                 `;
             });
