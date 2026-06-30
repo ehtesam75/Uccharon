@@ -17,7 +17,7 @@ Uccharon is an interactive AI-powered language learning application that acts as
 - **User Personalization:** Dark and Light themes tailored to your preference.
 - **PWA Support:** Installable as a Progressive Web App (PWA) with native-like icons and experience.
 
-## 🛠 Tech Stack
+# 🛠 Tech Stack
 
 - **Backend:** Django 5.2 (Python 3)
 - **Database:** SQLite3 (Local) / PostgreSQL (Production)
