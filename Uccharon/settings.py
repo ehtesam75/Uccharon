@@ -26,12 +26,10 @@ SECRET_KEY = 'django-insecure-*w%7n+y0ym&&o+daz#sy&7t#wejn46#g9$z=c6u++ct%d+1*d1
 DEBUG = True
 
 ALLOWED_HOSTS = [
-"uccharon.up.railway.app", 
-"127.0.0.1", 
-"localhost",
+    "uccharon.up.railway.app", 
+    "127.0.0.1", 
+    "localhost",
 ]
-
-
 
 # Application definition
 
@@ -46,14 +44,17 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+"django.middleware.security.SecurityMiddleware",
+"whitenoise.middleware.WhiteNoiseMiddleware",
+
+"django.contrib.sessions.middleware.SessionMiddleware",
+"django.middleware.common.CommonMiddleware",
+"django.middleware.csrf.CsrfViewMiddleware",
+"django.contrib.auth.middleware.AuthenticationMiddleware",
+"django.contrib.messages.middleware.MessageMiddleware",
+"django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 ROOT_URLCONF = 'Uccharon.urls'
 
@@ -120,8 +121,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'coach' / 'static']
+STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+BASE_DIR / "coach" / "static"
+]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
