@@ -108,6 +108,7 @@
         dashEmpty: $('#dashboard-empty'),
         dashData: $('#dashboard-data'),
         dashTotalMessages: $('#dash-total-messages'),
+        dashTotalConvos: $('#dash-total-convos'),
         dashStreak: $('#dash-streak'),
         dashMaxStreak: $('#dash-max-streak'),
         dashTodayProgress: $('#dash-today-progress'),
@@ -1346,7 +1347,7 @@
         try {
             const data = await api(`/api/stats/?range=${range}`);
 
-            if (data.total_messages === 0 && range === 'all') {
+            if (data.total_messages === 0) {
                 DOM.dashLoading.style.display = 'none';
                 DOM.dashEmpty.style.display = 'block';
                 return;
@@ -1369,6 +1370,7 @@
         animateCounter(DOM.dashStreak, data.streak);
         animateCounter(DOM.dashMaxStreak, data.max_streak);
         animateCounter(DOM.dashTotalMessages, data.total_messages);
+        animateCounter(DOM.dashTotalConvos, data.total_conversations);
         animateCounter(DOM.dashOverallScore, data.averages.overall, true);
 
         // Score Breakdowns (Averages)
