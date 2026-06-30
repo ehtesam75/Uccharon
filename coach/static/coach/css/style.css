@@ -2190,9 +2190,11 @@ input, textarea, select {
     }
 
     .dash-stat-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1.2rem;
+        display: none;
+    }
+
+    .dash-today-text {
+        font-size: 0.8rem !important;
     }
 
     .dash-stat-number {
