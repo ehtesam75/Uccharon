@@ -1,5 +1,7 @@
 import json
+from datetime import timedelta
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
@@ -268,28 +270,57 @@ def messages_view(request, convo_id):
 @login_required
 @require_http_methods(["GET"])
 def stats_view(request):
-    """Get user's performance statistics."""
-    messages = Message.objects.filter(
+    """Get user's performance statistics with optional time-range filtering."""
+    range_param = request.GET.get('range', 'all')  # daily, weekly, monthly, all
+
+    now = timezone.now()
+    if range_param == 'daily':
+        start_date = now - timedelta(days=1)
+    elif range_param == 'weekly':
+        start_date = now - timedelta(days=7)
+    elif range_param == 'monthly':
+        start_date = now - timedelta(days=30)
+    else:
+        start_date = None
+
+    base_qs = Message.objects.filter(
         conversation__user=request.user,
         score_grammar__isnull=False
-    ).order_by('created_at')
+    )
+    if start_date:
+        filtered_qs = base_qs.filter(created_at__gte=start_date).order_by('created_at')
+    else:
+        filtered_qs = base_qs.order_by('created_at')
 
-    if not messages.exists():
+    total_messages = Message.objects.filter(conversation__user=request.user).count()
+    total_conversations = Conversation.objects.filter(user=request.user).count()
+
+    if not filtered_qs.exists():
         return JsonResponse({
-            'total_messages': 0,
-            'total_conversations': 0,
+            'total_messages': total_messages,
+            'total_conversations': total_conversations,
             'scores': [],
+            'daily_scores': [],
             'averages': {
                 'grammar': 0,
                 'vocabulary': 0,
                 'naturalness': 0,
                 'confidence': 0,
                 'overall': 0,
-            }
+            },
+            'best_scores': {
+                'grammar': 0,
+                'vocabulary': 0,
+                'naturalness': 0,
+                'confidence': 0,
+                'overall': 0,
+            },
+            'streak': 0,
         })
 
+    # Build per-message scores list
     scores_list = []
-    for m in messages:
+    for m in filtered_qs:
         scores_list.append({
             'grammar': m.score_grammar,
             'vocabulary': m.score_vocabulary,
@@ -308,11 +339,58 @@ def stats_view(request):
         'overall': round(sum(s['overall'] or 0 for s in scores_list) / count, 1),
     }
 
+    # Group scores by day for charting
+    from collections import defaultdict
+    daily_map = defaultdict(lambda: {'grammar': [], 'vocabulary': [], 'naturalness': [], 'confidence': [], 'overall': []})
+    for s in scores_list:
+        day = s['created_at'][:10]  # YYYY-MM-DD
+        for key in ('grammar', 'vocabulary', 'naturalness', 'confidence', 'overall'):
+            if s[key] is not None:
+                daily_map[day][key].append(s[key])
+
+    daily_scores = []
+    for day in sorted(daily_map.keys()):
+        entry = {'date': day}
+        for key in ('grammar', 'vocabulary', 'naturalness', 'confidence', 'overall'):
+            vals = daily_map[day][key]
+            entry[key] = round(sum(vals) / len(vals), 1) if vals else 0
+        daily_scores.append(entry)
+
+    # Best scores (all-time, not filtered)
+    all_scores = base_qs.order_by('created_at')
+    best_scores = {
+        'grammar': 0, 'vocabulary': 0, 'naturalness': 0, 'confidence': 0, 'overall': 0,
+    }
+    for m in all_scores:
+        for key, field in [('grammar', 'score_grammar'), ('vocabulary', 'score_vocabulary'),
+                           ('naturalness', 'score_naturalness'), ('confidence', 'score_confidence'),
+                           ('overall', 'score_overall')]:
+            val = getattr(m, field) or 0
+            if val > best_scores[key]:
+                best_scores[key] = val
+
+    # Calculate practice streak (consecutive days with at least one scored message)
+    all_days = set()
+    for m in base_qs:
+        all_days.add(m.created_at.date())
+
+    streak = 0
+    check_date = now.date()
+    # If user hasn't practiced today, start from yesterday
+    if check_date not in all_days:
+        check_date -= timedelta(days=1)
+    while check_date in all_days:
+        streak += 1
+        check_date -= timedelta(days=1)
+
     return JsonResponse({
-        'total_messages': Message.objects.filter(conversation__user=request.user).count(),
-        'total_conversations': Conversation.objects.filter(user=request.user).count(),
+        'total_messages': total_messages,
+        'total_conversations': total_conversations,
         'scores': scores_list,
+        'daily_scores': daily_scores,
         'averages': averages,
+        'best_scores': best_scores,
+        'streak': streak,
     })
 
 

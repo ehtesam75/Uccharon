@@ -244,6 +244,112 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ═══════════════ DASHBOARD SCREEN ═══════════════ -->
+            <div id="dashboard-screen" class="dashboard-screen" style="display:none">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div class="dashboard-title-group">
+                            <h2 class="dashboard-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#dashGrad)" stroke-width="2" stroke-linecap="round">
+                                    <defs><linearGradient id="dashGrad" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#6c5ce7"/><stop offset="100%" stop-color="#00cec9"/></linearGradient></defs>
+                                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                                </svg>
+                                Analytics Dashboard
+                            </h2>
+                            <p class="dashboard-subtitle">Track your learning journey and performance trends</p>
+                        </div>
+                        <div class="time-range-tabs" id="time-range-tabs">
+                            <button class="time-tab" data-range="daily">Today</button>
+                            <button class="time-tab" data-range="weekly">Week</button>
+                            <button class="time-tab" data-range="monthly">Month</button>
+                            <button class="time-tab active" data-range="all">All Time</button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="dashboard-loading" class="dashboard-loading">
+                        <div class="dash-loader"><div></div><div></div><div></div></div>
+                        <p>Loading your analytics...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="dashboard-empty" class="dashboard-empty" style="display:none">
+                        <div class="dashboard-empty-icon">📊</div>
+                        <h3>No performance data yet</h3>
+                        <p>Start a conversation to track your progress!</p>
+                    </div>
+
+                    <!-- Dashboard Content -->
+                    <div id="dashboard-data" class="dashboard-data" style="display:none">
+                        <!-- Summary Cards -->
+                        <div class="dash-summary-grid">
+                            <div class="dash-stat-card">
+                                <div class="dash-stat-icon">💬</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-total-messages">0</div>
+                                    <div class="dash-stat-label">Total Messages</div>
+                                </div>
+                            </div>
+                            <div class="dash-stat-card">
+                                <div class="dash-stat-icon">📝</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-total-convos">0</div>
+                                    <div class="dash-stat-label">Conversations</div>
+                                </div>
+                            </div>
+                            <div class="dash-stat-card">
+                                <div class="dash-stat-icon">🔥</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-streak">0</div>
+                                    <div class="dash-stat-label">Day Streak</div>
+                                </div>
+                            </div>
+                            <div class="dash-stat-card dash-stat-card-accent">
+                                <div class="dash-stat-icon">⭐</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-overall-score">0</div>
+                                    <div class="dash-stat-label">Overall Score</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row -->
+                        <div class="dash-charts-grid">
+                            <div class="dash-chart-card">
+                                <h3 class="dash-card-title">Skill Breakdown</h3>
+                                <p class="dash-card-desc">Average scores across categories</p>
+                                <div class="radar-chart-container">
+                                    <canvas id="radar-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="dash-chart-card">
+                                <h3 class="dash-card-title">Progress Over Time</h3>
+                                <p class="dash-card-desc">Daily score trends</p>
+                                <div class="line-chart-container">
+                                    <canvas id="line-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score Breakdown -->
+                        <div class="dash-detail-grid">
+                            <div class="dash-detail-card">
+                                <h3 class="dash-card-title">Average Scores</h3>
+                                <div class="scores-grid" id="dash-avg-scores">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                            <div class="dash-detail-card">
+                                <h3 class="dash-card-title">Personal Bests</h3>
+                                <div class="scores-grid" id="dash-best-scores">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <!-- Settings Drawer -->
@@ -415,21 +521,10 @@
             </div>
         </div>
 
-        <!-- Stats Modal -->
-        <div id="stats-overlay" class="settings-overlay" style="display:none"></div>
-        <div id="stats-modal" class="stats-modal">
-            <div class="drawer-header">
-                <h2>Performance Stats</h2>
-                <button id="close-stats" class="icon-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="stats-content" id="stats-content">
-                <!-- Populated by JS -->
-            </div>
-        </div>
+
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="{% static 'coach/js/providers.js' %}"></script>
     <script src="{% static 'coach/js/app.js' %}"></script>
 </body>
