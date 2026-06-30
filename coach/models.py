@@ -21,11 +21,28 @@ class UserProfile(models.Model):
     ai_provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default='gemini')
     gemini_api_key = models.CharField(max_length=255, blank=True, default='')
     groq_api_key = models.CharField(max_length=255, blank=True, default='')
+    daily_word_goal = models.IntegerField(default=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username}'s profile"
+
+
+class DailyProgress(models.Model):
+    """Tracks a user's daily word count progress against their goal."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='daily_progress')
+    date = models.DateField()
+    word_count = models.IntegerField(default=0)
+    goal_target = models.IntegerField()
+    is_completed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'date')
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date} ({self.word_count}/{self.goal_target})"
 
 
 class Conversation(models.Model):

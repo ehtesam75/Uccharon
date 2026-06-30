@@ -110,11 +110,18 @@
         dashTotalMessages: $('#dash-total-messages'),
         dashTotalConvos: $('#dash-total-convos'),
         dashStreak: $('#dash-streak'),
+        dashMaxStreak: $('#dash-max-streak'),
+        dashTodayProgress: $('#dash-today-progress'),
         dashOverallScore: $('#dash-overall-score'),
         radarChartCtx: $('#radar-chart'),
         lineChartCtx: $('#line-chart'),
         dashAvgScores: $('#dash-avg-scores'),
         dashBestScores: $('#dash-best-scores'),
+        
+        // Onboarding Goal Modal
+        goalModalOverlay: $('#goal-modal-overlay'),
+        saveOnboardingGoalBtn: $('#save-onboarding-goal-btn'),
+        dailyWordGoalSelect: $('#daily-word-goal'),
 
         // Theme
         themeToggleBtn: $('#theme-toggle-btn'),
@@ -197,6 +204,25 @@
         DOM.signupPassword.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleSignup();
         });
+
+        // Onboarding Goal Selection
+        DOM.saveOnboardingGoalBtn.addEventListener('click', async () => {
+            const selectedGoal = document.querySelector('input[name="onboarding-goal"]:checked').value;
+            DOM.saveOnboardingGoalBtn.classList.add('btn-loading');
+            DOM.saveOnboardingGoalBtn.disabled = true;
+            try {
+                await api('/api/settings/', 'PUT', { daily_word_goal: selectedGoal });
+                state.settings.daily_word_goal = parseInt(selectedGoal);
+                DOM.goalModalOverlay.style.display = 'none';
+                showApp();
+                await createConversation(); // Auto-start a chat for new users
+            } catch (err) {
+                showToast('Failed to save goal', 'error');
+            } finally {
+                DOM.saveOnboardingGoalBtn.classList.remove('btn-loading');
+                DOM.saveOnboardingGoalBtn.disabled = false;
+            }
+        });
     }
 
     async function handleLogin() {
@@ -246,7 +272,8 @@
             const data = await api('/api/auth/signup/', 'POST', { username, email, password });
             state.user = data.user;
             await loadUserData();
-            showApp();
+            DOM.authScreen.style.display = 'none';
+            DOM.goalModalOverlay.style.display = 'flex';
         } catch (err) {
             showAuthError('signup', err.message);
         } finally {
@@ -1174,6 +1201,8 @@
         if (providerRadio) providerRadio.checked = true;
         _updateAiProviderUI(aiProvider);
 
+        DOM.dailyWordGoalSelect.value = state.settings.daily_word_goal || '50';
+
         // Model selects
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.0-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
@@ -1208,6 +1237,7 @@
         const geminiModel = DOM.geminiModelSelect.value;
         const groqModel = DOM.groqModelSelect.value;
         const voiceProvider = document.querySelector('input[name="voice-provider"]:checked')?.value || 'browser';
+        const dailyWordGoal = DOM.dailyWordGoalSelect.value;
 
         if (voiceProvider === 'openai' && !openaiKey) {
             showToast('OpenAI API key is required for Whisper voice input.', 'error');
@@ -1240,7 +1270,9 @@
                 ai_provider: provider,
                 gemini_api_key: geminiKey,
                 groq_api_key: groqKey,
+                daily_word_goal: dailyWordGoal
             });
+            state.settings.daily_word_goal = parseInt(dailyWordGoal);
             showToast('Settings saved successfully!', 'success');
             closeSettings();
         } catch (err) {
@@ -1334,9 +1366,11 @@
 
     function renderDashboard(data) {
         // Summary Cards
+        DOM.dashTodayProgress.textContent = `${data.today_words}/${data.today_goal}`;
+        animateCounter(DOM.dashStreak, data.streak);
+        animateCounter(DOM.dashMaxStreak, data.max_streak);
         animateCounter(DOM.dashTotalMessages, data.total_messages);
         animateCounter(DOM.dashTotalConvos, data.total_conversations);
-        animateCounter(DOM.dashStreak, data.streak);
         animateCounter(DOM.dashOverallScore, data.averages.overall, true);
 
         // Score Breakdowns (Averages)

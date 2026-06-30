@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
-from .models import UserProfile, Conversation, Message
+from .models import UserProfile, Conversation, Message, DailyProgress
 
 
 def json_body(request):
@@ -112,6 +112,7 @@ def current_user_view(request):
                 'ai_provider': profile.ai_provider,
                 'gemini_api_key': profile.gemini_api_key,
                 'groq_api_key': profile.groq_api_key,
+                'daily_word_goal': profile.daily_word_goal,
             }
         })
     return JsonResponse({'authenticated': False})
@@ -132,6 +133,7 @@ def settings_view(request):
             'ai_provider': profile.ai_provider,
             'gemini_api_key': profile.gemini_api_key,
             'groq_api_key': profile.groq_api_key,
+            'daily_word_goal': profile.daily_word_goal,
         })
 
     data = json_body(request)
@@ -143,6 +145,8 @@ def settings_view(request):
         profile.gemini_api_key = data['gemini_api_key']
     if 'groq_api_key' in data:
         profile.groq_api_key = data['groq_api_key']
+    if 'daily_word_goal' in data:
+        profile.daily_word_goal = int(data['daily_word_goal'])
     profile.save()
 
     return JsonResponse({'success': True})
@@ -244,6 +248,20 @@ def messages_view(request, convo_id):
         score_confidence=scores.get('confidence'),
         score_overall=scores.get('overall'),
     )
+
+    # Track daily word progress
+    word_count = len(user_text.split())
+    now_local = timezone.localtime(timezone.now())
+    today_date = now_local.date()
+    
+    dp, created = DailyProgress.objects.get_or_create(
+        user=request.user,
+        date=today_date,
+        defaults={'goal_target': request.user.profile.daily_word_goal}
+    )
+    dp.word_count += word_count
+    dp.is_completed = dp.word_count >= dp.goal_target
+    dp.save()
 
     # Update conversation title from first message
     if convo.messages.count() == 1:
@@ -397,18 +415,41 @@ def stats_view(request):
             if val > best_scores[key]:
                 best_scores[key] = val
 
-    # Calculate practice streak (consecutive days with at least one scored message)
-    # Streak should always use all-time data
-    all_days = set()
-    for m in all_scores:
-        all_days.add(timezone.localtime(m.created_at).date())
+    # Calculate goal-based streaks using DailyProgress
+    all_progress = DailyProgress.objects.filter(user=request.user).order_by('-date')
+    
+    today_date = now_local.date()
+    today_words = 0
+    today_goal = request.user.profile.daily_word_goal
+    completed_days = set()
 
+    for dp in all_progress:
+        if dp.date == today_date:
+            today_words = dp.word_count
+            today_goal = dp.goal_target
+        if dp.is_completed:
+            completed_days.add(dp.date)
+
+    # Calculate max streak
+    max_streak = 0
+    sorted_completed = sorted(list(completed_days), reverse=True)
+    if sorted_completed:
+        current_run = 1
+        max_streak = 1
+        for i in range(len(sorted_completed) - 1):
+            if (sorted_completed[i] - sorted_completed[i+1]).days == 1:
+                current_run += 1
+                max_streak = max(max_streak, current_run)
+            else:
+                current_run = 1
+
+    # Calculate current streak
     streak = 0
-    check_date = now_local.date()
-    # If user hasn't practiced today, start from yesterday
-    if check_date not in all_days:
+    check_date = today_date
+    if check_date not in completed_days:
         check_date -= timedelta(days=1)
-    while check_date in all_days:
+    
+    while check_date in completed_days:
         streak += 1
         check_date -= timedelta(days=1)
 
@@ -420,6 +461,9 @@ def stats_view(request):
         'averages': averages,
         'best_scores': best_scores,
         'streak': streak,
+        'max_streak': max_streak,
+        'today_words': today_words,
+        'today_goal': today_goal,
     })
 
 
