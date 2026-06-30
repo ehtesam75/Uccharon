@@ -11,25 +11,42 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+import dj_database_url
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*w%7n+y0ym&&o+daz#sy&7t#wejn46#g9$z=c6u++ct%d+1*d1'
+# Falls back to a dev-only key so local development still works without a .env file.
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-*w%7n+y0ym&&o+daz#sy&7t#wejn46#g9$z=c6u++ct%d+1*d1",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Reads from environment so DEBUG is True locally but False on Railway.
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    "uccharon.up.railway.app", 
-    "127.0.0.1", 
+    "uccharon.up.railway.app",
+    "127.0.0.1",
     "localhost",
 ]
+
+# Required when running behind a proxy (Railway) that terminates HTTPS.
+# Without this, request.is_secure() returns False even on real HTTPS requests,
+# which breaks CSRF cookies, secure redirects, and admin login.
+CSRF_TRUSTED_ORIGINS = [
+    "https://uccharon.up.railway.app",
+]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
@@ -44,17 +61,15 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-"django.middleware.security.SecurityMiddleware",
-"whitenoise.middleware.WhiteNoiseMiddleware",
-
-"django.contrib.sessions.middleware.SessionMiddleware",
-"django.middleware.common.CommonMiddleware",
-"django.middleware.csrf.CsrfViewMiddleware",
-"django.contrib.auth.middleware.AuthenticationMiddleware",
-"django.contrib.messages.middleware.MessageMiddleware",
-"django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
 
 ROOT_URLCONF = 'Uccharon.urls'
 
@@ -75,17 +90,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Uccharon.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
     }
-}
-
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -105,30 +128,34 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Asia/Dhaka'
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "/static/"
-
 STATICFILES_DIRS = [
-BASE_DIR / "coach" / "static"
+    BASE_DIR / "coach" / "static"
 ]
-
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Use WhiteNoise's compressed + hashed storage for cache-busting and gzip/brotli
+# in production. This is the Django 5.x STORAGES-style config (replaces the
+# older STATICFILES_STORAGE setting).
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -142,3 +169,12 @@ SESSION_SAVE_EVERY_REQUEST = True
 # Login redirect
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
+
+# Security settings that only make sense once DEBUG is False (production).
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # 1 week, raise once confirmed working
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
