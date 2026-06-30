@@ -1051,9 +1051,9 @@ input, textarea, select {
     line-height: 1;
 }
 
-/* Pronunciation */
 .pronunciation-item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     padding: 10px 14px;
@@ -1084,9 +1084,11 @@ input, textarea, select {
 }
 
 .pronunciation-tip {
-    flex: 1;
+    width: 100%;
+    margin-top: 4px;
     font-size: 0.825rem;
     color: var(--text-secondary);
+    font-style: italic;
 }
 
 /* Vocabulary */
@@ -1131,6 +1133,7 @@ input, textarea, select {
     color: var(--text-secondary);
     text-align: left;
     margin-top: 4px;
+    font-style: italic;
 }
 
 /* Performance scores */
@@ -2249,13 +2252,7 @@ input, textarea, select {
     }
 
     .pronunciation-item {
-        flex-wrap: wrap;
         gap: 6px;
-    }
-
-    .pronunciation-tip {
-        width: 100%;
-        margin-top: 4px;
     }
 }
 

@@ -33,6 +33,7 @@ For every user message, you MUST respond with this exact JSON structure:
     {
       "word": "the word",
       "phonetic": "IPA or simplified pronunciation",
+      "spelling": "simple English-letter pronunciation spelling",
       "tip": "specific tip for pronouncing this word correctly"
     }
   ],

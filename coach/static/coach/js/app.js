@@ -629,11 +629,16 @@
         if (response.pronunciation_guidance && response.pronunciation_guidance.length > 0) {
             let pronHtml = '';
             response.pronunciation_guidance.forEach(pg => {
+                let spellingHtml = '';
+                if (pg.spelling) {
+                    spellingHtml = `<span class="pronunciation-spelling" style="font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--text-secondary); background: var(--bg-glass); padding: 2px 8px; border-radius: 4px;">${escapeHtml(pg.spelling)}</span>`;
+                }
                 pronHtml += `
                     <div class="pronunciation-item">
                         <span class="pronunciation-word">${escapeHtml(pg.word)}</span>
                         <span class="pronunciation-phonetic">${escapeHtml(pg.phonetic)}</span>
-                        <span class="pronunciation-tip">${escapeHtml(pg.tip)}</span>
+                        ${spellingHtml}
+                        <div class="pronunciation-tip">${escapeHtml(pg.tip)}</div>
                     </div>
                 `;
             });
