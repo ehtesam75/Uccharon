@@ -1,6 +1,8 @@
 # Uccharon (উচ্চারণ) - AI Language Coach
 
 Uccharon is an interactive AI-powered language learning application that acts as your personal conversation coach. Built with Django and vanilla JavaScript, it integrates directly with Large Language Models (Gemini and Groq) to provide dynamic conversations, evaluate your language skills, and help you improve over time.
+<br>
+
 
 ## ✨ Features
 
@@ -16,14 +18,16 @@ Uccharon is an interactive AI-powered language learning application that acts as
   - View detailed visual analytics for your historical performance (daily, weekly, monthly).
 - **User Personalization:** Dark and Light themes tailored to your preference.
 - **PWA Support:** Installable as a Progressive Web App (PWA) with native-like icons and experience.
+<br>
 
-# 🛠 Tech Stack
+## 🛠 Tech Stack
 
 - **Backend:** Django 5.2 (Python 3)
 - **Database:** SQLite3 (Local) / PostgreSQL (Production)
 - **Frontend:** HTML5, CSS, Vanilla JS (`app.js`, `providers.js`)
 - **Deployment:** Ready for platforms like Railway or Heroku (Gunicorn + Whitenoise)
 - **Static & Media:** Configured for Django Cloudinary Storage
+<br>
 
 ## 🚀 Getting Started
 
@@ -72,12 +76,14 @@ Uccharon is an interactive AI-powered language learning application that acts as
    python manage.py runserver
    ```
    Open `http://127.0.0.1:8000` in your web browser.
+<br>
 
 ## ⚙️ Configuration
 
 To use the AI features, register an account in the app, click on your profile/settings, and add your API keys for:
 - [Google Gemini API](https://aistudio.google.com/)
 - [Groq API](https://console.groq.com/)
+<br>
 
 ## 🚢 Deployment
 
@@ -85,6 +91,7 @@ The project is configured for easy deployment on PaaS platforms like Railway:
 - Uses `dj-database-url` for database configuration via the `DATABASE_URL` environment variable.
 - Uses `gunicorn` as the WSGI HTTP server (configured in `Procfile`).
 - Static files are served efficiently via `whitenoise`.
+<br>
 
 ## 📁 Project Structure
 
