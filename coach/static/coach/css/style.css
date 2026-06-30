@@ -2140,6 +2140,91 @@ input, textarea, select {
     .provider-card-content {
         padding: 12px;
     }
+
+    /* ─── Dashboard Mobile Redesign ─── */
+    .dashboard-container {
+        padding: 20px 16px 40px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .dashboard-title-group {
+        text-align: center;
+    }
+
+    .dashboard-title {
+        justify-content: center;
+    }
+
+    .time-range-tabs {
+        width: 100%;
+        display: flex;
+        padding: 4px;
+        border-radius: 12px;
+    }
+
+    .time-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px 4px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+
+    .dash-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .dash-stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .dash-stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.2rem;
+    }
+
+    .dash-stat-number {
+        font-size: 1.5rem;
+    }
+
+    .dash-stat-label {
+        font-size: 0.7rem;
+    }
+
+    .dash-charts-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .dash-detail-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .dash-chart-card, .dash-detail-card {
+        padding: 20px 16px;
+    }
+
+    .radar-chart-container {
+        max-width: 260px;
+    }
+
+    .line-chart-container {
+        height: 220px;
+    }
 }
 
 @media (max-width: 480px) {
