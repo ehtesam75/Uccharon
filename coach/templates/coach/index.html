@@ -280,53 +280,44 @@
                         <p>Start a conversation to track your progress!</p>
                     </div>
 
-                    <!-- Dashboard Content -->
-                    <div id="dashboard-data" class="dashboard-data" style="display:none">
-                        <!-- Summary Cards -->
-                        <div class="dash-summary-grid">
-                            <div class="dash-stat-card">
-                                <div class="dash-stat-icon">🎯</div>
-                                <div class="dash-stat-info">
-                                    <div class="dash-stat-number" id="dash-today-progress">0/0</div>
-                                    <div class="dash-stat-label">Words Today</div>
+                        <!-- Dashboard Content -->
+                        <div id="dashboard-data" class="dashboard-data" style="display:none">
+                            <!-- Daily Progress Text -->
+                            <div class="dash-today-text" style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 500;">
+                                Words Today: <span id="dash-today-progress" style="color: var(--text-primary); font-weight: bold;">0/0</span>
+                            </div>
+
+                            <!-- Summary Cards -->
+                            <div class="dash-summary-grid">
+                                <div class="dash-stat-card">
+                                    <div class="dash-stat-icon">🔥</div>
+                                    <div class="dash-stat-info">
+                                        <div class="dash-stat-number" id="dash-streak">0</div>
+                                        <div class="dash-stat-label">Current Streak</div>
+                                    </div>
+                                </div>
+                                <div class="dash-stat-card">
+                                    <div class="dash-stat-icon">👑</div>
+                                    <div class="dash-stat-info">
+                                        <div class="dash-stat-number" id="dash-max-streak">0</div>
+                                        <div class="dash-stat-label">Max Streak</div>
+                                    </div>
+                                </div>
+                                <div class="dash-stat-card">
+                                    <div class="dash-stat-icon">💬</div>
+                                    <div class="dash-stat-info">
+                                        <div class="dash-stat-number" id="dash-total-messages">0</div>
+                                        <div class="dash-stat-label">Total Messages</div>
+                                    </div>
+                                </div>
+                                <div class="dash-stat-card dash-stat-card-accent">
+                                    <div class="dash-stat-icon">⭐</div>
+                                    <div class="dash-stat-info">
+                                        <div class="dash-stat-number" id="dash-overall-score">0</div>
+                                        <div class="dash-stat-label">Overall Score</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="dash-stat-card">
-                                <div class="dash-stat-icon">🔥</div>
-                                <div class="dash-stat-info">
-                                    <div class="dash-stat-number" id="dash-streak">0</div>
-                                    <div class="dash-stat-label">Current Streak</div>
-                                </div>
-                            </div>
-                            <div class="dash-stat-card">
-                                <div class="dash-stat-icon">👑</div>
-                                <div class="dash-stat-info">
-                                    <div class="dash-stat-number" id="dash-max-streak">0</div>
-                                    <div class="dash-stat-label">Max Streak</div>
-                                </div>
-                            </div>
-                            <div class="dash-stat-card">
-                                <div class="dash-stat-icon">💬</div>
-                                <div class="dash-stat-info">
-                                    <div class="dash-stat-number" id="dash-total-messages">0</div>
-                                    <div class="dash-stat-label">Total Messages</div>
-                                </div>
-                            </div>
-                            <div class="dash-stat-card">
-                                <div class="dash-stat-icon">📝</div>
-                                <div class="dash-stat-info">
-                                    <div class="dash-stat-number" id="dash-total-convos">0</div>
-                                    <div class="dash-stat-label">Conversations</div>
-                                </div>
-                            </div>
-                            <div class="dash-stat-card dash-stat-card-accent">
-                                <div class="dash-stat-icon">⭐</div>
-                                <div class="dash-stat-info">
-                                    <div class="dash-stat-number" id="dash-overall-score">0</div>
-                                    <div class="dash-stat-label">Overall Score</div>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Charts Row -->
                         <div class="dash-charts-grid">
@@ -376,6 +367,17 @@
                 </button>
             </div>
             <div class="drawer-content">
+                <div class="settings-section">
+                    <h3>Daily Word Target</h3>
+                    <p class="settings-desc">Set your daily learning goal. <strong>Note:</strong> Any changes made will only take effect starting the next day.</p>
+                    <select id="daily-word-goal" class="settings-select">
+                        <option value="50">50 words/day</option>
+                        <option value="100">100 words/day</option>
+                        <option value="200">200 words/day</option>
+                        <option value="500">500+ words/day</option>
+                    </select>
+                </div>
+                
                 <div class="settings-section">
                     <h3>AI Provider</h3>
                     <p class="settings-desc">Select your preferred AI provider</p>
@@ -461,17 +463,6 @@
                             <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3>Daily Word Target</h3>
-                    <p class="settings-desc">Set your daily learning goal</p>
-                    <select id="daily-word-goal" class="settings-select">
-                        <option value="50">50 words/day (Casual)</option>
-                        <option value="100">100 words/day (Steady)</option>
-                        <option value="150">150 words/day (Active)</option>
-                        <option value="200">200+ words/day (Intense)</option>
-                    </select>
                 </div>
 
                 <!-- Voice Input Provider -->
@@ -560,32 +551,28 @@
                     <input type="radio" name="onboarding-goal" value="50" checked style="display:none;">
                     <div class="goal-card" style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
                         <span class="goal-num" style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">50</span>
-                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">words/day</span>
-                        <span class="goal-tag" style="font-size: 0.75rem; background: var(--bg-secondary); padding: 4px 8px; border-radius: 12px; color: var(--text-primary);">Casual</span>
+                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
                     </div>
                 </label>
                 <label class="goal-option">
                     <input type="radio" name="onboarding-goal" value="100" style="display:none;">
                     <div class="goal-card" style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
                         <span class="goal-num" style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">100</span>
-                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">words/day</span>
-                        <span class="goal-tag" style="font-size: 0.75rem; background: var(--bg-secondary); padding: 4px 8px; border-radius: 12px; color: var(--text-primary);">Steady</span>
-                    </div>
-                </label>
-                <label class="goal-option">
-                    <input type="radio" name="onboarding-goal" value="150" style="display:none;">
-                    <div class="goal-card" style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
-                        <span class="goal-num" style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">150</span>
-                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">words/day</span>
-                        <span class="goal-tag" style="font-size: 0.75rem; background: var(--bg-secondary); padding: 4px 8px; border-radius: 12px; color: var(--text-primary);">Active</span>
+                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
                     </div>
                 </label>
                 <label class="goal-option">
                     <input type="radio" name="onboarding-goal" value="200" style="display:none;">
                     <div class="goal-card" style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
-                        <span class="goal-num" style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">200+</span>
-                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">words/day</span>
-                        <span class="goal-tag" style="font-size: 0.75rem; background: var(--bg-secondary); padding: 4px 8px; border-radius: 12px; color: var(--text-primary);">Intense</span>
+                        <span class="goal-num" style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">200</span>
+                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
+                    </div>
+                </label>
+                <label class="goal-option">
+                    <input type="radio" name="onboarding-goal" value="500" style="display:none;">
+                    <div class="goal-card" style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                        <span class="goal-num" style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">500+</span>
+                        <span class="goal-text" style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
                     </div>
                 </label>
             </div>

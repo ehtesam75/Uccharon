@@ -146,7 +146,16 @@ def settings_view(request):
     if 'groq_api_key' in data:
         profile.groq_api_key = data['groq_api_key']
     if 'daily_word_goal' in data:
-        profile.daily_word_goal = int(data['daily_word_goal'])
+        new_goal = int(data['daily_word_goal'])
+        if profile.daily_word_goal != new_goal:
+            # Lock in today's goal to the OLD goal so the new goal only takes effect tomorrow
+            now_local = timezone.localtime(timezone.now())
+            DailyProgress.objects.get_or_create(
+                user=request.user,
+                date=now_local.date(),
+                defaults={'goal_target': profile.daily_word_goal}
+            )
+            profile.daily_word_goal = new_goal
     profile.save()
 
     return JsonResponse({'success': True})
