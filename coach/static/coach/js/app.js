@@ -94,6 +94,7 @@
         saveSettingsBtn: $('#save-settings-btn'),
         openaiKeyGroup: $('#openai-key-group'),
         voiceBrowserNotice: $('#voice-browser-notice'),
+        geminiSttNotice: $('#gemini-stt-notice'),
 
         // Stats
         statsBtn: $('#stats-btn'),
@@ -1154,8 +1155,8 @@
 
     /** Show/hide the OpenAI key field and notice based on selected voice provider */
     function _updateVoiceProviderUI(provider) {
-        const showOpenAI = provider === 'openai' || provider === 'gemini-stt';
-        DOM.openaiKeyGroup.style.display = showOpenAI ? 'block' : 'none';
+        DOM.openaiKeyGroup.style.display = provider === 'openai' ? 'block' : 'none';
+        DOM.geminiSttNotice.style.display = provider === 'gemini-stt' ? 'flex' : 'none';
         DOM.voiceBrowserNotice.style.display = provider === 'browser' ? 'flex' : 'none';
     }
 
