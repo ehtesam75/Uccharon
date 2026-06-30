@@ -332,12 +332,18 @@ def stats_view(request):
     scores_list = []
     for m in filtered_qs:
         local_dt = timezone.localtime(m.created_at)
+        
+        # Calculate overall score if missing in database
+        overall = m.score_overall
+        if overall is None and m.score_grammar is not None:
+            overall = round((m.score_grammar * 0.4) + (m.score_naturalness * 0.3) + (m.score_vocabulary * 0.2) + (m.score_confidence * 0.1), 1)
+
         scores_list.append({
             'grammar': m.score_grammar,
             'vocabulary': m.score_vocabulary,
             'naturalness': m.score_naturalness,
             'confidence': m.score_confidence,
-            'overall': m.score_overall,
+            'overall': overall,
             'local_date': local_dt.date().isoformat(),  # Grouping by local date
             'created_at': m.created_at.isoformat(),
         })
@@ -374,10 +380,20 @@ def stats_view(request):
         'grammar': 0, 'vocabulary': 0, 'naturalness': 0, 'confidence': 0, 'overall': 0,
     }
     for m in all_scores:
-        for key, field in [('grammar', 'score_grammar'), ('vocabulary', 'score_vocabulary'),
-                           ('naturalness', 'score_naturalness'), ('confidence', 'score_confidence'),
-                           ('overall', 'score_overall')]:
-            val = getattr(m, field) or 0
+        # Calculate overall dynamically if missing
+        overall = m.score_overall
+        if overall is None and m.score_grammar is not None:
+            overall = round((m.score_grammar * 0.4) + (m.score_naturalness * 0.3) + (m.score_vocabulary * 0.2) + (m.score_confidence * 0.1), 1)
+
+        scores_dict = {
+            'grammar': m.score_grammar or 0,
+            'vocabulary': m.score_vocabulary or 0,
+            'naturalness': m.score_naturalness or 0,
+            'confidence': m.score_confidence or 0,
+            'overall': overall or 0,
+        }
+        
+        for key, val in scores_dict.items():
             if val > best_scores[key]:
                 best_scores[key] = val
 

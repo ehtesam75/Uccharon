@@ -783,6 +783,9 @@
 
             // Extract scores
             const scores = aiResponse.performance_rating || {};
+            if (scores.grammar !== undefined) {
+                scores.overall = Number(((scores.grammar * 0.40) + (scores.naturalness * 0.30) + (scores.vocabulary * 0.20) + (scores.confidence * 0.10)).toFixed(1));
+            }
 
             // Save to server
             const savedMsg = await api(
