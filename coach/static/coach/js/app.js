@@ -311,9 +311,12 @@
                 state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
                 await loadConversations();
                 showApp();
+            } else {
+                DOM.authScreen.style.display = 'flex';
             }
         } catch (e) {
             // Not logged in, show auth screen
+            DOM.authScreen.style.display = 'flex';
         }
     }
 
