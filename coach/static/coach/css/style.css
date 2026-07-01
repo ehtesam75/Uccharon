@@ -77,7 +77,7 @@
     --border-color: rgba(0, 0, 0, 0.08);
     --border-color-hover: rgba(0, 0, 0, 0.15);
 
-    --gradient-hero: linear-gradient(135deg, #f4f5fa 0%, #e8e9f5 50%, #e0f0f0 100%);
+    --gradient-hero: linear-gradient(135deg, #ede6d8 0%, #e4e3dc 35%, #dae4e1 65%, #d1dedc 100%);
     --gradient-card: linear-gradient(135deg, rgba(95, 61, 196, 0.06) 0%, rgba(12, 166, 161, 0.03) 100%);
 
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -1223,6 +1223,16 @@ select {
     font-weight: 500;
     color: var(--text-secondary);
     min-width: 100px;
+}
+
+.score-row.overall-score .score-label {
+    color: var(--accent-primary);
+    font-weight: 700;
+}
+
+.score-row.overall-score .score-value {
+    color: var(--accent-primary);
+    font-size: 1.05rem;
 }
 
 .score-bar-container {

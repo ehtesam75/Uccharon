@@ -426,6 +426,11 @@
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         state.settings.theme = theme;
+        
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', theme === 'dark' ? '#12122A' : '#EDE6D8');
+        }
 
         const darkIcon = $('.theme-icon-dark');
         const lightIcon = $('.theme-icon-light');
@@ -765,8 +770,9 @@
                         trendHtml = `<span class="score-trend same">=</span>`;
                     }
                 }
+                const rowClass = s.key === 'overall' ? 'score-row overall-score' : 'score-row';
                 scoresHtml += `
-                    <div class="score-row">
+                    <div class="${rowClass}">
                         <span class="score-label">${s.label}</span>
                         <div class="score-bar-container">
                             <div class="score-bar" data-width="${(s.value / 10) * 100}%"></div>
