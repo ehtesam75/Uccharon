@@ -452,6 +452,18 @@
     }
 
     async function selectConversation(convo) {
+        // Delete the previous conversation if it has no messages before switching
+        if (state.currentConversation && state.currentConversation.id !== convo.id) {
+            if (state.currentMessages.length === 0) {
+                try {
+                    await api(`/api/conversations/${state.currentConversation.id}/`, 'DELETE');
+                    state.conversations = state.conversations.filter(c => c.id !== state.currentConversation.id);
+                } catch (e) {
+                    console.error('Failed to delete empty conversation', e);
+                }
+            }
+        }
+
         state.currentConversation = convo;
         state.previousScores = null;
 
