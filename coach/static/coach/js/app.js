@@ -965,8 +965,11 @@
 
         DOM.chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+                if (!isMobile) {
+                    e.preventDefault();
+                    sendMessage();
+                }
             }
         });
 
