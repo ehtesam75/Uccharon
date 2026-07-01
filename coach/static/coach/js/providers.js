@@ -65,6 +65,7 @@ RULES:
 8. The Vocabulary Improvement section should include relevant synonyms or similar words based on the user’s message.
 9. For pronunciation, focus on words that non-native speakers commonly mispronounce.
 10. Your conversational_reply should feel natural and friendly, like talking to a supportive coach.
+11. If the user's message is completely meaningless, random keyboard mashing (e.g., 'slejwofeij', 'i slie sklesie'), or impossible to understand, return a score of 0 for ALL performance_rating categories (grammar, vocabulary, naturalness, confidence), leave all correction arrays empty, and politely ask them to try again in your conversational_reply.
 
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
