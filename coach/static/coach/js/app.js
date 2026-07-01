@@ -958,6 +958,17 @@
     // ─── Auto-resize textarea ────────────────────────────
 
     function initChatInput() {
+        // Handle placeholder based on screen size
+        const updatePlaceholder = () => {
+            if (window.innerWidth <= 768) {
+                DOM.chatInput.placeholder = "Type your message";
+            } else {
+                DOM.chatInput.placeholder = "Type your message in English...";
+            }
+        };
+        window.addEventListener('resize', updatePlaceholder);
+        updatePlaceholder(); // Call once on init
+
         DOM.chatInput.addEventListener('input', () => {
             DOM.chatInput.style.height = 'auto';
             DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
@@ -1701,7 +1712,8 @@
             DOM.sidebar.classList.toggle('collapsed');
         });
 
-        DOM.mobileSidebarToggle.addEventListener('click', () => {
+        DOM.mobileSidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from immediately closing it
             if (window.innerWidth <= 768) {
                 DOM.sidebar.classList.toggle('mobile-open');
                 DOM.sidebarOverlay.classList.toggle('active');
@@ -1715,7 +1727,9 @@
             if (DOM.sidebar.classList.contains('mobile-open') &&
                 !DOM.sidebar.contains(e.target) &&
                 e.target !== DOM.mobileSidebarToggle &&
-                !DOM.mobileSidebarToggle.contains(e.target)) {
+                !DOM.mobileSidebarToggle.contains(e.target) &&
+                !DOM.settingsDrawer.contains(e.target) &&
+                e.target !== DOM.settingsOverlay) {
                 DOM.sidebar.classList.remove('mobile-open');
                 DOM.sidebarOverlay.classList.remove('active');
             }
