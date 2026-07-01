@@ -1003,22 +1003,33 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) return;
 
+        // Disable interim results on mobile to prevent Android Chrome duplication bugs
+        const isMobile = window.matchMedia('(max-width: 768px)').matches || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
         state.recognition = new SpeechRecognition();
         state.recognition.continuous = true;
-        state.recognition.interimResults = true;
+        state.recognition.interimResults = !isMobile;
         state.recognition.lang = 'en-US';
 
         state.recognition.onstart = () => {
             state.initialInputText = DOM.chatInput.value;
+            state.finalTranscript = ''; // Track final parts separately
         };
 
         state.recognition.onresult = (event) => {
-            let transcript = '';
-            for (let i = 0; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const text = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    state.finalTranscript += text;
+                } else {
+                    interimTranscript += text;
+                }
             }
             
+            let transcript = state.finalTranscript + interimTranscript;
             let prefix = state.initialInputText || '';
+            
             if (prefix && !prefix.endsWith(' ') && transcript && !transcript.startsWith(' ')) {
                 prefix += ' ';
             }

@@ -2246,18 +2246,16 @@ select {
     }
 
     .settings-drawer {
-        width: 85vw;
-        max-width: 360px;
-        border-left: 1px solid var(--border-color);
+        width: 100vw;
+        max-width: 100%;
+        border-left: none;
         border-radius: 0;
-        border-top-left-radius: var(--radius-xl);
-        border-bottom-left-radius: var(--radius-xl);
         height: 100dvh;
         top: 0;
         bottom: auto;
         right: -100%;
         transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: -8px 0 30px rgba(0, 0, 0, 0.5);
+        box-shadow: none;
     }
 
     .settings-drawer.open {
@@ -2288,7 +2286,7 @@ select {
 
     /* ─── Dashboard Mobile Redesign ─── */
     .dashboard-container {
-        padding: 20px 16px 40px;
+        padding: 60px 16px 40px;
     }
 
     .dashboard-header {
