@@ -123,7 +123,7 @@
         lineChartCtx: $('#line-chart'),
         dashAvgScores: $('#dash-avg-scores'),
         dashBestScores: $('#dash-best-scores'),
-        
+
         // Onboarding Goal Modal
         goalModalOverlay: $('#goal-modal-overlay'),
         saveOnboardingGoalBtn: $('#save-onboarding-goal-btn'),
@@ -269,7 +269,7 @@
             state.user = data.user;
             await loadUserData();
             showApp();
-            
+
             // Automatically create a new chat session on login if they aren't a new user
             if (state.conversations.length > 0) {
                 await createConversation();
@@ -318,12 +318,12 @@
         try {
             const data = await api('/api/auth/signup/', 'POST', { username, email, password, daily_word_goal });
             state.user = data.user;
-            
+
             // Explicitly force defaults for local settings on new signup
             // so they don't inherit a previous user's settings on the same machine
             localStorage.setItem('uccharon_voice_provider', 'browser');
             localStorage.removeItem('uccharon_openai_api_key');
-            
+
             await loadUserData();
             DOM.authScreen.style.display = 'none';
             showApp();
@@ -341,7 +341,7 @@
         else if (form === 'signup1') el = DOM.signupError1;
         else if (form === 'signup2') el = DOM.signupError2;
         else el = DOM.signupError1;
-        
+
         el.textContent = message;
         el.classList.add('show');
         el.style.animation = 'none';
@@ -426,10 +426,10 @@
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         state.settings.theme = theme;
-        
+
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
-            metaThemeColor.setAttribute('content', theme === 'dark' ? '#12122A' : '#EDE6D8');
+            metaThemeColor.setAttribute('content', theme === 'dark' ? '#12122A' : '#d9b97aff');
         }
 
         const darkIcon = $('.theme-icon-dark');
@@ -463,7 +463,7 @@
             const data = await api('/api/conversations/');
             state.conversations = data.conversations;
             renderConversationList();
-            
+
             // Auto-select the first conversation if we don't have one selected and we have conversations
             if (!state.currentConversation && state.conversations.length > 0) {
                 await selectConversation(state.conversations[0]);
@@ -561,7 +561,7 @@
             state.conversations = state.conversations.filter(c => c.id !== state.currentConversation.id);
             state.currentConversation = null;
             state.currentMessages = [];
-            
+
             if (state.conversations.length > 0) {
                 await selectConversation(state.conversations[0]);
             } else {
@@ -744,7 +744,7 @@
             // Calculate overall score
             const overall = (pr.grammar * 0.40) + (pr.naturalness * 0.30) + (pr.vocabulary * 0.20) + (pr.confidence * 0.10);
             const overallRounded = Number(overall.toFixed(1));
-            
+
             // Add to currentScores so backend saves it
             currentScores.overall = overallRounded;
 
@@ -1032,14 +1032,14 @@
                     interimTranscript += text;
                 }
             }
-            
+
             let transcript = state.finalTranscript + interimTranscript;
             let prefix = state.initialInputText || '';
-            
+
             if (prefix && !prefix.endsWith(' ') && transcript && !transcript.startsWith(' ')) {
                 prefix += ' ';
             }
-            
+
             DOM.chatInput.value = prefix + transcript;
             DOM.chatInput.style.height = 'auto';
             DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
@@ -1434,7 +1434,7 @@
         DOM.welcomeScreen.style.display = 'none';
         DOM.chatArea.style.display = 'none';
         DOM.dashboardScreen.style.display = 'flex';
-        
+
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
         DOM.sidebarOverlay.classList.remove('active');
@@ -1448,7 +1448,7 @@
 
     async function loadDashboardData(range) {
         state.dashboardRange = range;
-        
+
         // Update tabs UI
         document.querySelectorAll('.time-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.range === range);
@@ -1515,12 +1515,12 @@
         function update(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Easing (easeOutExpo)
             const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-            
+
             const current = start + (target - start) * easeProgress;
-            
+
             element.textContent = isDecimal ? current.toFixed(1) : Math.round(current);
 
             if (progress < 1) {
@@ -1567,22 +1567,22 @@
 
     function updateChartColors() {
         if (!state.radarChart || !state.lineChart) return;
-        
+
         const colors = chartTheme.colors;
-        
+
         // Update Radar Chart
         state.radarChart.options.scales.r.grid.color = colors.grid;
         state.radarChart.options.scales.r.angleLines.color = colors.grid;
         state.radarChart.options.scales.r.pointLabels.color = colors.text;
         state.radarChart.options.scales.r.ticks.backdropColor = 'transparent';
         state.radarChart.options.scales.r.ticks.color = colors.text;
-        
+
         // Update Line Chart
         state.lineChart.options.scales.x.grid.color = colors.grid;
         state.lineChart.options.scales.y.grid.color = colors.grid;
         state.lineChart.options.scales.x.ticks.color = colors.text;
         state.lineChart.options.scales.y.ticks.color = colors.text;
-        
+
         state.radarChart.update();
         state.lineChart.update();
     }
@@ -1712,7 +1712,7 @@
 
     function initDashboard() {
         DOM.statsBtn.addEventListener('click', showDashboard);
-        
+
         DOM.timeRangeTabs.addEventListener('click', (e) => {
             if (e.target.classList.contains('time-tab')) {
                 loadDashboardData(e.target.dataset.range);
