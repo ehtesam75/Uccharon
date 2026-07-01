@@ -2320,3 +2320,84 @@ input, textarea, select {
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-20px); }
 }
+
+/* 2-Step Signup Styles */
+.goal-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.goal-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.goal-card:hover {
+    border-color: var(--accent-primary);
+    background: rgba(var(--accent-primary-rgb), 0.05);
+    transform: translateY(-2px);
+}
+
+.goal-card.selected {
+    border-color: var(--accent-primary);
+    background: rgba(var(--accent-primary-rgb), 0.1);
+    box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.goal-card .goal-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    width: 60px;
+    text-align: center;
+}
+
+.goal-card .goal-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.goal-card .goal-desc {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    text-align: right;
+    flex-grow: 1;
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    margin-bottom: 8px;
+    margin-left: -4px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.back-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+#signup-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-secondary);
+    color: var(--text-tertiary);
+    box-shadow: none;
+}

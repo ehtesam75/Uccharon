@@ -54,11 +54,16 @@
         loginPassword: $('#login-password'),
         loginBtn: $('#login-btn'),
         loginError: $('#login-error'),
+        signupStep1: $('#signup-step-1'),
+        signupStep2: $('#signup-step-2'),
+        signupNextBtn: $('#signup-next-btn'),
+        signupBackBtn: $('#signup-back-btn'),
+        signupError1: $('#signup-error-1'),
+        signupError2: $('#signup-error-2'),
         signupUsername: $('#signup-username'),
         signupEmail: $('#signup-email'),
         signupPassword: $('#signup-password'),
         signupBtn: $('#signup-btn'),
-        signupError: $('#signup-error'),
         showSignup: $('#show-signup'),
         showLogin: $('#show-login'),
 
@@ -195,14 +200,30 @@
         });
 
         DOM.loginBtn.addEventListener('click', handleLogin);
+        DOM.signupNextBtn.addEventListener('click', handleSignupNext);
         DOM.signupBtn.addEventListener('click', handleSignup);
+        DOM.signupBackBtn.addEventListener('click', () => {
+            DOM.signupStep2.style.display = 'none';
+            DOM.signupStep1.style.display = 'block';
+        });
+
+        // Goal cards selection
+        const goalCards = $$('.goal-card');
+        goalCards.forEach(card => {
+            card.addEventListener('click', () => {
+                goalCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                window.selectedDailyGoal = card.dataset.goal;
+                DOM.signupBtn.disabled = false;
+            });
+        });
 
         // Enter key support
         DOM.loginPassword.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleLogin();
         });
         DOM.signupPassword.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') handleSignup();
+            if (e.key === 'Enter') handleSignupNext();
         });
 
         // Onboarding Goal Selection
@@ -255,13 +276,32 @@
         }
     }
 
-    async function handleSignup() {
+    function handleSignupNext() {
         const username = DOM.signupUsername.value.trim();
         const email = DOM.signupEmail.value.trim();
         const password = DOM.signupPassword.value;
 
         if (!username || !email || !password) {
-            showAuthError('signup', 'Please fill in all fields.');
+            showAuthError('signup1', 'Please fill in all fields.');
+            return;
+        }
+        if (password.length < 6) {
+            showAuthError('signup1', 'Password must be at least 6 characters.');
+            return;
+        }
+
+        DOM.signupStep1.style.display = 'none';
+        DOM.signupStep2.style.display = 'block';
+    }
+
+    async function handleSignup() {
+        const username = DOM.signupUsername.value.trim();
+        const email = DOM.signupEmail.value.trim();
+        const password = DOM.signupPassword.value;
+        const daily_word_goal = window.selectedDailyGoal;
+
+        if (!daily_word_goal) {
+            showAuthError('signup2', 'Please select a daily goal.');
             return;
         }
 
@@ -269,7 +309,7 @@
         DOM.signupBtn.disabled = true;
 
         try {
-            const data = await api('/api/auth/signup/', 'POST', { username, email, password });
+            const data = await api('/api/auth/signup/', 'POST', { username, email, password, daily_word_goal });
             state.user = data.user;
             
             // Explicitly force defaults for local settings on new signup
@@ -279,9 +319,10 @@
             
             await loadUserData();
             DOM.authScreen.style.display = 'none';
-            DOM.goalModalOverlay.style.display = 'flex';
+            showApp();
+            await createConversation(); // Auto-start a chat for new users
         } catch (err) {
-            showAuthError('signup', err.message);
+            showAuthError('signup2', err.message);
         } finally {
             DOM.signupBtn.classList.remove('btn-loading');
             DOM.signupBtn.disabled = false;
@@ -289,7 +330,12 @@
     }
 
     function showAuthError(form, message) {
-        const el = form === 'login' ? DOM.loginError : DOM.signupError;
+        let el;
+        if (form === 'login') el = DOM.loginError;
+        else if (form === 'signup1') el = DOM.signupError1;
+        else if (form === 'signup2') el = DOM.signupError2;
+        else el = DOM.signupError1;
+        
         el.textContent = message;
         el.classList.add('show');
         el.style.animation = 'none';

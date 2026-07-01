@@ -77,30 +77,71 @@
 
             <!-- Signup Form -->
             <div id="signup-form" class="auth-card" style="display:none">
-                <h2 class="auth-card-title">Get Started</h2>
-                <p class="auth-card-desc">Create your account to begin practicing</p>
-                <div class="auth-error" id="signup-error"></div>
-                <div class="form-group">
-                    <label for="signup-username">Username</label>
-                    <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+                <!-- Step 1: Credentials -->
+                <div id="signup-step-1">
+                    <h2 class="auth-card-title">Get Started</h2>
+                    <p class="auth-card-desc">Create your account to begin practicing</p>
+                    <div class="auth-error" id="signup-error-1"></div>
+                    <div class="form-group">
+                        <label for="signup-username">Username</label>
+                        <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" placeholder="Enter your email" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" placeholder="Create a password (min 6 chars)"
+                            autocomplete="new-password">
+                    </div>
+                    <button id="signup-next-btn" class="auth-btn primary-btn">
+                        <span>Next Step</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    <p class="auth-switch">Already have an account? <a href="#" id="show-login">Sign in</a></p>
                 </div>
-                <div class="form-group">
-                    <label for="signup-email">Email</label>
-                    <input type="email" id="signup-email" placeholder="Enter your email" autocomplete="email">
+
+                <!-- Step 2: Daily Goal -->
+                <div id="signup-step-2" style="display:none">
+                    <button type="button" class="back-btn" id="signup-back-btn" aria-label="Back to Step 1">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="auth-card-title">Set Your Daily Goal</h2>
+                    <p class="auth-card-desc">Your daily word goal is the target number of words you want to send to the chat to practice each day.</p>
+                    <div class="auth-error" id="signup-error-2"></div>
+                    
+                    <div class="goal-selection-container">
+                        <div class="goal-card" data-goal="20">
+                            <div class="goal-number">20</div>
+                            <div class="goal-label">Words/Day</div>
+                            <div class="goal-desc">Casual Learner</div>
+                        </div>
+                        <div class="goal-card" data-goal="50">
+                            <div class="goal-number">50</div>
+                            <div class="goal-label">Words/Day</div>
+                            <div class="goal-desc">Steady Pace</div>
+                        </div>
+                        <div class="goal-card" data-goal="100">
+                            <div class="goal-number">100</div>
+                            <div class="goal-label">Words/Day</div>
+                            <div class="goal-desc">Intensive</div>
+                        </div>
+                    </div>
+                    
+                    <button id="signup-btn" class="auth-btn primary-btn" disabled>
+                        <span>Create Account</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" placeholder="Create a password (min 6 chars)"
-                        autocomplete="new-password">
-                </div>
-                <button id="signup-btn" class="auth-btn primary-btn">
-                    <span>Create Account</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                </button>
-                <p class="auth-switch">Already have an account? <a href="#" id="show-login">Sign in</a></p>
             </div>
         </div>
     </div>

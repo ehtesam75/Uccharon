@@ -43,6 +43,16 @@ def signup_view(request):
         return JsonResponse({'error': 'Password must be at least 6 characters.'}, status=400)
 
     user = User.objects.create_user(username=username, email=email, password=password)
+    
+    # Set daily word goal if provided
+    daily_word_goal = data.get('daily_word_goal')
+    if daily_word_goal is not None:
+        try:
+            user.profile.daily_word_goal = int(daily_word_goal)
+            user.profile.save()
+        except ValueError:
+            pass
+
     login(request, user)
 
     return JsonResponse({
