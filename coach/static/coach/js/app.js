@@ -320,7 +320,6 @@
             await loadUserData();
             DOM.authScreen.style.display = 'none';
             showApp();
-            await createConversation(); // Auto-start a chat for new users
         } catch (err) {
             showAuthError('signup2', err.message);
         } finally {
