@@ -1708,15 +1708,24 @@
     // ═══════════════════════════════════════════════════════
 
     function initSidebar() {
-        DOM.sidebarToggle.addEventListener('click', () => {
-            DOM.sidebar.classList.toggle('collapsed');
+        DOM.sidebarToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                DOM.sidebar.classList.remove('mobile-open');
+                DOM.sidebarOverlay.classList.remove('active');
+            } else {
+                DOM.sidebar.classList.toggle('collapsed');
+            }
         });
 
         DOM.mobileSidebarToggle.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation(); // Prevent document click from immediately closing it
-            if (window.innerWidth <= 768) {
+            if (window.matchMedia('(max-width: 768px)').matches) {
                 DOM.sidebar.classList.toggle('mobile-open');
                 DOM.sidebarOverlay.classList.toggle('active');
+                DOM.sidebar.classList.remove('collapsed'); // ensure no conflict
             } else {
                 DOM.sidebar.classList.toggle('collapsed');
             }
