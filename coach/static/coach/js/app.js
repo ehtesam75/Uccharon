@@ -48,6 +48,7 @@
         app: $('#app'),
 
         // Auth
+        authBrand: $('#auth-brand'),
         loginForm: $('#login-form'),
         signupForm: $('#signup-form'),
         loginUsername: $('#login-username'),
@@ -189,6 +190,9 @@
             e.preventDefault();
             DOM.loginForm.style.display = 'none';
             DOM.signupForm.style.display = 'block';
+            DOM.authBrand.style.display = 'flex';
+            DOM.signupStep2.style.display = 'none';
+            DOM.signupStep1.style.display = 'block';
             DOM.signupForm.style.animation = 'cardSlideUp 0.4s ease-out';
         });
 
@@ -196,6 +200,7 @@
             e.preventDefault();
             DOM.signupForm.style.display = 'none';
             DOM.loginForm.style.display = 'block';
+            DOM.authBrand.style.display = 'flex';
             DOM.loginForm.style.animation = 'cardSlideUp 0.4s ease-out';
         });
 
@@ -205,6 +210,7 @@
         DOM.signupBackBtn.addEventListener('click', () => {
             DOM.signupStep2.style.display = 'none';
             DOM.signupStep1.style.display = 'block';
+            DOM.authBrand.style.display = 'flex';
         });
 
         // Goal cards selection
@@ -292,6 +298,7 @@
 
         DOM.signupStep1.style.display = 'none';
         DOM.signupStep2.style.display = 'block';
+        DOM.authBrand.style.display = 'none';
     }
 
     async function handleSignup() {
