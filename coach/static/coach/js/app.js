@@ -190,7 +190,7 @@
             e.preventDefault();
             DOM.loginForm.style.display = 'none';
             DOM.signupForm.style.display = 'block';
-            DOM.authBrand.style.display = 'flex';
+            DOM.authBrand.style.display = '';
             DOM.signupStep2.style.display = 'none';
             DOM.signupStep1.style.display = 'block';
             DOM.signupForm.style.animation = 'cardSlideUp 0.4s ease-out';
@@ -200,7 +200,7 @@
             e.preventDefault();
             DOM.signupForm.style.display = 'none';
             DOM.loginForm.style.display = 'block';
-            DOM.authBrand.style.display = 'flex';
+            DOM.authBrand.style.display = '';
             DOM.loginForm.style.animation = 'cardSlideUp 0.4s ease-out';
         });
 
@@ -210,7 +210,7 @@
         DOM.signupBackBtn.addEventListener('click', () => {
             DOM.signupStep2.style.display = 'none';
             DOM.signupStep1.style.display = 'block';
-            DOM.authBrand.style.display = 'flex';
+            DOM.authBrand.style.display = '';
         });
 
         // Goal cards selection
