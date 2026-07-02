@@ -911,6 +911,67 @@ select {
     gap: 4px;
 }
 
+/* ─── Empty Chat State ─────────────────────────────────────── */
+
+.empty-chat-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.empty-chat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 400px;
+}
+
+.empty-chat-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    font-size: 2rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.empty-chat-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.9;
+}
+
+.empty-chat-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+}
+
+.empty-chat-content p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* ─── Messages ───────────────────────────────────────────── */
 
 .chat-messages {
@@ -2282,6 +2343,14 @@ select {
 
     .chat-messages {
         padding: 16px;
+    }
+
+    .empty-chat-content h3 {
+        font-size: 1.25rem;
+    }
+
+    .empty-chat-content p {
+        font-size: 0.9rem;
     }
 
     .chat-header {

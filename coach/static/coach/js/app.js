@@ -615,11 +615,13 @@
 
         if (state.currentMessages.length === 0) {
             DOM.chatMessages.innerHTML = `
-                <div style="flex:1; display:flex; align-items:center; justify-content:center; color: var(--text-tertiary); font-size: 0.9rem; text-align: center; padding: 40px;">
-                    <div>
-                        <div style="font-size: 2rem; margin-bottom: 12px;">💬</div>
-                        <p>Start the conversation by typing or speaking in English.</p>
-                        <p style="font-size: 0.8rem; margin-top: 8px;">I'll evaluate your message and help you improve!</p>
+                <div class="empty-chat-state">
+                    <div class="empty-chat-content">
+                        <div class="empty-chat-icon">
+                            <img src="/static/coach/icon/uccharon-circle-icon.png" alt="Uccharon AI">
+                        </div>
+                        <h3>How can I help you today?</h3>
+                        <p>Type a message or use your voice to practice your English. I'll provide real-time pronunciation and grammar feedback.</p>
                     </div>
                 </div>
             `;
