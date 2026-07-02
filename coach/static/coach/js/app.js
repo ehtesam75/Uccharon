@@ -713,7 +713,14 @@
             response.native_versions.forEach((nv, idx) => {
                 versionsHtml += `
                     <div class="native-version-item" style="${idx > 0 ? 'margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color);' : ''}">
-                        <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Version ${idx + 1}</div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <div style="font-size: 0.75rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Version ${idx + 1}</div>
+                            <button class="vocab-speak-btn" data-word="${escapeHtml(nv)}" title="Listen to pronunciation" style="padding: 2px; border-radius: 4px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                                </svg>
+                            </button>
+                        </div>
                         <div class="native-version-text">${escapeHtml(nv)}</div>
                     </div>
                 `;
@@ -723,7 +730,17 @@
             // Fallback for older conversation history
             card.appendChild(createFeedbackSection(
                 '🗣️', 'Native Speaker Version',
-                `<div class="native-version-text">${escapeHtml(response.native_version)}</div>`
+                `<div class="native-version-item">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <div style="font-size: 0.75rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Version 1</div>
+                        <button class="vocab-speak-btn" data-word="${escapeHtml(response.native_version)}" title="Listen to pronunciation" style="padding: 2px; border-radius: 4px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="native-version-text">${escapeHtml(response.native_version)}</div>
+                </div>`
             ));
         }
 
@@ -1840,7 +1857,25 @@
             if (speakBtn) {
                 const word = speakBtn.getAttribute('data-word');
                 if (word && 'speechSynthesis' in window) {
+                    const speakerIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
+                    const stopIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>`;
+                    
+                    const resetAllButtons = () => {
+                        document.querySelectorAll('.vocab-speak-btn.playing').forEach(b => {
+                            b.classList.remove('playing');
+                            b.innerHTML = speakerIcon;
+                        });
+                    };
+
+                    if (speakBtn.classList.contains('playing') && window.speechSynthesis.speaking) {
+                        window.speechSynthesis.cancel();
+                        resetAllButtons();
+                        return;
+                    }
+
                     window.speechSynthesis.cancel();
+                    resetAllButtons();
+                    
                     const utterance = new SpeechSynthesisUtterance(word);
                     utterance.lang = 'en-US';
                     
@@ -1853,8 +1888,16 @@
                     window.speechSynthesis.speak(utterance);
                     
                     speakBtn.classList.add('playing');
-                    utterance.onend = () => speakBtn.classList.remove('playing');
-                    utterance.onerror = () => speakBtn.classList.remove('playing');
+                    speakBtn.innerHTML = stopIcon;
+                    
+                    utterance.onend = () => {
+                        speakBtn.classList.remove('playing');
+                        speakBtn.innerHTML = speakerIcon;
+                    };
+                    utterance.onerror = () => {
+                        speakBtn.classList.remove('playing');
+                        speakBtn.innerHTML = speakerIcon;
+                    };
                 }
             }
         });
