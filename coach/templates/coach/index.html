@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{% static 'coach/css/style.css' %}">
 </head>
 
-<body>
+<body style="background-color: #0a0a1a; color: #f0f0f8; margin: 0;">
 
     <!-- ═══════════════ AUTH SCREEN ═══════════════ -->
     <div id="auth-screen" class="auth-screen" style="display: none;">
@@ -231,35 +231,43 @@
             <div id="welcome-screen" class="welcome-screen">
                 <div class="welcome-content">
                     <div class="welcome-icon">
-                        <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="80" height="80" class="logo-img">
+                        <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="80" height="80" class="logo-img" style="filter: drop-shadow(0 4px 12px rgba(var(--accent-primary-rgb), 0.3)); border-radius: 50%;">
                     </div>
-                    <h2 class="welcome-title">Welcome to Uccharon</h2>
-                    <p class="welcome-desc">Start a conversation to practice your English. I'll be your personal
-                        speaking coach — correcting grammar, improving vocabulary, and helping you sound more natural.
-                    </p>
-                    <div class="welcome-features">
-                        <div class="feature-card">
-                            <div class="feature-icon">🔍</div>
-                            <h3>Grammar Check</h3>
-                            <p>Detailed corrections with explanations</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">🗣️</div>
-                            <h3>Native Version</h3>
-                            <p>How a native speaker would say it</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">📊</div>
-                            <h3>Score Tracking</h3>
-                            <p>Track your improvement over time</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">🎤</div>
-                            <h3>Voice Input</h3>
-                            <p>Speak directly using your microphone</p>
-                        </div>
+                    <h2 class="welcome-title">How can I help you practice today?</h2>
+                    <p class="welcome-desc">Start speaking to improve your fluency. I'll provide real-time corrections, better vocabulary, and native-sounding alternatives.</p>
+                    
+                    <div class="welcome-suggestions">
+                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='Let\'s practice a job interview for a software engineer role.'; document.getElementById('chat-input').focus();">
+                            <span class="suggestion-icon">💼</span>
+                            <div class="suggestion-text">
+                                <h4>Job Interview</h4>
+                                <p>Practice common questions</p>
+                            </div>
+                        </button>
+                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='I want to talk about my daily routine.'; document.getElementById('chat-input').focus();">
+                            <span class="suggestion-icon">🌅</span>
+                            <div class="suggestion-text">
+                                <h4>Daily Routine</h4>
+                                <p>Talk about your day</p>
+                            </div>
+                        </button>
+                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='Can we do a roleplay where I am ordering food at a restaurant?'; document.getElementById('chat-input').focus();">
+                            <span class="suggestion-icon">🍽️</span>
+                            <div class="suggestion-text">
+                                <h4>Restaurant</h4>
+                                <p>Order food in English</p>
+                            </div>
+                        </button>
+                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='Let\'s discuss a movie I watched recently.'; document.getElementById('chat-input').focus();">
+                            <span class="suggestion-icon">🎬</span>
+                            <div class="suggestion-text">
+                                <h4>Movie Review</h4>
+                                <p>Discuss your favorite film</p>
+                            </div>
+                        </button>
                     </div>
-                    <button id="welcome-new-chat" class="welcome-start-btn">
+
+                    <button id="welcome-new-chat" class="welcome-start-btn" style="margin-top: 10px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round">
                             <path d="M12 5v14M5 12h14" />

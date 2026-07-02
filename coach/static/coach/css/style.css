@@ -808,41 +808,50 @@ select {
     margin-right: auto;
 }
 
-.welcome-features {
+.welcome-suggestions {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 32px;
 }
 
-.feature-card {
+.suggestion-card {
     background: var(--bg-glass);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 20px 16px;
+    padding: 16px;
     transition: all var(--transition-normal);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
 }
 
-.feature-card:hover {
+.suggestion-card:hover {
     background: var(--bg-glass-hover);
-    border-color: var(--border-color-hover);
+    border-color: var(--accent-primary);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.feature-icon {
+.suggestion-icon {
     font-size: 1.5rem;
-    margin-bottom: 8px;
+    line-height: 1;
 }
 
-.feature-card h3 {
+.suggestion-text h4 {
     font-size: 0.875rem;
     font-weight: 600;
     margin-bottom: 4px;
+    color: var(--text-primary);
 }
 
-.feature-card p {
+.suggestion-text p {
     font-size: 0.75rem;
     color: var(--text-secondary);
+    margin: 0;
 }
 
 .welcome-start-btn {
@@ -2246,15 +2255,28 @@ select {
     }
 
     .ai-message {
-        max-width: 95%;
+        max-width: 100%;
     }
 
-    .welcome-features {
-        grid-template-columns: 1fr 1fr;
+    .ai-message .ai-feedback-card {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        backdrop-filter: none;
+    }
+
+    .ai-message .feedback-section {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .welcome-suggestions {
+        grid-template-columns: 1fr;
         gap: 8px;
     }
 
-    .feature-card {
+    .suggestion-card {
         padding: 14px 12px;
     }
 
