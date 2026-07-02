@@ -268,7 +268,6 @@
             const data = await api('/api/auth/login/', 'POST', { username, password });
             state.user = data.user;
             await loadUserData(true); // Pass true to skip auto-selecting the first conversation
-            showApp();
 
             // Automatically create a new chat session on login if they aren't a new user
             if (state.conversations.length > 0) {
@@ -276,6 +275,8 @@
             } else {
                 await createConversation(); // Also create one if they have 0
             }
+
+            showApp();
         } catch (err) {
             showAuthError('login', err.message);
         } finally {
@@ -509,6 +510,24 @@
             showToast('Failed to create conversation', 'error');
         }
     }
+
+    // Expose a global function to start a chat with a specific prompt
+    window.startConversationWithPrompt = async function (promptText) {
+        if (!state.currentConversation) {
+            // No chat selected, let's create a new one
+            await createConversation();
+        }
+        
+        // Populate the input
+        DOM.chatInput.value = promptText;
+        
+        // Trigger auto-resize logic manually if needed
+        DOM.chatInput.style.height = 'auto';
+        DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
+        
+        // Auto-send
+        sendMessage();
+    };
 
     async function selectConversation(convo) {
         // Delete the previous conversation if it has no messages before switching

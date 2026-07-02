@@ -18,9 +18,13 @@
     <link rel="icon" type="image/x-icon" href="{% static 'coach/icon/favicon.ico' %}">
     <link rel="apple-touch-icon" href="{% static 'coach/icon/apple-touch-icon.png' %}">
     <link rel="stylesheet" href="{% static 'coach/css/style.css' %}">
+    <style>
+        body { background-color: #0a0a1a; margin: 0; }
+        html[data-theme="light"] body { background-color: #f4f5fa; }
+    </style>
 </head>
 
-<body style="background-color: #0a0a1a; color: #f0f0f8; margin: 0;">
+<body>
 
     <!-- ═══════════════ AUTH SCREEN ═══════════════ -->
     <div id="auth-screen" class="auth-screen" style="display: none;">
@@ -237,28 +241,28 @@
                     <p class="welcome-desc">Start speaking to improve your fluency. I'll provide real-time corrections, better vocabulary, and native-sounding alternatives.</p>
                     
                     <div class="welcome-suggestions">
-                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='Let\'s practice a job interview for a software engineer role.'; document.getElementById('chat-input').focus();">
+                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('Let\'s practice a job interview for a software engineer role.')">
                             <span class="suggestion-icon">💼</span>
                             <div class="suggestion-text">
                                 <h4>Job Interview</h4>
                                 <p>Practice common questions</p>
                             </div>
                         </button>
-                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='I want to talk about my daily routine.'; document.getElementById('chat-input').focus();">
+                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('I want to talk about my daily routine.')">
                             <span class="suggestion-icon">🌅</span>
                             <div class="suggestion-text">
                                 <h4>Daily Routine</h4>
                                 <p>Talk about your day</p>
                             </div>
                         </button>
-                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='Can we do a roleplay where I am ordering food at a restaurant?'; document.getElementById('chat-input').focus();">
+                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('Can we do a roleplay where I am ordering food at a restaurant?')">
                             <span class="suggestion-icon">🍽️</span>
                             <div class="suggestion-text">
                                 <h4>Restaurant</h4>
                                 <p>Order food in English</p>
                             </div>
                         </button>
-                        <button class="suggestion-card" onclick="document.getElementById('chat-input').value='Let\'s discuss a movie I watched recently.'; document.getElementById('chat-input').focus();">
+                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('Let\'s discuss a movie I watched recently.')">
                             <span class="suggestion-icon">🎬</span>
                             <div class="suggestion-text">
                                 <h4>Movie Review</h4>
