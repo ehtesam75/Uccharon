@@ -267,12 +267,14 @@
         try {
             const data = await api('/api/auth/login/', 'POST', { username, password });
             state.user = data.user;
-            await loadUserData();
+            await loadUserData(true); // Pass true to skip auto-selecting the first conversation
             showApp();
 
             // Automatically create a new chat session on login if they aren't a new user
             if (state.conversations.length > 0) {
                 await createConversation();
+            } else {
+                await createConversation(); // Also create one if they have 0
             }
         } catch (err) {
             showAuthError('login', err.message);
@@ -399,7 +401,7 @@
         applySettingsToUI();
     }
 
-    async function loadUserData() {
+    async function loadUserData(skipAutoSelect = false) {
         try {
             const settingsData = await api('/api/settings/');
             state.settings = { ...state.settings, ...settingsData };
@@ -408,7 +410,7 @@
             state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
             state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
         } catch (e) { /* ignore */ }
-        await loadConversations();
+        await loadConversations(skipAutoSelect);
     }
 
     function updateUserInfo() {
@@ -458,14 +460,14 @@
     // CONVERSATIONS
     // ═══════════════════════════════════════════════════════
 
-    async function loadConversations() {
+    async function loadConversations(skipAutoSelect = false) {
         try {
             const data = await api('/api/conversations/');
             state.conversations = data.conversations;
             renderConversationList();
 
             // Auto-select the first conversation if we don't have one selected and we have conversations
-            if (!state.currentConversation && state.conversations.length > 0) {
+            if (!skipAutoSelect && !state.currentConversation && state.conversations.length > 0) {
                 await selectConversation(state.conversations[0]);
             }
         } catch (e) {
@@ -708,6 +710,11 @@
                 pronHtml += `
                     <div class="pronunciation-item">
                         <span class="pronunciation-word">${escapeHtml(pg.word)}</span>
+                        <button class="vocab-speak-btn" data-word="${escapeHtml(pg.word)}" title="Listen to pronunciation">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                            </svg>
+                        </button>
                         <span class="pronunciation-phonetic">${escapeHtml(pg.phonetic)}</span>
                         ${spellingHtml}
                         <div class="pronunciation-tip">${escapeHtml(pg.tip)}</div>
@@ -983,6 +990,11 @@
         DOM.chatInput.addEventListener('input', () => {
             DOM.chatInput.style.height = 'auto';
             DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
+            if (DOM.chatInput.scrollHeight > 120) {
+                DOM.chatInput.style.overflowY = 'auto';
+            } else {
+                DOM.chatInput.style.overflowY = 'hidden';
+            }
         });
 
         DOM.chatInput.addEventListener('keydown', (e) => {
