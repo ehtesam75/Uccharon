@@ -1197,6 +1197,29 @@ select {
     font-weight: 600;
 }
 
+.vocab-speak-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition-fast);
+}
+
+.vocab-speak-btn:hover {
+    color: var(--accent-primary);
+    background: var(--bg-glass-hover);
+}
+
+.vocab-speak-btn.playing {
+    color: var(--accent-secondary);
+    animation: pulse 1s infinite;
+}
+
 .vocab-context {
     width: 100%;
     font-size: 0.8rem;

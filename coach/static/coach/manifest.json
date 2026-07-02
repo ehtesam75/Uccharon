@@ -4,8 +4,8 @@
   "description": "Your AI English Speaking Coach",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#6c5ce7",
+  "background_color": "#0a0a1a",
+  "theme_color": "#12122a",
   "icons": [
     {
       "src": "icon/android-chrome-192x192.png",
