@@ -1438,9 +1438,9 @@ select {
 /* ─── Chat Input ─────────────────────────────────────────── */
 
 .chat-input-container {
-    padding: 16px max(24px, calc(50% - 500px)) 20px;
-    background: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
+    padding: 16px max(24px, calc(50% - 500px)) 24px;
+    background: transparent;
+    border-top: none;
 }
 
 .chat-input-wrapper {
