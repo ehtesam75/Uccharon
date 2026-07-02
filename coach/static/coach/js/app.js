@@ -377,6 +377,15 @@
 
     async function handleLogout() {
         try {
+            // Delete the current conversation if it has no messages
+            if (state.currentConversation && state.currentMessages.length === 0) {
+                try {
+                    await api(`/api/conversations/${state.currentConversation.id}/`, 'DELETE');
+                } catch (e) {
+                    console.error('Failed to delete empty conversation on logout:', e);
+                }
+            }
+
             await api('/api/auth/logout/', 'POST');
             state.user = null;
             state.conversations = [];
