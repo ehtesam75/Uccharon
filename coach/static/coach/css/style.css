@@ -323,6 +323,14 @@ select {
     animation: cardSlideUp 0.5s ease-out;
 }
 
+.signup-card {
+    max-height: min(90dvh, 860px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    position: relative;
+    isolation: isolate;
+}
+
 @keyframes cardSlideUp {
     from {
         opacity: 0;
@@ -345,6 +353,247 @@ select {
     color: var(--text-secondary);
     font-size: 0.875rem;
     margin-bottom: 24px;
+}
+
+.signup-progress {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: -8px 0 18px;
+    padding: 14px 0 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.signup-progress-track {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    left: 56px;
+    right: 56px;
+    top: 34px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.signup-progress-line {
+    height: 2px;
+    background: linear-gradient(90deg, rgba(var(--accent-primary-rgb), 0.55), rgba(var(--accent-secondary-rgb), 0.24));
+    opacity: 0.5;
+    border-radius: 999px;
+}
+
+.signup-progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-tertiary);
+    text-align: center;
+    transition: color var(--transition-normal), transform var(--transition-normal);
+    position: relative;
+    z-index: 2;
+}
+
+.signup-progress-step.active,
+.signup-progress-step.completed {
+    color: var(--text-primary);
+}
+
+.signup-progress-step.completed {
+    opacity: 0.9;
+}
+
+.signup-progress-dot {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all var(--transition-normal);
+    position: relative;
+    z-index: 2;
+}
+
+.signup-progress-step.active .signup-progress-dot {
+    background: var(--gradient-accent);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 0 0 4px rgba(var(--accent-primary-rgb), 0.16);
+}
+
+.signup-progress-step.completed .signup-progress-dot {
+    background: rgba(var(--accent-secondary-rgb), 0.18);
+    border-color: rgba(var(--accent-secondary-rgb), 0.4);
+    color: var(--accent-secondary);
+}
+
+.signup-progress-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.signup-select {
+    margin-bottom: 0;
+}
+
+.signup-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.signup-grid-2col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.signup-grid-single {
+    grid-template-columns: 1fr;
+}
+
+.signup-grid-step2 {
+    grid-template-columns: 0.95fr 1.05fr;
+    align-items: start;
+    margin-bottom: 16px;
+}
+
+.signup-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.signup-step-scroll {
+    max-height: calc(100dvh - 420px);
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-gutter: stable;
+}
+
+.signup-step-scroll-step1 {
+    max-height: calc(100dvh - 470px);
+    margin-bottom: 8px;
+}
+
+.signup-step-scroll-single {
+    padding-right: 6px;
+}
+
+.signup-step-scroll-step2 {
+    max-height: none;
+    margin-bottom: 16px;
+}
+
+.signup-provider-panel,
+.signup-api-panel {
+    min-width: 0;
+}
+
+.signup-note-panel {
+    padding: 14px 16px;
+    border: 1px solid rgba(var(--accent-secondary-rgb), 0.18);
+    background: rgba(var(--accent-secondary-rgb), 0.06);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.signup-note-panel-static {
+    margin-bottom: 16px;
+}
+
+.signup-note-helper {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.signup-note-helper p {
+    margin: 0;
+}
+
+.signup-api-panel {
+    gap: 0;
+}
+
+.signup-note-panel p + p {
+    margin-top: 6px;
+}
+
+.signup-key-guide {
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.signup-key-guide-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.signup-key-guide ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.signup-key-guide li + li {
+    margin-top: 8px;
+}
+
+.signup-key-guide a {
+    word-break: break-word;
+}
+
+@media (max-width: 720px) {
+    .signup-card {
+        max-height: calc(100dvh - 24px);
+        padding: 24px;
+    }
+
+    .signup-progress {
+        top: 0;
+        margin-bottom: 20px;
+    }
+
+    .signup-progress-track {
+        left: 44px;
+        right: 44px;
+        top: 34px;
+    }
+
+    .signup-grid-2col,
+    .signup-grid-step2 {
+        grid-template-columns: 1fr;
+    }
+
+    .signup-grid-single {
+        grid-template-columns: 1fr;
+    }
+
+    .signup-step-scroll {
+        max-height: none;
+        padding-right: 0;
+    }
+
+    .signup-step-scroll-step1 {
+        max-height: calc(100dvh - 420px);
+    }
 }
 
 .auth-error {

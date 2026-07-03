@@ -66,13 +66,22 @@
         loginError: $('#login-error'),
         signupStep1: $('#signup-step-1'),
         signupStep2: $('#signup-step-2'),
+        signupStep3: $('#signup-step-3'),
+        signupProgressSteps: $$('.signup-progress-step'),
         signupNextBtn: $('#signup-next-btn'),
+        signupStep2NextBtn: $('#signup-step-2-next-btn'),
         signupBackBtn: $('#signup-back-btn'),
+        signupStep3BackBtn: $('#signup-step-3-back-btn'),
         signupError1: $('#signup-error-1'),
         signupError2: $('#signup-error-2'),
+        signupError3: $('#signup-error-3'),
         signupUsername: $('#signup-username'),
         signupEmail: $('#signup-email'),
         signupPassword: $('#signup-password'),
+        signupConfirmPassword: $('#signup-confirm-password'),
+        signupAiProvider: $('#signup-ai-provider'),
+        signupApiKeySection: $('#signup-api-key-section'),
+        signupApiKey: $('#signup-api-key'),
         signupBtn: $('#signup-btn'),
         showSignup: $('#show-signup'),
         showLogin: $('#show-login'),
@@ -215,9 +224,8 @@
             e.preventDefault();
             DOM.loginForm.style.display = 'none';
             DOM.signupForm.style.display = 'block';
-            DOM.authBrand.style.display = '';
-            DOM.signupStep2.style.display = 'none';
-            DOM.signupStep1.style.display = 'block';
+            DOM.authBrand.style.display = 'none';
+            resetSignupFlow();
             DOM.signupForm.style.animation = 'cardSlideUp 0.4s ease-out';
         });
 
@@ -231,12 +239,21 @@
 
         DOM.loginBtn.addEventListener('click', handleLogin);
         DOM.signupNextBtn.addEventListener('click', handleSignupNext);
+        DOM.signupStep2NextBtn.addEventListener('click', handleSignupStep2Next);
         DOM.signupBtn.addEventListener('click', handleSignup);
         DOM.signupBackBtn.addEventListener('click', () => {
-            DOM.signupStep2.style.display = 'none';
-            DOM.signupStep1.style.display = 'block';
-            DOM.authBrand.style.display = '';
+            setSignupStep(1);
         });
+        DOM.signupStep3BackBtn.addEventListener('click', () => {
+            setSignupStep(2);
+        });
+
+        DOM.signupUsername.addEventListener('input', updateSignupStep1State);
+        DOM.signupEmail.addEventListener('input', updateSignupStep1State);
+        DOM.signupPassword.addEventListener('input', updateSignupStep1State);
+        DOM.signupConfirmPassword.addEventListener('input', updateSignupStep1State);
+        DOM.signupAiProvider.addEventListener('change', updateSignupStep2State);
+        DOM.signupApiKey.addEventListener('input', updateSignupStep2State);
 
         // Goal cards selection
         const goalCards = $$('.goal-card');
@@ -246,6 +263,7 @@
                 card.classList.add('selected');
                 window.selectedDailyGoal = card.dataset.goal;
                 DOM.signupBtn.disabled = false;
+                updateSignupStep3State();
             });
         });
 
@@ -253,8 +271,11 @@
         DOM.loginPassword.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleLogin();
         });
-        DOM.signupPassword.addEventListener('keydown', (e) => {
+        DOM.signupConfirmPassword.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleSignupNext();
+        });
+        DOM.signupApiKey.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSignupStep2Next();
         });
 
         // Onboarding Goal Selection
@@ -314,29 +335,66 @@
         const username = DOM.signupUsername.value.trim();
         const email = DOM.signupEmail.value.trim();
         const password = DOM.signupPassword.value;
+        const confirmPassword = DOM.signupConfirmPassword.value;
 
-        if (!username || !email || !password) {
+        if (!username || !email || !password || !confirmPassword) {
             showAuthError('signup1', 'Please fill in all fields.');
+            return;
+        }
+        if (!DOM.signupEmail.checkValidity()) {
+            showAuthError('signup1', 'Please enter a valid email address.');
             return;
         }
         if (password.length < 6) {
             showAuthError('signup1', 'Password must be at least 6 characters.');
             return;
         }
+        if (password !== confirmPassword) {
+            showAuthError('signup1', 'Passwords do not match.');
+            return;
+        }
 
-        DOM.signupStep1.style.display = 'none';
-        DOM.signupStep2.style.display = 'block';
-        DOM.authBrand.style.display = 'none';
+        setSignupStep(2);
+    }
+
+    function handleSignupStep2Next() {
+        const provider = DOM.signupAiProvider.value;
+        const apiKey = DOM.signupApiKey.value.trim();
+
+        if (!provider) {
+            showAuthError('signup2', 'Please select an AI provider.');
+            return;
+        }
+
+        if (!isValidSignupApiKey(apiKey)) {
+            showAuthError('signup2', 'Please enter a valid API key.');
+            return;
+        }
+
+        setSignupStep(3);
     }
 
     async function handleSignup() {
         const username = DOM.signupUsername.value.trim();
         const email = DOM.signupEmail.value.trim();
         const password = DOM.signupPassword.value;
+        const confirmPassword = DOM.signupConfirmPassword.value;
+        const ai_provider = DOM.signupAiProvider.value;
+        const apiKey = DOM.signupApiKey.value.trim();
         const daily_word_goal = window.selectedDailyGoal;
 
+        if (password !== confirmPassword) {
+            showAuthError('signup1', 'Passwords do not match.');
+            setSignupStep(1);
+            return;
+        }
+        if (!ai_provider || !isValidSignupApiKey(apiKey)) {
+            showAuthError('signup2', 'Please complete the AI key step before continuing.');
+            setSignupStep(2);
+            return;
+        }
         if (!daily_word_goal) {
-            showAuthError('signup2', 'Please select a daily goal.');
+            showAuthError('signup3', 'Please select a daily goal.');
             return;
         }
 
@@ -344,7 +402,15 @@
         DOM.signupBtn.disabled = true;
 
         try {
-            const data = await api('/api/auth/signup/', 'POST', { username, email, password, daily_word_goal });
+            const data = await api('/api/auth/signup/', 'POST', {
+                username,
+                email,
+                password,
+                ai_provider,
+                gemini_api_key: ai_provider === 'gemini' ? apiKey : '',
+                groq_api_key: ai_provider === 'groq' ? apiKey : '',
+                daily_word_goal
+            });
             state.user = data.user;
 
             // Explicitly force defaults for local settings on new signup
@@ -356,11 +422,90 @@
             DOM.authScreen.style.display = 'none';
             showApp();
         } catch (err) {
-            showAuthError('signup2', err.message);
+            showAuthError('signup3', err.message);
         } finally {
             DOM.signupBtn.classList.remove('btn-loading');
             DOM.signupBtn.disabled = false;
         }
+    }
+
+    function setSignupStep(step) {
+        DOM.signupStep1.style.display = step === 1 ? 'block' : 'none';
+        DOM.signupStep2.style.display = step === 2 ? 'block' : 'none';
+        DOM.signupStep3.style.display = step === 3 ? 'block' : 'none';
+        if (DOM.signupForm) {
+            DOM.signupForm.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        DOM.signupProgressSteps.forEach(stepEl => {
+            const stepNumber = Number(stepEl.dataset.step);
+            stepEl.classList.toggle('active', stepNumber === step);
+            stepEl.classList.toggle('completed', stepNumber < step);
+            if (stepNumber === step) stepEl.setAttribute('aria-current', 'step');
+            else stepEl.removeAttribute('aria-current');
+        });
+
+        clearSignupError('signup1');
+        clearSignupError('signup2');
+        clearSignupError('signup3');
+
+        if (step === 1) {
+            updateSignupStep1State();
+        } else if (step === 2) {
+            updateSignupStep2State();
+        } else {
+            updateSignupStep3State();
+        }
+    }
+
+    function resetSignupFlow() {
+        DOM.signupUsername.value = '';
+        DOM.signupEmail.value = '';
+        DOM.signupPassword.value = '';
+        DOM.signupConfirmPassword.value = '';
+        DOM.signupAiProvider.value = '';
+        DOM.signupApiKey.value = '';
+        DOM.signupApiKeySection.style.display = 'none';
+        window.selectedDailyGoal = null;
+        $$('.goal-card').forEach(card => card.classList.remove('selected'));
+        DOM.signupNextBtn.disabled = true;
+        DOM.signupStep2NextBtn.disabled = true;
+        DOM.signupBtn.disabled = true;
+        setSignupStep(1);
+    }
+
+    function clearSignupError(form) {
+        let el;
+        if (form === 'signup1') el = DOM.signupError1;
+        else if (form === 'signup2') el = DOM.signupError2;
+        else if (form === 'signup3') el = DOM.signupError3;
+        else return;
+        el.textContent = '';
+        el.classList.remove('show');
+    }
+
+    function isValidSignupApiKey(apiKey) {
+        return Boolean(apiKey) && apiKey.length >= 20 && !/\s/.test(apiKey);
+    }
+
+    function updateSignupStep1State() {
+        const username = DOM.signupUsername.value.trim();
+        const email = DOM.signupEmail.value.trim();
+        const password = DOM.signupPassword.value;
+        const confirmPassword = DOM.signupConfirmPassword.value;
+        const isValid = Boolean(username && email && DOM.signupEmail.checkValidity() && password.length >= 6 && confirmPassword && password === confirmPassword);
+        DOM.signupNextBtn.disabled = !isValid;
+    }
+
+    function updateSignupStep2State() {
+        const provider = DOM.signupAiProvider.value;
+        const apiKey = DOM.signupApiKey.value.trim();
+        DOM.signupApiKeySection.style.display = provider ? 'block' : 'none';
+        DOM.signupStep2NextBtn.disabled = !(provider && isValidSignupApiKey(apiKey));
+    }
+
+    function updateSignupStep3State() {
+        DOM.signupBtn.disabled = !window.selectedDailyGoal;
     }
 
     function showAuthError(form, message) {
@@ -368,6 +513,7 @@
         if (form === 'login') el = DOM.loginError;
         else if (form === 'signup1') el = DOM.signupError1;
         else if (form === 'signup2') el = DOM.signupError2;
+        else if (form === 'signup3') el = DOM.signupError3;
         else el = DOM.signupError1;
 
         el.textContent = message;

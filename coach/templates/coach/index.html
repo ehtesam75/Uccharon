@@ -68,26 +68,54 @@
             </div>
 
             <!-- Signup Form -->
-            <div id="signup-form" class="auth-card" style="display:none">
+            <div id="signup-form" class="auth-card signup-card" style="display:none">
+                <div class="signup-progress" id="signup-progress" aria-label="Sign up progress">
+                    <div class="signup-progress-track" aria-hidden="true">
+                        <span class="signup-progress-line"></span>
+                        <span class="signup-progress-line"></span>
+                    </div>
+                    <div class="signup-progress-step active" data-step="1" aria-current="step">
+                        <span class="signup-progress-dot">1</span>
+                        <span class="signup-progress-label">Personal Info</span>
+                    </div>
+                    <div class="signup-progress-step" data-step="2">
+                        <span class="signup-progress-dot">2</span>
+                        <span class="signup-progress-label">AI Key</span>
+                    </div>
+                    <div class="signup-progress-step" data-step="3">
+                        <span class="signup-progress-dot">3</span>
+                        <span class="signup-progress-label">Daily Goal</span>
+                    </div>
+                </div>
+
                 <!-- Step 1: Credentials -->
                 <div id="signup-step-1">
                     <h2 class="auth-card-title">Get Started</h2>
                     <p class="auth-card-desc">Create your account to begin practicing</p>
                     <div class="auth-error" id="signup-error-1"></div>
-                    <div class="form-group">
-                        <label for="signup-username">Username</label>
-                        <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+                    <div class="signup-step-scroll signup-step-scroll-step1 signup-step-scroll-single">
+                        <div class="signup-grid signup-grid-single">
+                            <div class="form-group">
+                                <label for="signup-username">Username</label>
+                                <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-email">Email</label>
+                                <input type="email" id="signup-email" placeholder="Enter your email" autocomplete="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-password">Password</label>
+                                <input type="password" id="signup-password" placeholder="Create a password (min 6 chars)"
+                                    autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-confirm-password">Confirm Password</label>
+                                <input type="password" id="signup-confirm-password" placeholder="Re-enter your password"
+                                    autocomplete="new-password">
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="signup-email">Email</label>
-                        <input type="email" id="signup-email" placeholder="Enter your email" autocomplete="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="signup-password">Password</label>
-                        <input type="password" id="signup-password" placeholder="Create a password (min 6 chars)"
-                            autocomplete="new-password">
-                    </div>
-                    <button id="signup-next-btn" class="auth-btn primary-btn">
+                    <button id="signup-next-btn" class="auth-btn primary-btn" disabled>
                         <span>Next Step</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -97,17 +125,81 @@
                     <p class="auth-switch">Already have an account? <a href="#" id="show-login">Sign in</a></p>
                 </div>
 
-                <!-- Step 2: Daily Goal -->
+                <!-- Step 2: AI API Key -->
                 <div id="signup-step-2" style="display:none">
                     <button type="button" class="back-btn" id="signup-back-btn" aria-label="Back to Step 1">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                     </button>
+                    <h2 class="auth-card-title">Connect Your AI Key</h2>
+                    <p class="auth-card-desc">Choose an AI provider and add the API key for your account.</p>
+                    <div class="auth-error" id="signup-error-2"></div>
+
+                    <div class="signup-note-panel signup-note-panel-static signup-note-helper">
+                        <p>Your API key is stored securely and used only for your account.</p>
+                    </div>
+
+                    <div class="signup-step-scroll signup-step-scroll-step2">
+                        <div class="signup-panel signup-provider-panel">
+                            <div class="form-group">
+                                <label for="signup-ai-provider">AI Chat Provider</label>
+                                <select id="signup-ai-provider" class="settings-select signup-select">
+                                    <option value="">Select a provider</option>
+                                    <option value="groq">Groq</option>
+                                </select>
+                            </div>
+                            <div class="signup-api-panel">
+                                <div id="signup-api-key-section" style="display:none;">
+                                    <div class="form-group">
+                                        <label for="signup-api-key">API Key</label>
+                                        <div class="key-input-wrapper">
+                                            <input type="password" id="signup-api-key" placeholder="Enter your Groq API key" autocomplete="off">
+                                            <button class="toggle-key-vis" data-target="signup-api-key" title="Show/hide key">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="signup-key-guide">
+                        <p class="signup-key-guide-title">How to get a Groq API key</p>
+                        <ol>
+                            <li>Go to <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">https://console.groq.com/keys</a></li>
+                            <li>Create or sign in to your account.</li>
+                            <li>Create a new API key.</li>
+                            <li>Enter a name for the key.</li>
+                            <li>Copy the generated API key and paste it into the input field.</li>
+                        </ol>
+                    </div>
+
+                    <button id="signup-step-2-next-btn" class="auth-btn primary-btn" disabled>
+                        <span>Next Step</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Step 3: Daily Goal -->
+                <div id="signup-step-3" style="display:none">
+                    <button type="button" class="back-btn" id="signup-step-3-back-btn" aria-label="Back to Step 2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                    </button>
                     <h2 class="auth-card-title">Set Your Daily Goal</h2>
                     <p class="auth-card-desc">Your daily word goal is the target number of words you want to send to the chat to practice each day.</p>
-                    <div class="auth-error" id="signup-error-2"></div>
-                    
+                    <div class="auth-error" id="signup-error-3"></div>
+
                     <div class="goal-selection-container">
                         <div class="goal-card" data-goal="50">
                             <div class="goal-number">50</div>
@@ -130,7 +222,7 @@
                             <div class="goal-desc">Immersive</div>
                         </div>
                     </div>
-                    
+
                     <button id="signup-btn" class="auth-btn primary-btn" disabled>
                         <span>Create Account</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

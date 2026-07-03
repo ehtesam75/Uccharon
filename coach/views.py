@@ -29,6 +29,9 @@ def signup_view(request):
     username = data.get('username', '').strip()
     email = data.get('email', '').strip()
     password = data.get('password', '')
+    ai_provider = data.get('ai_provider', 'gemini')
+    gemini_api_key = data.get('gemini_api_key', '').strip()
+    groq_api_key = data.get('groq_api_key', '').strip()
 
     if not username or not email or not password:
         return JsonResponse({'error': 'All fields are required.'}, status=400)
@@ -42,7 +45,19 @@ def signup_view(request):
     if len(password) < 6:
         return JsonResponse({'error': 'Password must be at least 6 characters.'}, status=400)
 
+    valid_providers = {choice[0] for choice in UserProfile.PROVIDER_CHOICES}
+    if ai_provider not in valid_providers:
+        return JsonResponse({'error': 'Please select a valid AI provider.'}, status=400)
+
+    if ai_provider == 'gemini' and not gemini_api_key:
+        return JsonResponse({'error': 'A Gemini API key is required.'}, status=400)
+    if ai_provider == 'groq' and not groq_api_key:
+        return JsonResponse({'error': 'A Groq API key is required.'}, status=400)
+
     user = User.objects.create_user(username=username, email=email, password=password)
+    user.profile.ai_provider = ai_provider
+    user.profile.gemini_api_key = gemini_api_key if ai_provider == 'gemini' else ''
+    user.profile.groq_api_key = groq_api_key if ai_provider == 'groq' else ''
     
     # Set daily word goal if provided
     daily_word_goal = data.get('daily_word_goal')
