@@ -896,6 +896,15 @@ select {
     transition: padding var(--transition-slow);
 }
 
+.chat-header-title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 12px;
+}
+
 .chat-title {
     font-size: 1rem;
     font-weight: 600;
@@ -903,7 +912,21 @@ select {
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
-    margin-right: 12px;
+    margin-right: 0;
+    outline: none;
+    border-radius: var(--radius-sm);
+    padding: 4px 6px;
+    transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.chat-title.editing {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    background: var(--bg-input);
+    box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.14);
+    cursor: text;
+    user-select: text;
 }
 
 .chat-header-actions {

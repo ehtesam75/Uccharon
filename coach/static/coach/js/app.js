@@ -33,6 +33,11 @@
         previousScores: null,
         conversationLoadToken: 0,
         pendingConversationLoads: new Set(),
+        conversationRename: {
+            active: false,
+            cancelled: false,
+            originalTitle: ''
+        },
         dashboardRange: 'all',
         radarChart: null,
         lineChart: null
@@ -90,6 +95,7 @@
         chatInput: $('#chat-input'),
         sendBtn: $('#send-btn'),
         scrollToBottomBtn: $('#scroll-to-bottom-btn'),
+        renameConvoBtn: $('#rename-convo-btn'),
         micBtn: $('#mic-btn'),
         micStatus: $('#mic-status'),
         deleteConvoBtn: $('#delete-convo-btn'),
@@ -575,6 +581,8 @@
         const loadMessages = options.loadMessages !== false;
         const loadToken = ++state.conversationLoadToken;
 
+        finishConversationRename(true);
+
         state.currentConversation = convo;
         state.previousScores = null;
         setPersistedConversationId(convo.id);
@@ -635,6 +643,114 @@
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
         DOM.sidebarOverlay.classList.remove('active');
+    }
+
+    function beginConversationRename() {
+        if (!state.currentConversation || state.conversationRename.active || !DOM.chatTitle) return;
+
+        state.conversationRename.active = true;
+        state.conversationRename.cancelled = false;
+        state.conversationRename.originalTitle = DOM.chatTitle.textContent.trim();
+
+        DOM.chatTitle.classList.add('editing');
+        DOM.chatTitle.contentEditable = 'true';
+        DOM.chatTitle.spellcheck = false;
+        DOM.chatTitle.focus();
+        selectNodeContents(DOM.chatTitle);
+    }
+
+    function selectNodeContents(node) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    async function finishConversationRename(forceCancel = false) {
+        if (!state.conversationRename.active || !DOM.chatTitle) return;
+
+        const originalTitle = state.conversationRename.originalTitle || 'New Conversation';
+        const currentTitle = DOM.chatTitle.textContent.trim();
+        const shouldCancel = forceCancel || state.conversationRename.cancelled;
+
+        DOM.chatTitle.classList.remove('editing');
+        DOM.chatTitle.contentEditable = 'false';
+        DOM.chatTitle.spellcheck = true;
+        state.conversationRename.active = false;
+
+        if (shouldCancel || !currentTitle || currentTitle === originalTitle) {
+            DOM.chatTitle.textContent = originalTitle;
+            state.conversationRename.cancelled = false;
+            return;
+        }
+
+        await saveConversationTitle(currentTitle, originalTitle);
+        state.conversationRename.cancelled = false;
+    }
+
+    async function saveConversationTitle(nextTitle, fallbackTitle) {
+        if (!state.currentConversation) return;
+
+        const previousTitle = state.currentConversation.title;
+        const updatedTitle = nextTitle.trim();
+
+        if (!updatedTitle) {
+            DOM.chatTitle.textContent = fallbackTitle || previousTitle;
+            return;
+        }
+
+        state.currentConversation.title = updatedTitle;
+        DOM.chatTitle.textContent = updatedTitle;
+        renderConversationList();
+
+        try {
+            const data = await api(`/api/conversations/${state.currentConversation.id}/`, 'PUT', { title: updatedTitle });
+            state.currentConversation.title = data.title;
+            const convo = state.conversations.find(c => c.id === state.currentConversation.id);
+            if (convo) convo.title = data.title;
+            DOM.chatTitle.textContent = data.title;
+            renderConversationList();
+        } catch (err) {
+            state.currentConversation.title = previousTitle;
+            DOM.chatTitle.textContent = previousTitle;
+            const convo = state.conversations.find(c => c.id === state.currentConversation.id);
+            if (convo) convo.title = previousTitle;
+            renderConversationList();
+            showToast('Failed to rename conversation', 'error');
+        }
+    }
+
+    function initConversationRename() {
+        if (!DOM.chatTitle || !DOM.renameConvoBtn) return;
+
+        DOM.renameConvoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            beginConversationRename();
+        });
+
+        DOM.chatTitle.addEventListener('dblclick', beginConversationRename);
+
+        DOM.chatTitle.addEventListener('keydown', (e) => {
+            if (!state.conversationRename.active && e.key !== 'Enter') return;
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                DOM.chatTitle.blur();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                state.conversationRename.cancelled = true;
+                DOM.chatTitle.textContent = state.conversationRename.originalTitle || DOM.chatTitle.textContent;
+                DOM.chatTitle.blur();
+            }
+        });
+
+        DOM.chatTitle.addEventListener('blur', () => {
+            if (state.conversationRename.active) {
+                finishConversationRename();
+            }
+        });
     }
 
     async function deleteConversation() {
@@ -1978,6 +2094,7 @@
     function init() {
         initAuth();
         initChatInput();
+        initConversationRename();
         initVoice();
         initSettings();
         initSidebar();

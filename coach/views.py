@@ -205,15 +205,32 @@ def conversations_view(request):
 
 @csrf_exempt
 @login_required
-@require_http_methods(["DELETE"])
+@require_http_methods(["DELETE", "PUT"])
 def conversation_delete_view(request, convo_id):
-    """Delete a conversation."""
+    """Delete or rename a conversation."""
     try:
         convo = Conversation.objects.get(id=convo_id, user=request.user)
-        convo.delete()
-        return JsonResponse({'success': True})
     except Conversation.DoesNotExist:
         return JsonResponse({'error': 'Conversation not found.'}, status=404)
+
+    if request.method == 'PUT':
+        data = json_body(request)
+        title = data.get('title', '').strip()
+
+        if not title:
+            return JsonResponse({'error': 'Title is required.'}, status=400)
+
+        convo.title = title
+        convo.save()
+        return JsonResponse({
+            'id': convo.id,
+            'title': convo.title,
+            'created_at': convo.created_at.isoformat(),
+            'updated_at': convo.updated_at.isoformat(),
+        })
+
+    convo.delete()
+    return JsonResponse({'success': True})
 
 
 # ─── Message Views ──────────────────────────────────────────
