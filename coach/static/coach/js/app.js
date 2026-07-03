@@ -637,6 +637,13 @@
         scrollToBottom();
     }
 
+    function clearEmptyChatState() {
+        const emptyState = DOM.chatMessages.querySelector('.empty-chat-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+    }
+
     function renderMessagePair(msg, prevScores) {
         const group = document.createElement('div');
         group.className = 'message-group';
@@ -923,6 +930,7 @@
         DOM.chatInput.value = '';
         DOM.chatInput.style.height = 'auto';
         DOM.sendBtn.disabled = true;
+        clearEmptyChatState();
 
         // Show user message immediately
         const userMsgEl = document.createElement('div');
