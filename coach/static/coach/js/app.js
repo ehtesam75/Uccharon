@@ -87,6 +87,7 @@
         chatMessages: $('#chat-messages'),
         chatInput: $('#chat-input'),
         sendBtn: $('#send-btn'),
+        scrollToBottomBtn: $('#scroll-to-bottom-btn'),
         micBtn: $('#mic-btn'),
         micStatus: $('#mic-status'),
         deleteConvoBtn: $('#delete-convo-btn'),
@@ -438,6 +439,7 @@
         updateUserInfo();
         applyTheme(state.settings.theme);
         applySettingsToUI();
+        updateScrollToBottomButton();
     }
 
     async function loadUserData(skipAutoSelect = false) {
@@ -606,6 +608,7 @@
         DOM.chatTitle.textContent = convo.title;
         renderMessages();
         renderConversationList();
+        updateScrollToBottomButton();
 
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
@@ -665,7 +668,7 @@
             renderMessagePair(msg, prevScores);
         });
 
-        scrollToBottom();
+        scrollLatestMessageIntoView();
     }
 
     function clearEmptyChatState() {
@@ -987,7 +990,7 @@
             <span class="thinking-text">Analyzing your English...</span>
         `;
         DOM.chatMessages.appendChild(thinkingEl);
-        scrollToBottom();
+        scrollLatestMessageIntoView(userMsgEl);
 
         try {
             // Get AI response
@@ -1037,7 +1040,7 @@
                 renderConversationList();
             }
 
-            scrollToBottom();
+            scrollLatestMessageIntoView(userMsgEl);
 
         } catch (err) {
             thinkingEl.remove();
@@ -1046,7 +1049,7 @@
             errEl.style.borderLeft = '3px solid var(--accent-error)';
             errEl.innerHTML = `<span style="color: var(--accent-error); font-size: 0.85rem;">⚠️ ${escapeHtml(err.message)}</span>`;
             DOM.chatMessages.appendChild(errEl);
-            scrollToBottom();
+            scrollLatestMessageIntoView(errEl);
         } finally {
             state.isSending = false;
             DOM.sendBtn.disabled = false;
@@ -1055,8 +1058,44 @@
 
     function scrollToBottom() {
         requestAnimationFrame(() => {
-            DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+            DOM.chatMessages.scrollTo({
+                top: DOM.chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+            updateScrollToBottomButton();
         });
+    }
+
+    function scrollLatestMessageIntoView(targetElement = null) {
+        const element = targetElement || DOM.chatMessages.querySelector('.message-group:last-of-type, .ai-thinking:last-of-type, .empty-chat-state');
+        if (!element) {
+            updateScrollToBottomButton();
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            const targetTop = Math.max(0, element.offsetTop - 24);
+            const maxTop = Math.max(0, DOM.chatMessages.scrollHeight - DOM.chatMessages.clientHeight);
+            DOM.chatMessages.scrollTo({
+                top: Math.min(targetTop, maxTop),
+                behavior: 'smooth'
+            });
+            updateScrollToBottomButton();
+        });
+    }
+
+    function isChatScrolledToBottom() {
+        return (DOM.chatMessages.scrollHeight - DOM.chatMessages.scrollTop - DOM.chatMessages.clientHeight) <= 12;
+    }
+
+    function updateScrollToBottomButton() {
+        if (!DOM.scrollToBottomBtn) return;
+
+        const chatVisible = DOM.chatArea && getComputedStyle(DOM.chatArea).display !== 'none';
+        const shouldShow = chatVisible && state.currentConversation && DOM.chatMessages && !isChatScrolledToBottom();
+
+        DOM.scrollToBottomBtn.classList.toggle('visible', Boolean(shouldShow));
+        DOM.scrollToBottomBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
     }
 
     // ─── Auto-resize textarea ────────────────────────────
@@ -1527,6 +1566,12 @@
                 _updateAiProviderUI(radio.value);
             });
         });
+
+        DOM.chatMessages.addEventListener('scroll', updateScrollToBottomButton, { passive: true });
+        window.addEventListener('resize', updateScrollToBottomButton);
+        DOM.scrollToBottomBtn.addEventListener('click', () => {
+            scrollToBottom();
+        });
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1891,6 +1936,8 @@
         initSettings();
         initSidebar();
         initDashboard();
+
+        updateScrollToBottomButton();
 
         // Init Speech Synthesis for Vocabulary
         document.getElementById('chat-messages').addEventListener('click', (e) => {

@@ -1504,6 +1504,49 @@ select {
     border-top: none;
 }
 
+.scroll-to-bottom-btn {
+    position: fixed;
+    left: 50%;
+    bottom: 112px;
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transform: translateX(-50%) translateY(12px) scale(0.96);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 32;
+    transition: opacity var(--transition-normal), transform var(--transition-normal), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.scroll-to-bottom-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.scroll-to-bottom-btn:hover {
+    border-color: var(--border-color-hover);
+    background: var(--bg-secondary);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+}
+
+.scroll-to-bottom-btn:active {
+    transform: translateX(-50%) translateY(1px) scale(0.98);
+}
+
+.scroll-to-bottom-btn svg {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
+}
+
 .chat-input-wrapper {
     display: flex;
     align-items: flex-end;
@@ -2359,6 +2402,12 @@ select {
 
     .chat-input-container {
         padding: 12px 16px 16px;
+    }
+
+    .scroll-to-bottom-btn {
+        bottom: 100px;
+        width: 44px;
+        height: 44px;
     }
 
     .strength-weakness {
