@@ -575,20 +575,6 @@
         const loadMessages = options.loadMessages !== false;
         const loadToken = ++state.conversationLoadToken;
 
-        // Delete the previous conversation if it has no messages before switching
-        if (state.currentConversation && state.currentConversation.id !== convo.id) {
-            const previousConversationId = state.currentConversation.id;
-            const previousConversationIsLoading = state.pendingConversationLoads.has(previousConversationId);
-            if (state.currentMessages.length === 0 && !previousConversationIsLoading) {
-                try {
-                    await api(`/api/conversations/${previousConversationId}/`, 'DELETE');
-                    state.conversations = state.conversations.filter(c => c.id !== previousConversationId);
-                } catch (e) {
-                    console.error('Failed to delete empty conversation', e);
-                }
-            }
-        }
-
         state.currentConversation = convo;
         state.previousScores = null;
         setPersistedConversationId(convo.id);
@@ -601,7 +587,7 @@
         if (loadMessages) {
             state.pendingConversationLoads.add(convo.id);
             state.currentMessages = [];
-            renderMessages();
+            renderMessages({ showEmptyState: false });
             renderConversationList();
             updateScrollToBottomButton();
         } else {
@@ -680,10 +666,15 @@
     // MESSAGES & CHAT
     // ═══════════════════════════════════════════════════════
 
-    function renderMessages() {
+    function renderMessages(options = {}) {
+        const showEmptyState = options.showEmptyState !== false;
         DOM.chatMessages.innerHTML = '';
 
         if (state.currentMessages.length === 0) {
+            if (!showEmptyState) {
+                return;
+            }
+
             DOM.chatMessages.innerHTML = `
                 <div class="empty-chat-state">
                     <div class="empty-chat-content">
