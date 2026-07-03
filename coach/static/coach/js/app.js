@@ -379,8 +379,6 @@
                 state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
                 state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
                 state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
-                showApp();
-
                 await loadConversations(true);
 
                 const persistedConversationId = getPersistedConversationId();
@@ -388,11 +386,14 @@
                     const conversation = state.conversations.find(c => String(c.id) === persistedConversationId);
                     if (conversation) {
                         await selectConversation(conversation);
-                        return;
+                    } else {
+                        await createConversation();
                     }
+                } else {
+                    await createConversation();
                 }
 
-                await createConversation();
+                showApp();
             } else {
                 DOM.authScreen.style.display = 'flex';
             }
