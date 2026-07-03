@@ -1092,7 +1092,15 @@
         if (!DOM.scrollToBottomBtn) return;
 
         const chatVisible = DOM.chatArea && getComputedStyle(DOM.chatArea).display !== 'none';
-        const shouldShow = chatVisible && state.currentConversation && DOM.chatMessages && !isChatScrolledToBottom();
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const sidebarOpenOnMobile = isMobile && DOM.sidebar.classList.contains('mobile-open');
+        const sidebarExpandedWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')) || 0;
+        const horizontalOffset = isMobile || DOM.sidebar.classList.contains('collapsed')
+            ? 0
+            : Math.max(0, sidebarExpandedWidth / 2);
+        const shouldShow = chatVisible && state.currentConversation && DOM.chatMessages && !isChatScrolledToBottom() && !sidebarOpenOnMobile;
+
+        DOM.scrollToBottomBtn.style.setProperty('--scroll-to-bottom-offset-x', `${horizontalOffset}px`);
 
         DOM.scrollToBottomBtn.classList.toggle('visible', Boolean(shouldShow));
         DOM.scrollToBottomBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
@@ -1882,6 +1890,7 @@
             } else {
                 DOM.sidebar.classList.toggle('collapsed');
             }
+            updateScrollToBottomButton();
         });
 
         DOM.mobileSidebarToggle.addEventListener('click', (e) => {
@@ -1893,6 +1902,13 @@
                 DOM.sidebar.classList.remove('collapsed'); // ensure no conflict
             } else {
                 DOM.sidebar.classList.toggle('collapsed');
+            }
+            updateScrollToBottomButton();
+        });
+
+        DOM.sidebar.addEventListener('transitionend', (e) => {
+            if (e.propertyName === 'width' || e.propertyName === 'left') {
+                updateScrollToBottomButton();
             }
         });
 
@@ -1906,12 +1922,15 @@
                 e.target !== DOM.settingsOverlay) {
                 DOM.sidebar.classList.remove('mobile-open');
                 DOM.sidebarOverlay.classList.remove('active');
+                updateScrollToBottomButton();
             }
         });
 
         DOM.newChatBtn.addEventListener('click', createConversation);
         DOM.welcomeNewChat.addEventListener('click', createConversation);
         DOM.deleteConvoBtn.addEventListener('click', deleteConversation);
+
+        window.addEventListener('resize', updateScrollToBottomButton);
     }
 
     // ═══════════════════════════════════════════════════════

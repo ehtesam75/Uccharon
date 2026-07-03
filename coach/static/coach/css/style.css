@@ -1506,10 +1506,10 @@ select {
 
 .scroll-to-bottom-btn {
     position: fixed;
-    left: 50%;
-    bottom: 112px;
-    width: 48px;
-    height: 48px;
+    left: calc(50% + var(--scroll-to-bottom-offset-x, 0px));
+    bottom: 104px;
+    width: 42px;
+    height: 42px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1520,11 +1520,11 @@ select {
     box-shadow: var(--shadow-lg);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    transform: translateX(-50%) translateY(12px) scale(0.96);
+    transform: translateX(-50%) translateY(10px) scale(0.92);
     opacity: 0;
     pointer-events: none;
     z-index: 32;
-    transition: opacity var(--transition-normal), transform var(--transition-normal), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    transition: left var(--transition-slow), opacity var(--transition-normal), transform var(--transition-normal), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
 .scroll-to-bottom-btn.visible {
@@ -1544,6 +1544,8 @@ select {
 }
 
 .scroll-to-bottom-btn svg {
+    width: 18px;
+    height: 18px;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
 }
 
@@ -2405,9 +2407,9 @@ select {
     }
 
     .scroll-to-bottom-btn {
-        bottom: 100px;
-        width: 44px;
-        height: 44px;
+        bottom: 96px;
+        width: 40px;
+        height: 40px;
     }
 
     .strength-weakness {
