@@ -32,6 +32,7 @@
         audioChunks: [],         // accumulated audio blobs
         previousScores: null,
         conversationLoadToken: 0,
+        pendingConversationLoads: new Set(),
         dashboardRange: 'all',
         radarChart: null,
         lineChart: null
@@ -576,10 +577,12 @@
 
         // Delete the previous conversation if it has no messages before switching
         if (state.currentConversation && state.currentConversation.id !== convo.id) {
-            if (state.currentMessages.length === 0) {
+            const previousConversationId = state.currentConversation.id;
+            const previousConversationIsLoading = state.pendingConversationLoads.has(previousConversationId);
+            if (state.currentMessages.length === 0 && !previousConversationIsLoading) {
                 try {
-                    await api(`/api/conversations/${state.currentConversation.id}/`, 'DELETE');
-                    state.conversations = state.conversations.filter(c => c.id !== state.currentConversation.id);
+                    await api(`/api/conversations/${previousConversationId}/`, 'DELETE');
+                    state.conversations = state.conversations.filter(c => c.id !== previousConversationId);
                 } catch (e) {
                     console.error('Failed to delete empty conversation', e);
                 }
@@ -596,12 +599,14 @@
         DOM.chatTitle.textContent = convo.title;
 
         if (loadMessages) {
+            state.pendingConversationLoads.add(convo.id);
             state.currentMessages = [];
             renderMessages();
             renderConversationList();
             updateScrollToBottomButton();
         } else {
             state.currentMessages = [];
+            state.pendingConversationLoads.delete(convo.id);
         }
 
         if (loadMessages) {
@@ -629,6 +634,8 @@
                     renderMessages();
                     renderConversationList();
                     updateScrollToBottomButton();
+                } finally {
+                    state.pendingConversationLoads.delete(convo.id);
                 }
             })();
         }
