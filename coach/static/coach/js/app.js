@@ -541,7 +541,7 @@
             const data = await api('/api/conversations/', 'POST', { title: 'New Conversation' });
             state.conversations.unshift(data);
             renderConversationList();
-            await selectConversation(data);
+            await selectConversation(data, { loadMessages: false });
 
             // Close mobile sidebar
             DOM.sidebar.classList.remove('mobile-open');
@@ -569,7 +569,9 @@
         sendMessage();
     };
 
-    async function selectConversation(convo) {
+    async function selectConversation(convo, options = {}) {
+        const loadMessages = options.loadMessages !== false;
+
         // Delete the previous conversation if it has no messages before switching
         if (state.currentConversation && state.currentConversation.id !== convo.id) {
             if (state.currentMessages.length === 0) {
@@ -586,19 +588,23 @@
         state.previousScores = null;
         setPersistedConversationId(convo.id);
 
-        // Load messages
-        try {
-            const data = await api(`/api/conversations/${convo.id}/messages/`);
-            state.currentMessages = data.messages;
+        if (loadMessages) {
+            // Load messages for an existing conversation
+            try {
+                const data = await api(`/api/conversations/${convo.id}/messages/`);
+                state.currentMessages = data.messages;
 
-            // Find previous scores from last message
-            if (state.currentMessages.length > 0) {
-                const lastMsg = state.currentMessages[state.currentMessages.length - 1];
-                if (lastMsg.scores && lastMsg.scores.grammar !== null) {
-                    state.previousScores = lastMsg.scores;
+                // Find previous scores from last message
+                if (state.currentMessages.length > 0) {
+                    const lastMsg = state.currentMessages[state.currentMessages.length - 1];
+                    if (lastMsg.scores && lastMsg.scores.grammar !== null) {
+                        state.previousScores = lastMsg.scores;
+                    }
                 }
+            } catch (e) {
+                state.currentMessages = [];
             }
-        } catch (e) {
+        } else {
             state.currentMessages = [];
         }
 
