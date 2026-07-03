@@ -33,6 +33,7 @@
         previousScores: null,
         conversationLoadToken: 0,
         pendingConversationLoads: new Set(),
+        emptyConversationDeletionQueue: new Set(),
         conversationRename: {
             active: false,
             cancelled: false,
@@ -416,11 +417,7 @@
         try {
             // Delete the current conversation if it has no messages
             if (state.currentConversation && state.currentMessages.length === 0) {
-                try {
-                    await api(`/api/conversations/${state.currentConversation.id}/`, 'DELETE');
-                } catch (e) {
-                    console.error('Failed to delete empty conversation on logout:', e);
-                }
+                await deleteConversationById(state.currentConversation.id);
             }
 
             await api('/api/auth/logout/', 'POST');
@@ -546,6 +543,10 @@
 
     async function createConversation() {
         try {
+            if (state.currentConversation && state.currentMessages.length === 0) {
+                void deleteConversationById(state.currentConversation.id);
+            }
+
             const data = await api('/api/conversations/', 'POST', { title: 'New Conversation' });
             state.conversations.unshift(data);
             renderConversationList();
@@ -583,6 +584,10 @@
 
         finishConversationRename(true);
 
+        if (state.currentConversation && state.currentConversation.id !== convo.id) {
+            void queueEmptyConversationDeletion(state.currentConversation.id, state.currentMessages);
+        }
+
         state.currentConversation = convo;
         state.previousScores = null;
         setPersistedConversationId(convo.id);
@@ -607,7 +612,15 @@
             void (async () => {
                 try {
                     const data = await api(`/api/conversations/${convo.id}/messages/`);
-                    if (loadToken !== state.conversationLoadToken || state.currentConversation?.id !== convo.id) return;
+
+                    const isStale = loadToken !== state.conversationLoadToken || state.currentConversation?.id !== convo.id;
+
+                    if (isStale) {
+                        if (state.emptyConversationDeletionQueue.has(convo.id) && data.messages.length === 0) {
+                            await deleteConversationById(convo.id);
+                        }
+                        return;
+                    }
 
                     state.currentMessages = data.messages;
 
@@ -622,6 +635,12 @@
                     renderMessages();
                     renderConversationList();
                     updateScrollToBottomButton();
+
+                    if (state.emptyConversationDeletionQueue.has(convo.id) && data.messages.length === 0) {
+                        await deleteConversationById(convo.id);
+                    } else {
+                        state.emptyConversationDeletionQueue.delete(convo.id);
+                    }
                 } catch (e) {
                     if (loadToken !== state.conversationLoadToken || state.currentConversation?.id !== convo.id) return;
                     state.currentMessages = [];
@@ -643,6 +662,44 @@
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
         DOM.sidebarOverlay.classList.remove('active');
+    }
+
+    async function queueEmptyConversationDeletion(convoId, messages = []) {
+        if (!convoId) return;
+
+        if (messages && messages.length > 0) {
+            state.emptyConversationDeletionQueue.delete(convoId);
+            return;
+        }
+
+        if (state.pendingConversationLoads.has(convoId)) {
+            state.emptyConversationDeletionQueue.add(convoId);
+            return;
+        }
+
+        await deleteConversationById(convoId);
+    }
+
+    async function deleteConversationById(convoId) {
+        if (!convoId) return;
+
+        const convo = state.conversations.find(c => c.id === convoId);
+        if (!convo) return;
+
+        try {
+            await api(`/api/conversations/${convoId}/`, 'DELETE');
+            state.conversations = state.conversations.filter(c => c.id !== convoId);
+            state.emptyConversationDeletionQueue.delete(convoId);
+
+            if (state.currentConversation?.id === convoId) {
+                state.currentConversation = null;
+                state.currentMessages = [];
+            }
+
+            renderConversationList();
+        } catch (e) {
+            console.error('Failed to delete empty conversation:', e);
+        }
     }
 
     function beginConversationRename() {
