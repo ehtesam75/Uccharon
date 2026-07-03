@@ -42,6 +42,7 @@
 
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => document.querySelectorAll(sel);
+    const ACTIVE_CONVERSATION_STORAGE_KEY = 'uccharon_active_conversation_id';
 
     const DOM = {
         authScreen: $('#auth-screen'),
@@ -179,6 +180,20 @@
         if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
         if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
         return date.toLocaleDateString();
+    }
+
+    function getPersistedConversationId() {
+        return sessionStorage.getItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+    }
+
+    function setPersistedConversationId(conversationId) {
+        if (conversationId) {
+            sessionStorage.setItem(ACTIVE_CONVERSATION_STORAGE_KEY, String(conversationId));
+        }
+    }
+
+    function clearPersistedConversationId() {
+        sessionStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -364,8 +379,20 @@
                 state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
                 state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
                 state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
-                await loadConversations();
                 showApp();
+
+                await loadConversations(true);
+
+                const persistedConversationId = getPersistedConversationId();
+                if (persistedConversationId) {
+                    const conversation = state.conversations.find(c => String(c.id) === persistedConversationId);
+                    if (conversation) {
+                        await selectConversation(conversation);
+                        return;
+                    }
+                }
+
+                await createConversation();
             } else {
                 DOM.authScreen.style.display = 'flex';
             }
@@ -391,6 +418,7 @@
             state.conversations = [];
             state.currentConversation = null;
             state.currentMessages = [];
+            clearPersistedConversationId();
             DOM.app.style.display = 'none';
             DOM.dashboardScreen.style.display = 'none';
             DOM.authScreen.style.display = 'flex';
@@ -553,6 +581,7 @@
 
         state.currentConversation = convo;
         state.previousScores = null;
+        setPersistedConversationId(convo.id);
 
         // Load messages
         try {
@@ -591,6 +620,7 @@
             state.conversations = state.conversations.filter(c => c.id !== state.currentConversation.id);
             state.currentConversation = null;
             state.currentMessages = [];
+            clearPersistedConversationId();
 
             if (state.conversations.length > 0) {
                 await selectConversation(state.conversations[0]);
