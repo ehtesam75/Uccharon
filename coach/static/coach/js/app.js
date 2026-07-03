@@ -31,6 +31,7 @@
         mediaRecorder: null,     // MediaRecorder for Whisper / Gemini audio
         audioChunks: [],         // accumulated audio blobs
         previousScores: null,
+        conversationLoadToken: 0,
         dashboardRange: 'all',
         radarChart: null,
         lineChart: null
@@ -571,6 +572,7 @@
 
     async function selectConversation(convo, options = {}) {
         const loadMessages = options.loadMessages !== false;
+        const loadToken = ++state.conversationLoadToken;
 
         // Delete the previous conversation if it has no messages before switching
         if (state.currentConversation && state.currentConversation.id !== convo.id) {
@@ -588,33 +590,54 @@
         state.previousScores = null;
         setPersistedConversationId(convo.id);
 
-        if (loadMessages) {
-            // Load messages for an existing conversation
-            try {
-                const data = await api(`/api/conversations/${convo.id}/messages/`);
-                state.currentMessages = data.messages;
-
-                // Find previous scores from last message
-                if (state.currentMessages.length > 0) {
-                    const lastMsg = state.currentMessages[state.currentMessages.length - 1];
-                    if (lastMsg.scores && lastMsg.scores.grammar !== null) {
-                        state.previousScores = lastMsg.scores;
-                    }
-                }
-            } catch (e) {
-                state.currentMessages = [];
-            }
-        } else {
-            state.currentMessages = [];
-        }
-
         DOM.welcomeScreen.style.display = 'none';
         DOM.dashboardScreen.style.display = 'none';
         DOM.chatArea.style.display = 'flex';
         DOM.chatTitle.textContent = convo.title;
-        renderMessages();
-        renderConversationList();
-        updateScrollToBottomButton();
+
+        if (loadMessages) {
+            state.currentMessages = [];
+            renderMessages();
+            renderConversationList();
+            updateScrollToBottomButton();
+        } else {
+            state.currentMessages = [];
+        }
+
+        if (loadMessages) {
+            void (async () => {
+                try {
+                    const data = await api(`/api/conversations/${convo.id}/messages/`);
+                    if (loadToken !== state.conversationLoadToken || state.currentConversation?.id !== convo.id) return;
+
+                    state.currentMessages = data.messages;
+
+                    // Find previous scores from last message
+                    if (state.currentMessages.length > 0) {
+                        const lastMsg = state.currentMessages[state.currentMessages.length - 1];
+                        if (lastMsg.scores && lastMsg.scores.grammar !== null) {
+                            state.previousScores = lastMsg.scores;
+                        }
+                    }
+
+                    renderMessages();
+                    renderConversationList();
+                    updateScrollToBottomButton();
+                } catch (e) {
+                    if (loadToken !== state.conversationLoadToken || state.currentConversation?.id !== convo.id) return;
+                    state.currentMessages = [];
+                    renderMessages();
+                    renderConversationList();
+                    updateScrollToBottomButton();
+                }
+            })();
+        }
+
+        if (!loadMessages) {
+            renderMessages();
+            renderConversationList();
+            updateScrollToBottomButton();
+        }
 
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
