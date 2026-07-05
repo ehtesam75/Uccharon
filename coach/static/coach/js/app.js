@@ -1061,24 +1061,28 @@
             ));
         }
 
+        const showFullFeedback = response.input_status === 'valid' || response.input_status === 'mixed_language';
+
         // 1. Grammar Corrections
-        if (response.grammar_corrections && response.grammar_corrections.length > 0) {
-            let grammarHtml = '';
-            response.grammar_corrections.forEach(gc => {
-                grammarHtml += `
-                    <div class="grammar-item">
-                        <div class="grammar-original">${escapeHtml(gc.original)}</div>
-                        <div class="grammar-corrected">${escapeHtml(gc.corrected)}</div>
-                        <div class="grammar-explanation">${escapeHtml(gc.explanation)}</div>
-                    </div>
-                `;
-            });
-            card.appendChild(createFeedbackSection('🔍', 'Grammar Corrections', grammarHtml));
-        } else {
-            card.appendChild(createFeedbackSection(
-                '🔍', 'Grammar Corrections',
-                '<div style="color: var(--accent-success); font-size: 0.875rem;">✓ No grammar issues found. Great job!</div>'
-            ));
+        if(showFullFeedback){
+            if (response.grammar_corrections && response.grammar_corrections.length > 0) {
+                let grammarHtml = '';
+                response.grammar_corrections.forEach(gc => {
+                    grammarHtml += `
+                        <div class="grammar-item">
+                            <div class="grammar-original">${escapeHtml(gc.original)}</div>
+                            <div class="grammar-corrected">${escapeHtml(gc.corrected)}</div>
+                            <div class="grammar-explanation">${escapeHtml(gc.explanation)}</div>
+                        </div>
+                    `;
+                });
+                card.appendChild(createFeedbackSection('🔍', 'Grammar Corrections', grammarHtml));
+            } else {
+                card.appendChild(createFeedbackSection(
+                    '🔍', 'Grammar Corrections',
+                    '<div style="color: var(--accent-success); font-size: 0.875rem;">✓ No grammar issues found. Great job!</div>'
+                ));
+            }
         }
 
         // 1.5 Sentence Improvements
@@ -1185,7 +1189,7 @@
         }
 
         // 5. Performance Rating
-        if (response.performance_rating) {
+        if(showFullFeedback && response.performance_rating){
             const pr = response.performance_rating;
             // Calculate overall score
             const overall = (pr.grammar * 0.40) + (pr.naturalness * 0.30) + (pr.vocabulary * 0.20) + (pr.confidence * 0.10);
@@ -1233,7 +1237,7 @@
         }
 
         // 6. Follow-up Question
-        if (response.follow_up_question) {
+        if (showFullFeedback && response.follow_up_question) {
             card.appendChild(createFeedbackSection(
                 '💬', 'Let\'s Continue',
                 `<div class="follow-up-text">${escapeHtml(response.follow_up_question)}</div>`,

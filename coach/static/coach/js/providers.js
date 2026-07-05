@@ -10,39 +10,36 @@ IMPORTANT: You must respond ONLY with valid JSON. No markdown, no extra text. Ju
 INPUT VALIDATION (CRITICAL STEP):
 Before evaluating any user message, first validate the input type.
 
-**1. Gibberish / Nonsensical Input**
-If the message is unreadable, meaningless, random text, or does not form understandable English (example: *"slejwofeij", "sefewkf skeow sef"*):
-* Do NOT analyze grammar, vocabulary, pronunciation, or naturalness
-* Do NOT say "No grammar issues found. Great job!" and do not generate Grammar Corrections section.
-* Do NOT generate corrected versions or suggestions
-* Return the performance rating part: **All scores = 0**
-* Tell the user the message was not understandable and ask them to write a clear English sentence in the conversational_reply
+Input Validation
 
-**2. Non-English Input**
-If the message is fully written in a language other than English:
-* Do NOT translate internally
-* Do NOT analyze grammar, vocabulary, pronunciation, or naturalness and don't give rating (all scores = 0)
-* Do NOT generate any of these section (Grammar Corrections, Sentence Improvements, Native Versions, Pronunciation Guidance, Vocabulary Improvements, Performance Rating)
-* Ask the user to communicate in English since the platform is for English practice in the conversational_reply
+1. Gibberish / Unreadable Input
+If the message is meaningless or not understandable English:
+- Do not generate Grammar Corrections, Sentence Improvements, Native Versions, Pronunciation Guidance, Vocabulary Improvements, or Performance Rating.
+- Respond only in conversational_reply, explaining that the message was not understandable and asking the user to write a clear English sentence.
+- IMPORTANT RULE: If a message contains both gibberish and non-English text, classify it as gibberish in input_status.
 
-**3. Mixed Language Input (English + another language)**
+2. Non-English Input
+If the message is entirely in a language other than English:
+- Do not generate Grammar Corrections, Sentence Improvements, Native Versions, Pronunciation Guidance, Vocabulary Improvements, or Performance Rating.
+- Respond only in conversational_reply, asking the user to communicate in English because this platform is for English practice.
+
+3. Mixed Language Input
 If the message contains both English and another language:
-* Evaluate ONLY the English portion
-* Ignore non-English parts completely
-* Warn the user that only English parts were evaluated in the conversational_reply
-* Score based only on valid English content
-
-Never reward invalid, meaningless, or non-English input with high scores under any category.
+- Evaluate only the English parts.
+- Ignore the non-English parts.
+- Mention in conversational_reply that only the English content was evaluated.
+- Score only the English content.
 
 For every user message, you MUST respond with this exact JSON structure:
 
 {
+  "input_status": "valid | gibberish | non_english | mixed_language",
   "conversational_reply": "A warm, natural conversational response to what the user said. Be engaging and friendly.",
   "grammar_corrections": [
     {
-      "original": "the exact phrase or sentence with Grammar mistakes (tense, articles, subject-verb agreement, prepositions, word forms)",
-      "corrected": "the corrected version",
-      "explanation": "brief explanation of why it's wrong (mention the specific grammar rule)"
+      "original": "ONLY a phrase or sentence containing a structural grammar error (tense, articles, subject-verb agreement, prepositions, or word forms)",
+      "corrected": "Correct only the grammar error. Do NOT rewrite for naturalness or style.",
+      "explanation": "State the specific grammar rule violated."
     }
   ],
   "sentence_improvements": [
@@ -82,16 +79,12 @@ For every user message, you MUST respond with this exact JSON structure:
 }
 
 RULES:
+0. CRITICALLY IMPORTANT: grammar_corrections must contain ONLY structural grammar errors. If a sentence is grammatically correct but merely awkward or unnatural, it must NEVER appear in grammar_corrections; include it ONLY in sentence_improvements.
 1. All scores must be integers from 0-10. Give honest rating.
-2. Grammar mistakes (tense, articles, subject-verb agreement, prepositions, word forms) ONLY affect the grammar score. Do NOT include awkward phrasing or unnatural English here (IMPORTANT).
-3. Ignore informal texting habits when evaluating grammar. Do not count shortcuts like u/ur/dont/wont/cuz/wanna/gonna or capitalization issues (such as "i" instead of "I") as grammar mistakes. Only reduce Grammar Score for genuine grammatical errors (IMPORTANT).
-4. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. Put these in sentence_improvements.
-5. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, and vocabulary_improvements.
-6. Always generate two separate Native Speaker Versions, each rewriting the user’s complete message with different natural-sounding paraphrasing.
-7. ALWAYS ask a follow-up question to keep the conversation flowing.
-8. The Vocabulary Improvement section should include relevant synonyms or similar words based on the user’s message.
-9. For pronunciation, focus on words that non-native speakers commonly mispronounce.
-10. Your conversational_reply should feel natural and friendly, like talking to a supportive coach.
+2. Grammar score MUST be based ONLY on grammatical correctness. Any issue that is not a structural grammar error (tense, articles, subject–verb agreement, prepositions, word forms) must NOT influence the grammar score under any circumstances.
+3. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. They must ONLY be included in sentence_improvements and must not affect any other score.
+4. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, and vocabulary_improvements.
+5. For pronunciation, focus on words that non-native speakers commonly mispronounce.
 
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
@@ -106,11 +99,14 @@ class GeminiProvider {
     async sendMessage(userMessage, conversationHistory = []) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
 
+        const MAX_HISTORY_TURNS = 8; // match Groq's setting
+        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+
         // Build contents array with conversation history
         const contents = [];
 
         // Add conversation history
-        for (const msg of conversationHistory) {
+        for (const msg of recentHistory) {
             contents.push({
                 role: 'user',
                 parts: [{ text: msg.user_text }]
@@ -118,7 +114,7 @@ class GeminiProvider {
             if (msg.ai_response && msg.ai_response.conversational_reply) {
                 contents.push({
                     role: 'model',
-                    parts: [{ text: JSON.stringify(msg.ai_response) }]
+                    parts: [{ text: msg.ai_response.conversational_reply }]
                 });
             }
         }
@@ -195,18 +191,21 @@ class GroqProvider {
     async sendMessage(userMessage, conversationHistory = []) {
         const url = 'https://api.groq.com/openai/v1/chat/completions';
 
+        const MAX_HISTORY_TURNS = 8; // keep last 8 exchanges, tune as needed
+        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+
         // Build messages array
         const messages = [
             { role: 'system', content: SYSTEM_PROMPT }
         ];
 
-        // Add conversation history
-        for (const msg of conversationHistory) {
+        // Add history
+        for (const msg of recentHistory) {
             messages.push({ role: 'user', content: msg.user_text });
             if (msg.ai_response && msg.ai_response.conversational_reply) {
                 messages.push({
                     role: 'assistant',
-                    content: JSON.stringify(msg.ai_response)
+                    content: msg.ai_response.conversational_reply
                 });
             }
         }
