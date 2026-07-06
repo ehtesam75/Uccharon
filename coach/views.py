@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import timedelta
 from django.http import JsonResponse
 from django.utils import timezone
@@ -248,6 +249,33 @@ def conversation_delete_view(request, convo_id):
     return JsonResponse({'success': True})
 
 
+# ─── Helpers ────────────────────────────────────────────────
+
+# Regex for tokens that look like English words (Latin alphabet only)
+_ENGLISH_WORD_RE = re.compile(r"^[a-zA-Z][a-zA-Z''-]*$")
+
+
+def _count_english_words(text):
+    """Count words that appear to be English (Latin-alphabet tokens).
+
+    This filters out non-Latin scripts (e.g. Bengali, Arabic, Chinese)
+    while keeping English words in mixed-language input. Single-letter
+    tokens are only counted if they are common English words ('I', 'a').
+    """
+    count = 0
+    for token in text.split():
+        # Strip surrounding punctuation
+        word = token.strip('.,!?;:()[]{}"\'-–—…')
+        if not word:
+            continue
+        if _ENGLISH_WORD_RE.match(word):
+            # Single-letter: only count common English single-letter words
+            if len(word) == 1 and word.upper() not in ('I', 'A'):
+                continue
+            count += 1
+    return count
+
+
 # ─── Message Views ──────────────────────────────────────────
 
 @csrf_exempt
@@ -289,6 +317,16 @@ def messages_view(request, convo_id):
     if not user_text:
         return JsonResponse({'error': 'User text is required.'}, status=400)
 
+    # ── Input status classification ──────────────────────────
+    # The AI classifies each message; backend uses this to gate stats.
+    input_status = ai_response.get('input_status', 'valid')
+    eligible_statuses = {'valid', 'mixed_language'}
+    counts_for_stats = input_status in eligible_statuses
+
+    # For non-eligible input, nullify scores so they don't pollute averages
+    if not counts_for_stats:
+        scores = {}
+
     msg = Message.objects.create(
         conversation=convo,
         user_text=user_text,
@@ -298,21 +336,29 @@ def messages_view(request, convo_id):
         score_naturalness=scores.get('naturalness'),
         score_confidence=scores.get('confidence'),
         score_overall=scores.get('overall'),
+        counts_for_stats=counts_for_stats,
     )
 
-    # Track daily word progress
-    word_count = len(user_text.split())
-    now_local = timezone.localtime(timezone.now())
-    today_date = now_local.date()
-    
-    dp, created = DailyProgress.objects.get_or_create(
-        user=request.user,
-        date=today_date,
-        defaults={'goal_target': request.user.profile.daily_word_goal}
-    )
-    dp.word_count += word_count
-    dp.is_completed = dp.word_count >= dp.goal_target
-    dp.save()
+    # ── Track daily word progress (only for valid English input) ─
+    if counts_for_stats:
+        if input_status == 'mixed_language':
+            # Count only English words: alphabetic tokens that look like English
+            english_word_count = _count_english_words(user_text)
+            word_count = max(english_word_count, 1)  # at least 1 if deemed mixed
+        else:
+            word_count = len(user_text.split())
+
+        now_local = timezone.localtime(timezone.now())
+        today_date = now_local.date()
+
+        dp, created = DailyProgress.objects.get_or_create(
+            user=request.user,
+            date=today_date,
+            defaults={'goal_target': request.user.profile.daily_word_goal}
+        )
+        dp.word_count += word_count
+        dp.is_completed = dp.word_count >= dp.goal_target
+        dp.save()
 
     # Update conversation title from first message
     if convo.messages.count() == 1:
@@ -330,6 +376,7 @@ def messages_view(request, convo_id):
             'confidence': msg.score_confidence,
             'overall': msg.score_overall,
         },
+        'counts_for_stats': msg.counts_for_stats,
         'created_at': msg.created_at.isoformat(),
     })
 
@@ -354,8 +401,11 @@ def stats_view(request):
     else:
         start_date = None
 
-    # For total messages/conversations, count all (not just rated ones) in the time window
-    base_all_msgs = Message.objects.filter(conversation__user=request.user)
+    # For total messages/conversations, only count messages with valid English input
+    base_all_msgs = Message.objects.filter(
+        conversation__user=request.user,
+        counts_for_stats=True,
+    )
     if start_date:
         filtered_all_msgs = base_all_msgs.filter(created_at__gte=start_date)
     else:

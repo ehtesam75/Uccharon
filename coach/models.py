@@ -74,6 +74,10 @@ class Message(models.Model):
     score_confidence = models.FloatField(null=True, blank=True)
     score_overall = models.FloatField(null=True, blank=True)
 
+    # Whether this message counts toward user statistics (word count, message count, etc.)
+    # False for non-English or gibberish input — determined by AI's input_status classification
+    counts_for_stats = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
