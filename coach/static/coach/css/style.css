@@ -3013,20 +3013,17 @@ select {
 
 .history-grid {
     display: grid;
-    gap: 16px;
+    gap: 14px;
     margin-top: 24px;
 }
 
 .history-card {
     background: var(--bg-primary);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 4px 12px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .history-card:hover {
@@ -3034,69 +3031,9 @@ select {
     box-shadow: 0 6px 16px var(--shadow-color);
 }
 
-.history-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-light);
-    padding-bottom: 12px;
-}
-
-.history-type-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: capitalize;
-}
-
 .history-date {
-    font-size: 0.8rem;
-    color: var(--text-tertiary);
-}
-
-.history-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.history-original {
-    font-size: 0.95rem;
-    color: var(--text-primary);
-    text-decoration: line-through;
-    text-decoration-color: var(--error-color, #ff4757);
-    opacity: 0.8;
-}
-
-.history-suggestion {
-    font-size: 1.05rem;
-    color: var(--accent-primary);
-    font-weight: 500;
-}
-
-.history-explanation {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    background: var(--bg-secondary);
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 4px;
-}
-
-.history-synonyms {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 4px;
-}
-
-.history-synonym-tag {
     font-size: 0.75rem;
-    background: var(--bg-hover);
-    color: var(--text-primary);
-    padding: 4px 8px;
-    border-radius: 12px;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
 }

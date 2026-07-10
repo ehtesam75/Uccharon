@@ -2340,30 +2340,57 @@
             
             let icon = '';
             let title = '';
+            let bodyHtml = '';
             
-            if (item.type === 'grammar') { icon = '✍️'; title = 'Grammar'; }
-            else if (item.type === 'sentence') { icon = '✨'; title = 'Sentence'; }
-            else if (item.type === 'vocabulary') { icon = '📚'; title = 'Vocabulary'; }
-            else if (item.type === 'pronunciation') { icon = '🗣️'; title = 'Pronunciation'; }
-            
-            let html = `
-                <div class="history-card-header">
-                    <div class="history-type-badge">${icon} ${title}</div>
-                    <div class="history-date">${timeAgo(item.date)}</div>
-                </div>
-                <div class="history-content">
-                    <div class="history-original">${escapeHtml(item.original)}</div>
-                    <div class="history-suggestion">${escapeHtml(item.suggestion)}</div>
-                    ${item.explanation ? `<div class="history-explanation">${escapeHtml(item.explanation)}</div>` : ''}
-            `;
-            
-            if (item.type === 'vocabulary' && item.synonyms && item.synonyms.length > 0) {
-                const synonymsHtml = item.synonyms.map(syn => `<span class="history-synonym-tag">${escapeHtml(syn)}</span>`).join('');
-                html += `<div class="history-synonyms">${synonymsHtml}</div>`;
+            if (item.type === 'grammar') {
+                icon = '🔍'; title = 'Grammar Correction';
+                bodyHtml = `
+                    <div class="grammar-item">
+                        <div class="grammar-original">${escapeHtml(item.original)}</div>
+                        <div class="grammar-corrected">${escapeHtml(item.suggestion)}</div>
+                        ${item.explanation ? `<div class="grammar-explanation">${escapeHtml(item.explanation)}</div>` : ''}
+                    </div>`;
+            } else if (item.type === 'sentence') {
+                icon = '✨'; title = 'Sentence Improvement';
+                bodyHtml = `
+                    <div class="grammar-item">
+                        <div class="grammar-original">${escapeHtml(item.original)}</div>
+                        <div class="grammar-corrected" style="color: var(--accent-secondary);">${escapeHtml(item.suggestion)}</div>
+                        ${item.explanation ? `<div class="grammar-explanation">${escapeHtml(item.explanation)}</div>` : ''}
+                    </div>`;
+            } else if (item.type === 'vocabulary') {
+                icon = '📚'; title = 'Vocabulary Improvement';
+                let synonymsHtml = '';
+                if (item.synonyms && item.synonyms.length > 0) {
+                    synonymsHtml = `<div class="vocab-synonyms" style="width: 100%; font-size: 0.8rem; color: var(--accent-secondary); margin-top: 4px;">Synonyms: ${escapeHtml(item.synonyms.join(', '))}</div>`;
+                }
+                bodyHtml = `
+                    <div class="vocab-item">
+                        <span class="vocab-original">${escapeHtml(item.original)}</span>
+                        <span class="vocab-arrow">→</span>
+                        <span class="vocab-suggestion">${escapeHtml(item.suggestion)}</span>
+                        ${synonymsHtml}
+                        ${item.explanation ? `<div class="vocab-context">${escapeHtml(item.explanation)}</div>` : ''}
+                    </div>`;
+            } else if (item.type === 'pronunciation') {
+                icon = '🎯'; title = 'Pronunciation Guidance';
+                bodyHtml = `
+                    <div class="pronunciation-item">
+                        <span class="pronunciation-word">${escapeHtml(item.original)}</span>
+                        <span class="pronunciation-phonetic">${escapeHtml(item.suggestion)}</span>
+                        ${item.explanation ? `<div class="pronunciation-tip">${escapeHtml(item.explanation)}</div>` : ''}
+                    </div>`;
             }
             
-            html += `</div>`;
-            card.innerHTML = html;
+            card.innerHTML = `
+                <div class="feedback-section" style="border-bottom: none;">
+                    <div class="feedback-header" style="cursor: default;">
+                        <div class="feedback-icon">${icon}</div>
+                        <div class="feedback-title">${title}</div>
+                        <div class="history-date">${timeAgo(item.date)}</div>
+                    </div>
+                    <div class="feedback-body">${bodyHtml}</div>
+                </div>`;
             DOM.learningHistoryList.appendChild(card);
         });
     }
