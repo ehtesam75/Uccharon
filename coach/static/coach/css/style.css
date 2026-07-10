@@ -2761,6 +2761,15 @@ select {
         padding: 60px 16px 24px;
     }
 
+    #learning-history-screen .dashboard-container {
+        padding-top: 16px;
+    }
+
+    #learning-history-screen .dashboard-header {
+        margin-top: -16px;
+        padding-top: 16px;
+    }
+
     .dashboard-header::after {
         left: 16px;
         right: 16px;
@@ -2779,12 +2788,21 @@ select {
         display: flex;
         padding: 4px;
         border-radius: 12px;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .time-range-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .time-tab {
-        flex: 1;
+        flex: 0 0 auto;
         text-align: center;
-        padding: 10px 4px;
+        padding: 10px 12px;
         font-size: 0.8rem;
         border-radius: 8px;
     }
@@ -3030,24 +3048,39 @@ select {
 /* ═══════════════ LEARNING HISTORY ═══════════════ */
 
 .history-grid {
-    display: grid;
-    gap: 14px;
-    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-primary);
+    overflow: hidden;
 }
 
 .history-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px var(--shadow-color);
+    transition: background 0.2s;
+    box-shadow: none;
     animation: dashCardSlideUp 0.5s ease-out both;
 }
 
+.history-card:last-child {
+    border-bottom: none;
+}
+
 .history-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px var(--shadow-color);
+    transform: none;
+    box-shadow: none;
+    background: var(--bg-glass);
+}
+
+.history-card .feedback-section {
+    padding: 12px 16px;
 }
 
 .history-card .grammar-item {
