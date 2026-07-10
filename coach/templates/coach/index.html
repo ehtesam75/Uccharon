@@ -193,6 +193,9 @@
                                 <select id="signup-ai-provider" class="settings-select signup-select">
                                     <option value="">Select a provider</option>
                                     <option value="groq">Groq</option>
+                                    <option value="openrouter">OpenRouter</option>
+                                    <option value="cerebras">Cerebras</option>
+                                    <option value="cohere">Cohere</option>
                                 </select>
                             </div>
                             <div class="signup-api-panel">
@@ -758,6 +761,28 @@
                                 <div class="provider-radio-circle"></div>
                             </div>
                         </label>
+                        <label class="provider-card" id="provider-openrouter-card">
+                            <input type="radio" name="ai-provider" value="openrouter">
+                            <div class="provider-card-content">
+                                <div class="provider-icon">🌐</div>
+                                <div class="provider-info">
+                                    <div class="provider-name">OpenRouter</div>
+                                    <div class="provider-desc">Multiple models</div>
+                                </div>
+                                <div class="provider-radio-circle"></div>
+                            </div>
+                        </label>
+                        <label class="provider-card" id="provider-cerebras-card">
+                            <input type="radio" name="ai-provider" value="cerebras">
+                            <div class="provider-card-content">
+                                <div class="provider-icon">🧠</div>
+                                <div class="provider-info">
+                                    <div class="provider-name">Cerebras</div>
+                                    <div class="provider-desc">High-speed Llama</div>
+                                </div>
+                                <div class="provider-radio-circle"></div>
+                            </div>
+                        </label>
                     </div>
                 </div>
 
@@ -790,7 +815,8 @@
                         <select id="gemini-model-select" class="settings-select">
                             <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fast)</option>
                             <option value="gemini-2.5-flash">Gemini 2.5 Flash (Latest)</option>
-                            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Best)</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option>
                         </select>
                     </div>
                 </div>
@@ -823,11 +849,87 @@
                         <p class="settings-desc">Select the Groq model to use</p>
                         <select id="groq-model-select" class="settings-select">
                             <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-                            <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                            <option value="llama-3.1-8b-instant">Llama 3.1 8B</option>
+                            <option value="qwen-2.5-32b">Qwen 2.5 32B</option>
+                            <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 Llama 70B</option>
                             <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
                         </select>
                     </div>
                 </div>
+
+                <!-- OpenRouter Specific Settings -->
+                <div id="openrouter-settings-container" style="display:none;">
+                    <div class="settings-section">
+                        <h3>OpenRouter API Key</h3>
+                        <p class="settings-desc">Your key is stored securely in your profile</p>
+                        <div class="form-group" id="openrouter-key-group">
+                            <div class="key-input-wrapper">
+                                <input type="password" id="openrouter-api-key" placeholder="Enter your OpenRouter API key">
+                                <button class="toggle-key-vis" data-target="openrouter-api-key" title="Show/hide key">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="api-key-guide">
+                                Get your key from <a href="https://openrouter.ai/settings/keys" target="_blank"
+                                    rel="noopener noreferrer">OpenRouter</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>OpenRouter Model</h3>
+                        <p class="settings-desc">Select the OpenRouter model to use</p>
+                        <select id="openrouter-model-select" class="settings-select">
+                            <option value="openrouter/free">Free Models Router</option>
+                            <option value="google/gemma-4-31b-it:free">Google: Gemma 4 31B (Free)</option>
+                            <option value="nvidia/nemotron-3-super-120b-a12b:free">NVIDIA: Nemotron 3 Super 120B (Free)</option>
+                            <option value="qwen/qwen3-next-80b-a3b-instruct:free">Qwen: Qwen3 Next 80B (Free)</option>
+                            <option value="openai/gpt-oss-120b:free">OpenAI: GPT OSS 120B (Free)</option>
+                            <option value="liquid/lfm-2.5-1.2b-thinking:free">LiquidAI: LFM2.5-1.2B-Thinking (Free)</option>
+                            <option value="poolside/laguna-xs-2.1:free">Poolside: Laguna XS 2.1 (Free)</option>
+                            <option value="cohere/north-mini-code:free">Cohere: North Mini Code (Free)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cerebras Specific Settings -->
+                <div id="cerebras-settings-container" style="display:none;">
+                    <div class="settings-section">
+                        <h3>Cerebras API Key</h3>
+                        <p class="settings-desc">Your key is stored securely in your profile</p>
+                        <div class="form-group" id="cerebras-key-group">
+                            <div class="key-input-wrapper">
+                                <input type="password" id="cerebras-api-key" placeholder="Enter your Cerebras API key">
+                                <button class="toggle-key-vis" data-target="cerebras-api-key" title="Show/hide key">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="api-key-guide">
+                                Get your key from <a href="https://cloud.cerebras.ai/" target="_blank"
+                                    rel="noopener noreferrer">Cerebras Cloud</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Cerebras Model</h3>
+                        <p class="settings-desc">Select the Cerebras model to use</p>
+                        <select id="cerebras-model-select" class="settings-select">
+                            <option value="gpt-oss-120b">OpenAI GPT OSS (120B)</option>
+                            <option value="zai-glm-4.7">Z.ai GLM 4.7</option>
+                            <option value="gemma-4-31b">Gemma 4 31B</option>
+                        </select>
+                    </div>
+                </div>
+
 
                 <!-- Voice Input Provider -->
                 <div class="settings-section">
@@ -968,8 +1070,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <script src="{% static 'coach/js/providers.js' %}"></script>
-    <script src="{% static 'coach/js/app.js' %}"></script>
+    <script src="{% static 'coach/js/providers.js' %}?v=3"></script>
+    <script src="{% static 'coach/js/app.js' %}?v=3"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {

@@ -262,6 +262,137 @@ class GroqProvider {
 }
 
 
+class OpenRouterProvider {
+    constructor(apiKey, model = 'openai/gpt-3.5-turbo') {
+        this.apiKey = apiKey;
+        this.model = model;
+        this.name = 'OpenRouter';
+    }
+
+    async sendMessage(userMessage, conversationHistory = []) {
+        const url = 'https://openrouter.ai/api/v1/chat/completions';
+        const MAX_HISTORY_TURNS = 8;
+        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+
+        const messages = [{ role: 'system', content: SYSTEM_PROMPT }];
+        for (const msg of recentHistory) {
+            messages.push({ role: 'user', content: msg.user_text });
+            if (msg.ai_response && msg.ai_response.conversational_reply) {
+                messages.push({ role: 'assistant', content: msg.ai_response.conversational_reply });
+            }
+        }
+        messages.push({ role: 'user', content: userMessage });
+
+        const body = {
+            model: this.model,
+            messages: messages,
+            temperature: 0.8,
+            response_format: { type: 'json_object' }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.apiKey}`,
+                'HTTP-Referer': window.location.href, // Recommended for OpenRouter
+                'X-Title': 'Uccharon Coach' // Recommended for OpenRouter
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `OpenRouter API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.choices || !data.choices[0]?.message?.content) {
+            throw new Error('Invalid response from OpenRouter API');
+        }
+
+        return this._parseResponse(data.choices[0].message.content);
+    }
+
+    _parseResponse(text) {
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (match) return JSON.parse(match[1].trim());
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            throw new Error('Could not parse AI response as JSON');
+        }
+    }
+}
+
+
+class CerebrasProvider {
+    constructor(apiKey, model = 'gpt-oss-120b') {
+        this.apiKey = apiKey;
+        this.model = model;
+        this.name = 'Cerebras';
+    }
+
+    async sendMessage(userMessage, conversationHistory = []) {
+        const url = 'https://api.cerebras.ai/v1/chat/completions';
+        const MAX_HISTORY_TURNS = 8;
+        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+
+        const messages = [{ role: 'system', content: SYSTEM_PROMPT }];
+        for (const msg of recentHistory) {
+            messages.push({ role: 'user', content: msg.user_text });
+            if (msg.ai_response && msg.ai_response.conversational_reply) {
+                messages.push({ role: 'assistant', content: msg.ai_response.conversational_reply });
+            }
+        }
+        messages.push({ role: 'user', content: userMessage });
+
+        const body = {
+            model: this.model,
+            messages: messages,
+            temperature: 0.8,
+            max_tokens: 4096,
+            response_format: { type: 'json_object' }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Cerebras API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.choices || !data.choices[0]?.message?.content) {
+            throw new Error('Invalid response from Cerebras API');
+        }
+
+        return this._parseResponse(data.choices[0].message.content);
+    }
+
+    _parseResponse(text) {
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (match) return JSON.parse(match[1].trim());
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            throw new Error('Could not parse AI response as JSON');
+        }
+    }
+}
+
+
 class ProviderFactory {
     static create(providerName, apiKey, model) {
         switch (providerName) {
@@ -269,6 +400,10 @@ class ProviderFactory {
                 return new GeminiProvider(apiKey, model);
             case 'groq':
                 return new GroqProvider(apiKey, model);
+            case 'openrouter':
+                return new OpenRouterProvider(apiKey, model);
+            case 'cerebras':
+                return new CerebrasProvider(apiKey, model);
             default:
                 throw new Error(`Unknown provider: ${providerName}`);
         }

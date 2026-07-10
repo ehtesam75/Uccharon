@@ -49,6 +49,9 @@ def signup_view(request):
     ai_provider = data.get('ai_provider', 'gemini')
     gemini_api_key = data.get('gemini_api_key', '').strip()
     groq_api_key = data.get('groq_api_key', '').strip()
+    openrouter_api_key = data.get('openrouter_api_key', '').strip()
+    cerebras_api_key = data.get('cerebras_api_key', '').strip()
+    cohere_api_key = data.get('cohere_api_key', '').strip()
 
     if not username or not email or not password:
         return JsonResponse({'error': 'All fields are required.'}, status=400)
@@ -70,11 +73,20 @@ def signup_view(request):
         return JsonResponse({'error': 'A Gemini API key is required.'}, status=400)
     if ai_provider == 'groq' and not groq_api_key:
         return JsonResponse({'error': 'A Groq API key is required.'}, status=400)
+    if ai_provider == 'openrouter' and not openrouter_api_key:
+        return JsonResponse({'error': 'An OpenRouter API key is required.'}, status=400)
+    if ai_provider == 'cerebras' and not cerebras_api_key:
+        return JsonResponse({'error': 'A Cerebras API key is required.'}, status=400)
+    if ai_provider == 'cohere' and not cohere_api_key:
+        return JsonResponse({'error': 'A Cohere API key is required.'}, status=400)
 
     user = User.objects.create_user(username=username, email=email, password=password)
     user.profile.ai_provider = ai_provider
     user.profile.gemini_api_key = gemini_api_key if ai_provider == 'gemini' else ''
     user.profile.groq_api_key = groq_api_key if ai_provider == 'groq' else ''
+    user.profile.openrouter_api_key = openrouter_api_key if ai_provider == 'openrouter' else ''
+    user.profile.cerebras_api_key = cerebras_api_key if ai_provider == 'cerebras' else ''
+    user.profile.cohere_api_key = cohere_api_key if ai_provider == 'cohere' else ''
     
     # Set daily word goal if provided
     daily_word_goal = data.get('daily_word_goal')
@@ -154,6 +166,8 @@ def current_user_view(request):
                 'ai_provider': profile.ai_provider,
                 'gemini_api_key': profile.gemini_api_key,
                 'groq_api_key': profile.groq_api_key,
+                'openrouter_api_key': profile.openrouter_api_key,
+                'cerebras_api_key': profile.cerebras_api_key,
                 'daily_word_goal': profile.daily_word_goal,
             }
         })
@@ -175,6 +189,8 @@ def settings_view(request):
             'ai_provider': profile.ai_provider,
             'gemini_api_key': profile.gemini_api_key,
             'groq_api_key': profile.groq_api_key,
+            'openrouter_api_key': profile.openrouter_api_key,
+            'cerebras_api_key': profile.cerebras_api_key,
             'daily_word_goal': profile.daily_word_goal,
         })
 
@@ -187,6 +203,10 @@ def settings_view(request):
         profile.gemini_api_key = data['gemini_api_key']
     if 'groq_api_key' in data:
         profile.groq_api_key = data['groq_api_key']
+    if 'openrouter_api_key' in data:
+        profile.openrouter_api_key = data['openrouter_api_key']
+    if 'cerebras_api_key' in data:
+        profile.cerebras_api_key = data['cerebras_api_key']
     if 'daily_word_goal' in data:
         new_goal = int(data['daily_word_goal'])
         if profile.daily_word_goal != new_goal:

@@ -10,6 +10,8 @@ class UserProfile(models.Model):
     PROVIDER_CHOICES = [
         ('gemini', 'Gemini'),
         ('groq', 'Groq'),
+        ('openrouter', 'OpenRouter'),
+        ('cerebras', 'Cerebras'),
     ]
     THEME_CHOICES = [
         ('dark', 'Dark'),
@@ -21,6 +23,8 @@ class UserProfile(models.Model):
     ai_provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default='gemini')
     gemini_api_key = models.CharField(max_length=255, blank=True, default='')
     groq_api_key = models.CharField(max_length=255, blank=True, default='')
+    openrouter_api_key = models.CharField(max_length=255, blank=True, default='')
+    cerebras_api_key = models.CharField(max_length=255, blank=True, default='')
     daily_word_goal = models.IntegerField(default=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
