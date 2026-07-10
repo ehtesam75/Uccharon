@@ -6,6 +6,7 @@
 /* ─── CSS Custom Properties (Dark Theme — Default) ──────── */
 :root,
 [data-theme="dark"] {
+    color-scheme: dark;
     --bg-primary: #0a0a1a;
     --bg-secondary: #12122a;
     --bg-tertiary: #1a1a3e;
@@ -526,7 +527,7 @@ select {
     gap: 0;
 }
 
-.signup-note-panel p + p {
+.signup-note-panel p+p {
     margin-top: 6px;
 }
 
@@ -551,7 +552,7 @@ select {
     padding-left: 20px;
 }
 
-.signup-key-guide li + li {
+.signup-key-guide li+li {
     margin-top: 8px;
 }
 
@@ -1252,8 +1253,13 @@ select {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* ─── Messages ───────────────────────────────────────────── */
@@ -2313,7 +2319,7 @@ select {
     justify-content: space-between;
     gap: 20px;
     animation: dashFadeIn 0.5s ease-out;
-    
+
     position: sticky;
     top: 0;
     z-index: 10;
@@ -2354,7 +2360,58 @@ select {
     margin-top: 4px;
 }
 
-/* ─── Time Range Tabs ───────────────────────────────────── */
+/* ─── Time Range Tabs & Filters ───────────────────────────────────── */
+
+.dashboard-filters {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dashboard-filter-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dashboard-filter-select {
+    appearance: none;
+    background: var(--bg-glass);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    padding: 6px 32px 6px 14px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    outline: none;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 140px;
+    max-width: 220px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+
+.dashboard-filter-select:hover,
+.dashboard-filter-select:focus {
+    border-color: var(--accent-primary);
+}
+
+.dashboard-filter-select option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.dashboard-filter-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-tertiary);
+}
 
 .time-range-tabs {
     display: flex;
@@ -2686,6 +2743,10 @@ select {
    ═══════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
+    .dashboard-filter-wrapper {
+        display: none;
+    }
+
     .sidebar {
         position: fixed;
         left: -100%;
@@ -3159,4 +3220,3 @@ select {
     color: var(--text-tertiary);
     box-shadow: none;
 }
-

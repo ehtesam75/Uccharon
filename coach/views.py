@@ -433,6 +433,8 @@ def stats_view(request):
     """Get user's performance statistics with optional time-range filtering."""
     range_param = request.GET.get('range', 'all')  # daily, weekly, monthly, all
 
+    model_param = request.GET.get('model', 'all')
+
     now_local = timezone.localtime(timezone.now())
     today_start = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -445,18 +447,25 @@ def stats_view(request):
     else:
         start_date = None
 
+    # Get all unique models used by this user (unfiltered by time or model)
+    all_used_models_qs = Message.objects.filter(
+        conversation__user=request.user,
+        counts_for_stats=True
+    ).exclude(ai_model_name='').values_list('ai_model_name', flat=True).distinct()
+    all_used_models = list(all_used_models_qs)
+
     # For total messages/conversations, only count messages with valid English input
     base_all_msgs = Message.objects.filter(
         conversation__user=request.user,
         counts_for_stats=True,
     )
     if start_date:
-        filtered_all_msgs = base_all_msgs.filter(created_at__gte=start_date)
-    else:
-        filtered_all_msgs = base_all_msgs
+        base_all_msgs = base_all_msgs.filter(created_at__gte=start_date)
+    if model_param != 'all':
+        base_all_msgs = base_all_msgs.filter(ai_model_name=model_param)
         
-    total_messages = filtered_all_msgs.count()
-    total_conversations = filtered_all_msgs.values('conversation').distinct().count()
+    total_messages = base_all_msgs.count()
+    total_conversations = base_all_msgs.values('conversation').distinct().count()
 
     # For scores, only look at rated messages
     base_qs = Message.objects.filter(
@@ -464,12 +473,15 @@ def stats_view(request):
         score_grammar__isnull=False
     )
     if start_date:
-        filtered_qs = base_qs.filter(created_at__gte=start_date).order_by('created_at')
-    else:
-        filtered_qs = base_qs.order_by('created_at')
+        base_qs = base_qs.filter(created_at__gte=start_date)
+    if model_param != 'all':
+        base_qs = base_qs.filter(ai_model_name=model_param)
+        
+    filtered_qs = base_qs.order_by('created_at')
 
     if not filtered_qs.exists():
         return JsonResponse({
+            'available_models': all_used_models,
             'total_messages': total_messages,
             'total_conversations': total_conversations,
             'scores': [],
@@ -610,6 +622,7 @@ def stats_view(request):
         check_date -= timedelta(days=1)
 
     return JsonResponse({
+        'available_models': all_used_models,
         'total_messages': total_messages,
         'total_conversations': total_conversations,
         'scores': scores_list,

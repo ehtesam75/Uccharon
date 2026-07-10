@@ -44,10 +44,36 @@
             originalTitle: ''
         },
         dashboardRange: 'all',
+        dashboardModel: 'all',
         radarChart: null,
         lineChart: null,
         learningHistory: null,
         learningHistoryFilter: 'all'
+    };
+
+    const MODEL_DISPLAY_NAMES = {
+        'gemini-2.5-pro': 'Gemini 2.5 Pro',
+        'gemini-2.5-flash': 'Gemini 2.5 Flash',
+        'gemini-2.0-pro': 'Gemini 2.0 Pro',
+        'gemini-2.0-flash': 'Gemini 2.0 Flash',
+        'gemini-1.5-pro': 'Gemini 1.5 Pro',
+        'gemini-1.5-flash': 'Gemini 1.5 Flash',
+        'gemini-1.5-flash-8b': 'Gemini 1.5 Flash 8B',
+        'llama-3.3-70b-versatile': 'Llama 3.3 70B',
+        'llama-3.1-8b-instant': 'Llama 3.1 8B',
+        'deepseek-r1-distill-llama-70b': 'DeepSeek R1 Llama 70B',
+        'mixtral-8x7b-32768': 'Mixtral 8x7B',
+        'openrouter/free': 'Free Models Router',
+        'google/gemma-4-31b-it:free': 'Google: Gemma 4 31B',
+        'nvidia/nemotron-3-super-120b-a12b:free': 'NVIDIA: Nemotron 3 120B',
+        'qwen/qwen3-next-80b-a3b-instruct:free': 'Qwen: Qwen3 Next 80B',
+        'openai/gpt-oss-120b:free': 'OpenAI: GPT OSS 120B',
+        'liquid/lfm-2.5-1.2b-thinking:free': 'LiquidAI: LFM 2.5 1.2B',
+        'poolside/laguna-xs-2.1:free': 'Poolside: Laguna XS 2.1',
+        'cohere/north-mini-code:free': 'Cohere: North Mini Code',
+        'gpt-oss-120b': 'OpenAI GPT OSS 120B',
+        'zai-glm-4.7': 'Z.ai GLM 4.7',
+        'gemma-4-31b': 'Gemma 4 31B'
     };
 
     // ═══════════════════════════════════════════════════════
@@ -142,6 +168,7 @@
         statsBtn: $('#stats-btn'),
         dashboardScreen: $('#dashboard-screen'),
         timeRangeTabs: $('#time-range-tabs'),
+        dashboardModelFilter: $('#model-filter'),
         dashLoading: $('#dashboard-loading'),
         dashEmpty: $('#dashboard-empty'),
         dashData: $('#dashboard-data'),
@@ -1330,7 +1357,8 @@
                 gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter', cerebras: 'Cerebras'
             };
             const displayProvider = PROVIDER_DISPLAY[providerName] || providerName;
-            const parts = [displayProvider, modelName].filter(Boolean);
+            const displayModel = MODEL_DISPLAY_NAMES[modelName] || modelName;
+            const parts = [displayProvider, displayModel].filter(Boolean);
             if (parts.length) {
                 const label = document.createElement('div');
                 label.className = 'ai-model-label';
@@ -2085,11 +2113,12 @@
         state.currentConversation = null;
         document.querySelectorAll('.convo-item').forEach(el => el.classList.remove('active'));
 
-        await loadDashboardData(state.dashboardRange);
+        await loadDashboardData(state.dashboardRange, state.dashboardModel);
     }
 
-    async function loadDashboardData(range) {
+    async function loadDashboardData(range, model = 'all') {
         state.dashboardRange = range;
+        state.dashboardModel = model;
 
         // Update tabs UI
         document.querySelectorAll('.time-tab').forEach(tab => {
@@ -2101,7 +2130,19 @@
         DOM.dashData.style.display = 'none';
 
         try {
-            const data = await api(`/api/stats/?range=${range}`);
+            const data = await api(`/api/stats/?range=${range}&model=${model}`);
+
+            if (data.available_models) {
+                const currentVal = DOM.dashboardModelFilter.value;
+                
+                let optionsHtml = '<option value="all">All Models</option>';
+                data.available_models.forEach(mName => {
+                    const displayName = MODEL_DISPLAY_NAMES[mName] || mName;
+                    optionsHtml += `<option value="${escapeHtml(mName)}">${escapeHtml(displayName)}</option>`;
+                });
+                DOM.dashboardModelFilter.innerHTML = optionsHtml;
+                DOM.dashboardModelFilter.value = currentVal;
+            }
 
             if (data.total_messages === 0) {
                 DOM.dashLoading.style.display = 'none';
@@ -2366,9 +2407,15 @@
 
         DOM.timeRangeTabs.addEventListener('click', (e) => {
             if (e.target.classList.contains('time-tab')) {
-                loadDashboardData(e.target.dataset.range);
+                loadDashboardData(e.target.dataset.range, state.dashboardModel);
             }
         });
+
+        if (DOM.dashboardModelFilter) {
+            DOM.dashboardModelFilter.addEventListener('change', (e) => {
+                loadDashboardData(state.dashboardRange, e.target.value);
+            });
+        }
     }
 
     // ═══════════════════════════════════════════════════════

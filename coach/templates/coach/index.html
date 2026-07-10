@@ -539,11 +539,19 @@
                             </h2>
                             <p class="dashboard-subtitle">Track your learning journey and performance trends</p>
                         </div>
-                        <div class="time-range-tabs" id="time-range-tabs">
-                            <button class="time-tab" data-range="daily">Today</button>
-                            <button class="time-tab" data-range="weekly">Week</button>
-                            <button class="time-tab" data-range="monthly">Month</button>
-                            <button class="time-tab active" data-range="all">All Time</button>
+                        <div class="dashboard-filters">
+                            <div class="dashboard-filter-wrapper">
+                                <select id="model-filter" class="dashboard-filter-select">
+                                    <option value="all">All Models</option>
+                                </select>
+                                <svg class="dashboard-filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                            <div class="time-range-tabs" id="time-range-tabs">
+                                <button class="time-tab" data-range="daily">Today</button>
+                                <button class="time-tab" data-range="weekly">Week</button>
+                                <button class="time-tab" data-range="monthly">Month</button>
+                                <button class="time-tab active" data-range="all">All Time</button>
+                            </div>
                         </div>
                     </div>
 
@@ -853,7 +861,6 @@
                         <select id="groq-model-select" class="settings-select">
                             <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Balanced)</option>
                             <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
-                            <option value="qwen-2.5-32b">Qwen 2.5 32B (Excellent)</option>
                             <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 Llama 70B (Reasoning, Can be Slow)</option>
                             <option value="mixtral-8x7b-32768">Mixtral 8x7B (Older)</option>
                         </select>
