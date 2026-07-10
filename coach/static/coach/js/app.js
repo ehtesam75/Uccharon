@@ -1471,7 +1471,7 @@
                     element = child;
                     break;
                 } else if (child.classList.contains('message-group')) {
-                    element = child.querySelector('.user-message') || child;
+                    element = child;
                     break;
                 }
             }

@@ -2609,6 +2609,42 @@ select {
     }
 }
 
+/* ═══════════════ LEARNING HISTORY ═══════════════ */
+
+.history-grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.history-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    animation: dashCardSlideUp 0.5s ease-out both;
+}
+
+.history-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--shadow-color);
+}
+
+.history-card .grammar-item {
+    border-left: none;
+    padding-left: 0;
+    background: transparent;
+}
+
+.history-date {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════ */
@@ -3087,39 +3123,4 @@ select {
     color: var(--text-tertiary);
     box-shadow: none;
 }
-
-/* ═══════════════ LEARNING HISTORY ═══════════════ */
-
-.history-grid {
-    display: grid;
-    gap: 14px;
-    margin-top: 24px;
-}
-
-.history-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px var(--shadow-color);
-    animation: dashCardSlideUp 0.5s ease-out both;
-}
-
-.history-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px var(--shadow-color);
-}
-
-.history-card .grammar-item {
-    border-left: none;
-    padding-left: 0;
-    background: transparent;
-}
-
-.history-date {
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
+
