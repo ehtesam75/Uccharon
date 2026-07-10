@@ -580,10 +580,12 @@
                 showApp();
             } else {
                 DOM.authScreen.style.display = 'flex';
+                hideGlobalSplash();
             }
         } catch (e) {
             // Not logged in, show auth screen
             DOM.authScreen.style.display = 'flex';
+            hideGlobalSplash();
         }
     }
 
@@ -616,10 +618,19 @@
     function showApp() {
         DOM.authScreen.style.display = 'none';
         DOM.app.style.display = 'flex';
+        hideGlobalSplash();
         updateUserInfo();
         applyTheme(state.settings.theme);
         applySettingsToUI();
         updateScrollToBottomButton();
+    }
+
+    function hideGlobalSplash() {
+        const splash = document.getElementById('global-splash');
+        if (splash && !splash.classList.contains('hidden')) {
+            splash.classList.add('hidden');
+            setTimeout(() => splash.remove(), 400); // Remove from DOM after fade out
+        }
     }
 
     async function loadUserData(skipAutoSelect = false) {

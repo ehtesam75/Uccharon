@@ -27,10 +27,48 @@
         html[data-theme="light"] body {
             background-color: #f4f5fa;
         }
+        
+        .global-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100dvh;
+            background-color: #0a0a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        html[data-theme="light"] .global-splash {
+            background-color: #f4f5fa;
+        }
+
+        .global-splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .global-splash-content img {
+            animation: splashPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes splashPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.9); opacity: 0.8; }
+        }
     </style>
 </head>
 
 <body>
+    <!-- ═══════════════ GLOBAL SPLASH ═══════════════ -->
+    <div id="global-splash" class="global-splash">
+        <div class="global-splash-content">
+            <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon" width="80" height="80">
+        </div>
+    </div>
 
     <!-- ═══════════════ AUTH SCREEN ═══════════════ -->
     <div id="auth-screen" class="auth-screen" style="display: none;">
