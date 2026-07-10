@@ -25,4 +25,7 @@ urlpatterns = [
 
     # Stats API
     path('api/stats/', views.stats_view, name='api-stats'),
+
+    # Learning History API
+    path('api/learning-history/', views.learning_history_view, name='api-learning-history'),
 ]

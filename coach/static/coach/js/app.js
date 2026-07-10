@@ -41,7 +41,9 @@
         },
         dashboardRange: 'all',
         radarChart: null,
-        lineChart: null
+        lineChart: null,
+        learningHistory: null,
+        learningHistoryFilter: 'all'
     };
 
     // ═══════════════════════════════════════════════════════
@@ -143,6 +145,15 @@
         lineChartCtx: $('#line-chart'),
         dashAvgScores: $('#dash-avg-scores'),
         dashBestScores: $('#dash-best-scores'),
+
+        // Learning History
+        learningHistoryBtn: $('#learning-history-btn'),
+        learningHistoryScreen: $('#learning-history-screen'),
+        historyFilterTabs: $('#history-filter-tabs'),
+        historyLoading: $('#history-loading'),
+        historyEmpty: $('#history-empty'),
+        learningHistoryData: $('#learning-history-data'),
+        learningHistoryList: $('#learning-history-list'),
 
         // Onboarding Goal Modal
         goalModalOverlay: $('#goal-modal-overlay'),
@@ -574,6 +585,7 @@
             clearPersistedConversationId();
             DOM.app.style.display = 'none';
             DOM.dashboardScreen.style.display = 'none';
+            DOM.learningHistoryScreen.style.display = 'none';
             DOM.authScreen.style.display = 'flex';
         } catch (err) {
             showToast('Logout failed', 'error');
@@ -740,6 +752,7 @@
 
         DOM.welcomeScreen.style.display = 'none';
         DOM.dashboardScreen.style.display = 'none';
+        DOM.learningHistoryScreen.style.display = 'none';
         DOM.chatArea.style.display = 'flex';
         DOM.chatTitle.textContent = convo.title;
 
@@ -972,6 +985,7 @@
             } else {
                 DOM.chatArea.style.display = 'none';
                 DOM.dashboardScreen.style.display = 'none';
+                DOM.learningHistoryScreen.style.display = 'none';
                 DOM.welcomeScreen.style.display = 'flex';
                 renderConversationList();
             }
@@ -1953,6 +1967,7 @@
     async function showDashboard() {
         DOM.welcomeScreen.style.display = 'none';
         DOM.chatArea.style.display = 'none';
+        DOM.learningHistoryScreen.style.display = 'none';
         DOM.dashboardScreen.style.display = 'flex';
 
         // Close mobile sidebar
@@ -2241,6 +2256,131 @@
     }
 
     // ═══════════════════════════════════════════════════════
+    // LEARNING HISTORY
+    // ═══════════════════════════════════════════════════════
+
+    async function showLearningHistory() {
+        DOM.welcomeScreen.style.display = 'none';
+        DOM.chatArea.style.display = 'none';
+        DOM.dashboardScreen.style.display = 'none';
+        DOM.learningHistoryScreen.style.display = 'flex';
+
+        // Close mobile sidebar
+        DOM.sidebar.classList.remove('mobile-open');
+        DOM.sidebarOverlay.classList.remove('active');
+
+        // Clear active conversation selection
+        state.currentConversation = null;
+        document.querySelectorAll('.convo-item').forEach(el => el.classList.remove('active'));
+
+        await loadLearningHistoryData();
+    }
+
+    async function loadLearningHistoryData() {
+        DOM.historyLoading.style.display = 'flex';
+        DOM.historyEmpty.style.display = 'none';
+        DOM.learningHistoryData.style.display = 'none';
+
+        try {
+            const data = await api('/api/learning-history/');
+            state.learningHistory = data.items || [];
+            
+            if (state.learningHistory.length === 0) {
+                DOM.historyLoading.style.display = 'none';
+                DOM.historyEmpty.style.display = 'block';
+                return;
+            }
+
+            renderLearningHistory();
+            DOM.historyLoading.style.display = 'none';
+            DOM.learningHistoryData.style.display = 'block';
+        } catch (err) {
+            console.error(err);
+            DOM.historyLoading.style.display = 'none';
+            showToast('Failed to load learning history', 'error');
+        }
+    }
+
+    function renderLearningHistory() {
+        const filter = state.learningHistoryFilter;
+        let items = state.learningHistory;
+        
+        if (filter !== 'all') {
+            items = items.filter(item => item.type === filter);
+        }
+        
+        DOM.learningHistoryList.innerHTML = '';
+        
+        if (items.length === 0) {
+            DOM.learningHistoryList.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-tertiary); padding: 40px;">No ${filter} history found.</div>`;
+            return;
+        }
+        
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        }
+        
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+            
+            let icon = '';
+            let title = '';
+            
+            if (item.type === 'grammar') { icon = '✍️'; title = 'Grammar'; }
+            else if (item.type === 'sentence') { icon = '✨'; title = 'Sentence'; }
+            else if (item.type === 'vocabulary') { icon = '📚'; title = 'Vocabulary'; }
+            else if (item.type === 'pronunciation') { icon = '🗣️'; title = 'Pronunciation'; }
+            
+            let html = `
+                <div class="history-card-header">
+                    <div class="history-type-badge">${icon} ${title}</div>
+                    <div class="history-date">${timeAgo(item.date)}</div>
+                </div>
+                <div class="history-content">
+                    <div class="history-original">${escapeHtml(item.original)}</div>
+                    <div class="history-suggestion">${escapeHtml(item.suggestion)}</div>
+                    ${item.explanation ? `<div class="history-explanation">${escapeHtml(item.explanation)}</div>` : ''}
+            `;
+            
+            if (item.type === 'vocabulary' && item.synonyms && item.synonyms.length > 0) {
+                const synonymsHtml = item.synonyms.map(syn => `<span class="history-synonym-tag">${escapeHtml(syn)}</span>`).join('');
+                html += `<div class="history-synonyms">${synonymsHtml}</div>`;
+            }
+            
+            html += `</div>`;
+            card.innerHTML = html;
+            DOM.learningHistoryList.appendChild(card);
+        });
+    }
+
+    function initLearningHistory() {
+        if (DOM.learningHistoryBtn) {
+            DOM.learningHistoryBtn.addEventListener('click', showLearningHistory);
+        }
+        
+        if (DOM.historyFilterTabs) {
+            DOM.historyFilterTabs.addEventListener('click', (e) => {
+                if (e.target.classList.contains('time-tab')) {
+                    document.querySelectorAll('#history-filter-tabs .time-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    state.learningHistoryFilter = e.target.dataset.filter;
+                    renderLearningHistory();
+                }
+            });
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
     // SIDEBAR
     // ═══════════════════════════════════════════════════════
 
@@ -2320,6 +2460,7 @@
         initSettings();
         initSidebar();
         initDashboard();
+        initLearningHistory();
 
         updateScrollToBottomButton();
 

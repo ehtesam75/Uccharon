@@ -291,6 +291,13 @@
                             <path d="M18 20V10M12 20V4M6 20v-6" />
                         </svg>
                     </button>
+                    <button id="learning-history-btn" class="sidebar-action-btn" title="Learning History">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </button>
                     <button id="theme-toggle-btn" class="sidebar-action-btn" title="Toggle Theme">
                         <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -559,6 +566,56 @@
                                     <!-- Populated by JS -->
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ LEARNING HISTORY SCREEN ═══════════════ -->
+            <div id="learning-history-screen" class="dashboard-screen" style="display:none">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div class="dashboard-title-group">
+                            <h2 class="dashboard-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#dashGrad)"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                                Learning History
+                            </h2>
+                            <p class="dashboard-subtitle">Review all your grammar, vocabulary, and pronunciation corrections.</p>
+                        </div>
+                        <div class="time-range-tabs" id="history-filter-tabs">
+                            <button class="time-tab active" data-filter="all">All</button>
+                            <button class="time-tab" data-filter="grammar">Grammar</button>
+                            <button class="time-tab" data-filter="sentence">Sentences</button>
+                            <button class="time-tab" data-filter="vocabulary">Vocabulary</button>
+                            <button class="time-tab" data-filter="pronunciation">Pronunciation</button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="history-loading" class="dashboard-loading">
+                        <div class="dash-loader">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <p>Loading your history...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="history-empty" class="dashboard-empty" style="display:none">
+                        <div class="dashboard-empty-icon">📖</div>
+                        <h3>No learning history yet.</h3>
+                        <p>Start chatting and make some mistakes to get feedback!</p>
+                    </div>
+
+                    <!-- History Content -->
+                    <div id="learning-history-data" class="dashboard-data" style="display:none">
+                        <div class="history-grid" id="learning-history-list">
+                            <!-- Populated by JS -->
                         </div>
                     </div>
                 </div>

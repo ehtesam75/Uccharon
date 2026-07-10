@@ -568,6 +568,64 @@ def stats_view(request):
     })
 
 
+@login_required
+@require_http_methods(["GET"])
+def learning_history_view(request):
+    """Get user's learning history across all conversations."""
+    msgs = Message.objects.filter(
+        conversation__user=request.user,
+        counts_for_stats=True,
+    ).order_by('-created_at')
+
+    history_items = []
+    
+    for m in msgs:
+        ai_resp = m.ai_response
+        if not isinstance(ai_resp, dict):
+            continue
+            
+        local_date = timezone.localtime(m.created_at).isoformat()
+        
+        for gc in ai_resp.get('grammar_corrections', []):
+            history_items.append({
+                'type': 'grammar',
+                'date': local_date,
+                'original': gc.get('original', ''),
+                'suggestion': gc.get('corrected', ''),
+                'explanation': gc.get('explanation', ''),
+            })
+            
+        for si in ai_resp.get('sentence_improvements', []):
+            history_items.append({
+                'type': 'sentence',
+                'date': local_date,
+                'original': si.get('original', ''),
+                'suggestion': si.get('improved', ''),
+                'explanation': si.get('explanation', ''),
+            })
+            
+        for vi in ai_resp.get('vocabulary_improvements', []):
+            history_items.append({
+                'type': 'vocabulary',
+                'date': local_date,
+                'original': vi.get('original', ''),
+                'suggestion': vi.get('suggestion', ''),
+                'explanation': vi.get('context', ''),
+                'synonyms': vi.get('synonyms', [])
+            })
+            
+        for pg in ai_resp.get('pronunciation_guidance', []):
+            history_items.append({
+                'type': 'pronunciation',
+                'date': local_date,
+                'original': pg.get('word', ''),
+                'suggestion': pg.get('phonetic', '') or pg.get('spelling', ''),
+                'explanation': pg.get('tip', ''),
+            })
+
+    return JsonResponse({'items': history_items})
+
+
 # ─── Page View ───────────────────────────────────────────────
 
 def index_view(request):
