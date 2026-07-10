@@ -105,6 +105,7 @@
         chatArea: $('#chat-area'),
         chatTitle: $('#chat-title'),
         chatMessages: $('#chat-messages'),
+        chatLoading: $('#chat-loading'),
         chatInput: $('#chat-input'),
         sendBtn: $('#send-btn'),
         scrollToBottomBtn: $('#scroll-to-bottom-btn'),
@@ -775,6 +776,8 @@
         if (loadMessages) {
             state.pendingConversationLoads.add(convo.id);
             state.currentMessages = [];
+            DOM.chatLoading.style.display = 'flex';
+            DOM.chatMessages.style.visibility = 'hidden';
             renderMessages({ showEmptyState: false });
             renderConversationList();
             updateScrollToBottomButton();
@@ -808,6 +811,8 @@
                     }
 
                     renderMessages();
+                    DOM.chatLoading.style.display = 'none';
+                    DOM.chatMessages.style.visibility = 'visible';
                     renderConversationList();
                     updateScrollToBottomButton();
 
@@ -820,6 +825,8 @@
                     if (loadToken !== state.conversationLoadToken || state.currentConversation?.id !== convo.id) return;
                     state.currentMessages = [];
                     renderMessages();
+                    DOM.chatLoading.style.display = 'none';
+                    DOM.chatMessages.style.visibility = 'visible';
                     renderConversationList();
                     updateScrollToBottomButton();
                 } finally {

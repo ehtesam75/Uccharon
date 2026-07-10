@@ -14,7 +14,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="manifest" href="{% static 'coach/manifest.json' %}">
-    <meta name="theme-color" content="#12122A">
+    <meta name="theme-color" content="#0a0a1a">
     <link rel="icon" type="image/x-icon" href="{% static 'coach/icon/favicon.ico' %}">
     <link rel="apple-touch-icon" href="{% static 'coach/icon/apple-touch-icon.png' %}">
     <link rel="stylesheet" href="{% static 'coach/css/style.css' %}">
@@ -425,6 +425,15 @@
                             </svg>
                         </button>
                     </div>
+                </div>
+
+                <div id="chat-loading" class="dashboard-loading chat-loading-overlay" style="display:none">
+                    <div class="dash-loader">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <p>Loading your last chat...</p>
                 </div>
 
                 <div class="chat-messages" id="chat-messages">

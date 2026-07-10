@@ -1130,6 +1130,19 @@ select {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    position: relative;
+}
+
+.chat-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-primary);
+    z-index: 10;
+    margin: 0;
+    padding: 0;
 }
 
 .chat-header {
