@@ -2334,9 +2334,10 @@
             return `${days}d ago`;
         }
         
-        items.forEach(item => {
+        items.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'history-card';
+            card.style.animationDelay = `${index * 0.05}s`;
             
             let icon = '';
             let title = '';
@@ -2377,6 +2378,11 @@
                 bodyHtml = `
                     <div class="pronunciation-item">
                         <span class="pronunciation-word">${escapeHtml(item.original)}</span>
+                        <button class="vocab-speak-btn" data-word="${escapeHtml(item.original)}" title="Listen to pronunciation">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                            </svg>
+                        </button>
                         <span class="pronunciation-phonetic">${escapeHtml(item.suggestion)}</span>
                         ${item.explanation ? `<div class="pronunciation-tip">${escapeHtml(item.explanation)}</div>` : ''}
                     </div>`;
@@ -2385,8 +2391,7 @@
             card.innerHTML = `
                 <div class="feedback-section" style="border-bottom: none;">
                     <div class="feedback-header" style="cursor: default;">
-                        <div class="feedback-icon">${icon}</div>
-                        <div class="feedback-title">${title}</div>
+                        <div class="feedback-icon">${icon}</div><div class="feedback-title">${title}</div>
                         <div class="history-date">${timeAgo(item.date)}</div>
                     </div>
                     <div class="feedback-body">${bodyHtml}</div>
@@ -2496,8 +2501,8 @@
 
         updateScrollToBottomButton();
 
-        // Init Speech Synthesis for Vocabulary
-        document.getElementById('chat-messages').addEventListener('click', (e) => {
+        // Init Speech Synthesis for Vocabulary and Pronunciation
+        document.body.addEventListener('click', (e) => {
             const speakBtn = e.target.closest('.vocab-speak-btn');
             if (speakBtn) {
                 const word = speakBtn.getAttribute('data-word');

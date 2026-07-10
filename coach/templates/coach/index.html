@@ -19,8 +19,14 @@
     <link rel="apple-touch-icon" href="{% static 'coach/icon/apple-touch-icon.png' %}">
     <link rel="stylesheet" href="{% static 'coach/css/style.css' %}">
     <style>
-        body { background-color: #0a0a1a; margin: 0; }
-        html[data-theme="light"] body { background-color: #f4f5fa; }
+        body {
+            background-color: #0a0a1a;
+            margin: 0;
+        }
+
+        html[data-theme="light"] body {
+            background-color: #f4f5fa;
+        }
     </style>
 </head>
 
@@ -36,7 +42,8 @@
         <div class="auth-container">
             <div class="auth-brand" id="auth-brand">
                 <div class="auth-logo">
-                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="48" height="48" class="logo-img">
+                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="48"
+                        height="48" class="logo-img">
                 </div>
                 <h1 class="auth-title">Uccharon</h1>
                 <p class="auth-subtitle">Your AI English Speaking Coach</p>
@@ -97,16 +104,18 @@
                         <div class="signup-grid signup-grid-single">
                             <div class="form-group">
                                 <label for="signup-username">Username</label>
-                                <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+                                <input type="text" id="signup-username" placeholder="Choose a username"
+                                    autocomplete="username">
                             </div>
                             <div class="form-group">
                                 <label for="signup-email">Email</label>
-                                <input type="email" id="signup-email" placeholder="Enter your email" autocomplete="email">
+                                <input type="email" id="signup-email" placeholder="Enter your email"
+                                    autocomplete="email">
                             </div>
                             <div class="form-group">
                                 <label for="signup-password">Password</label>
-                                <input type="password" id="signup-password" placeholder="Create a password (min 6 chars)"
-                                    autocomplete="new-password">
+                                <input type="password" id="signup-password"
+                                    placeholder="Create a password (min 6 chars)" autocomplete="new-password">
                             </div>
                             <div class="form-group" style="margin-bottom: 12px;">
                                 <label for="signup-confirm-password">Confirm Password</label>
@@ -117,8 +126,8 @@
                     </div>
                     <button id="signup-next-btn" class="auth-btn primary-btn" disabled>
                         <span>Next Step</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>
                     </button>
@@ -128,7 +137,8 @@
                 <!-- Step 2: AI API Key -->
                 <div id="signup-step-2" style="display:none">
                     <button type="button" class="back-btn" id="signup-back-btn" aria-label="Back to Step 1">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                     </button>
@@ -153,10 +163,12 @@
                                     <div class="form-group">
                                         <label for="signup-api-key">API Key</label>
                                         <div class="key-input-wrapper">
-                                            <input type="password" id="signup-api-key" placeholder="Enter your Groq API key" autocomplete="off">
-                                            <button class="toggle-key-vis" data-target="signup-api-key" title="Show/hide key">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round">
+                                            <input type="password" id="signup-api-key"
+                                                placeholder="Enter your Groq API key" autocomplete="off">
+                                            <button class="toggle-key-vis" data-target="signup-api-key"
+                                                title="Show/hide key">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round">
                                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                                     <circle cx="12" cy="12" r="3" />
                                                 </svg>
@@ -168,7 +180,8 @@
                             <div class="signup-key-guide" id="signup-key-guide" style="display:none;">
                                 <p class="signup-key-guide-title">How to get a Groq API key</p>
                                 <ol>
-                                    <li>Go to <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">https://console.groq.com/keys</a></li>
+                                    <li>Go to <a href="https://console.groq.com/keys" target="_blank"
+                                            rel="noopener noreferrer">https://console.groq.com/keys</a></li>
                                     <li>Create or sign in to your account.</li>
                                     <li>Create a new API key.</li>
                                     <li>Enter a name for the key.</li>
@@ -180,8 +193,8 @@
 
                     <button id="signup-step-2-next-btn" class="auth-btn primary-btn" disabled>
                         <span>Next Step</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>
                     </button>
@@ -190,12 +203,14 @@
                 <!-- Step 3: Daily Goal -->
                 <div id="signup-step-3" style="display:none">
                     <button type="button" class="back-btn" id="signup-step-3-back-btn" aria-label="Back to Step 2">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                     </button>
                     <h2 class="auth-card-title">Set Your Daily Goal</h2>
-                    <p class="auth-card-desc">Your daily word goal is the target number of words you want to send to the chat to practice each day.</p>
+                    <p class="auth-card-desc">Your daily word goal is the target number of words you want to send to the
+                        chat to practice each day.</p>
                     <div class="auth-error" id="signup-error-3"></div>
 
                     <div class="goal-selection-container">
@@ -223,8 +238,8 @@
 
                     <button id="signup-btn" class="auth-btn primary-btn" disabled>
                         <span>Create Account</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>
                     </button>
@@ -243,7 +258,8 @@
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand">
-                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="32" height="32" class="logo-img">
+                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="32"
+                        height="32" class="logo-img">
                     <span class="sidebar-title">Uccharon</span>
                 </div>
                 <button id="sidebar-toggle" class="sidebar-toggle-btn" title="Toggle sidebar">
@@ -332,34 +348,41 @@
             <div id="welcome-screen" class="welcome-screen">
                 <div class="welcome-content">
                     <div class="welcome-icon">
-                        <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="80" height="80" class="logo-img" style="filter: drop-shadow(0 4px 12px rgba(var(--accent-primary-rgb), 0.3)); border-radius: 50%;">
+                        <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="80"
+                            height="80" class="logo-img"
+                            style="filter: drop-shadow(0 4px 12px rgba(var(--accent-primary-rgb), 0.3)); border-radius: 50%;">
                     </div>
                     <h2 class="welcome-title">How can I help you practice today?</h2>
-                    <p class="welcome-desc">Start speaking to improve your fluency. I'll provide real-time corrections, better vocabulary, and native-sounding alternatives.</p>
-                    
+                    <p class="welcome-desc">Start speaking to improve your fluency. I'll provide real-time corrections,
+                        better vocabulary, and native-sounding alternatives.</p>
+
                     <div class="welcome-suggestions">
-                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('Let\'s practice a job interview for a software engineer role.')">
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('Let\'s practice a realistic job interview for a software engineer role where you act as the interviewer and ask me technical and behavioral questions.')">
                             <span class="suggestion-icon">💼</span>
                             <div class="suggestion-text">
                                 <h4>Job Interview</h4>
                                 <p>Practice common questions</p>
                             </div>
                         </button>
-                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('I want to talk about my daily routine.')">
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('I want to talk about my daily routine. Help me practice describing my schedule, habits, responsibilities, and activities using natural English expressions.')">
                             <span class="suggestion-icon">🌅</span>
                             <div class="suggestion-text">
                                 <h4>Daily Routine</h4>
                                 <p>Talk about your day</p>
                             </div>
                         </button>
-                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('Can we do a roleplay where I am ordering food at a restaurant?')">
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('Can we do a roleplay where I am ordering food at a restaurant? Act as the waiter and help me practice a realistic conversation from start to finish.')">
                             <span class="suggestion-icon">🍽️</span>
                             <div class="suggestion-text">
                                 <h4>Restaurant</h4>
                                 <p>Order food in English</p>
                             </div>
                         </button>
-                        <button class="suggestion-card" onclick="window.startConversationWithPrompt('Let\'s discuss a movie I watched recently.')">
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('Let\'s discuss a movie I watched recently. Ask me about the story, characters, opinions, and my thoughts while helping me express my ideas naturally.')">
                             <span class="suggestion-icon">🎬</span>
                             <div class="suggestion-text">
                                 <h4>Movie Review</h4>
@@ -383,7 +406,8 @@
                 <div class="chat-header">
                     <div class="chat-header-title">
                         <h2 class="chat-title" id="chat-title" tabindex="0">New Conversation</h2>
-                        <button id="rename-convo-btn" class="icon-btn" title="Rename conversation" aria-label="Rename conversation">
+                        <button id="rename-convo-btn" class="icon-btn" title="Rename conversation"
+                            aria-label="Rename conversation">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 20h9" />
@@ -575,11 +599,6 @@
                     <div class="dashboard-header">
                         <div class="dashboard-title-group">
                             <h2 class="dashboard-title">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#dashGrad)"
-                                    stroke-width="2" stroke-linecap="round">
-                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                                </svg>
                                 Learning History
                             </h2>
                             <p class="dashboard-subtitle">View all corrections in one place</p>
@@ -619,8 +638,10 @@
                 </div>
             </div>
 
-            <button id="scroll-to-bottom-btn" class="scroll-to-bottom-btn" type="button" title="Scroll to latest message" aria-label="Scroll to latest message" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <button id="scroll-to-bottom-btn" class="scroll-to-bottom-btn" type="button"
+                title="Scroll to latest message" aria-label="Scroll to latest message" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 5v12" />
                     <path d="M7 12l5 5 5-5" />
                 </svg>
@@ -643,8 +664,10 @@
                 <div class="settings-section">
                     <h3 style="display: flex; align-items: center; gap: 6px;">
                         Daily Word Target
-                        <span style="cursor: help; color: var(--text-tertiary); display: inline-flex;" title="Set a daily goal for the number of words you want to practice to build a consistent habit.">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <span style="cursor: help; color: var(--text-tertiary); display: inline-flex;"
+                            title="Set a daily goal for the number of words you want to practice to build a consistent habit.">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10" />
                                 <line x1="12" y1="16" x2="12" y2="12" />
                                 <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -901,10 +924,10 @@
     <script src="{% static 'coach/js/app.js' %}"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register("{% static 'coach/sw.js' %}").then(function(registration) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register("{% static 'coach/sw.js' %}").then(function (registration) {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, function(err) {
+                }, function (err) {
                     console.log('ServiceWorker registration failed: ', err);
                 });
             });
