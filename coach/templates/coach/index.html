@@ -136,12 +136,11 @@
                     <p class="auth-card-desc">Choose an AI provider and add the API key for your account.</p>
                     <div class="auth-error" id="signup-error-2"></div>
 
-                    <div class="signup-note-panel signup-note-panel-static signup-note-helper">
-                        <p>Your API key is stored securely and used only for your account.</p>
-                    </div>
-
-                    <div class="signup-step-scroll signup-step-scroll-step2">
-                        <div class="signup-panel signup-provider-panel">
+                    <div class="signup-step-scroll signup-step-scroll-step1 signup-step-scroll-single">
+                        <div class="signup-grid signup-grid-single">
+                            <div class="signup-note-panel signup-note-panel-static signup-note-helper">
+                                <p>Your API key is stored securely and used only for your account.</p>
+                            </div>
                             <div class="form-group">
                                 <label for="signup-ai-provider">AI Chat Provider</label>
                                 <select id="signup-ai-provider" class="settings-select signup-select">
@@ -166,18 +165,17 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="signup-key-guide" id="signup-key-guide" style="display:none;">
+                                <p class="signup-key-guide-title">How to get a Groq API key</p>
+                                <ol>
+                                    <li>Go to <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">https://console.groq.com/keys</a></li>
+                                    <li>Create or sign in to your account.</li>
+                                    <li>Create a new API key.</li>
+                                    <li>Enter a name for the key.</li>
+                                    <li>Copy the generated API key and paste it into the input field.</li>
+                                </ol>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="signup-key-guide">
-                        <p class="signup-key-guide-title">How to get a Groq API key</p>
-                        <ol>
-                            <li>Go to <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">https://console.groq.com/keys</a></li>
-                            <li>Create or sign in to your account.</li>
-                            <li>Create a new API key.</li>
-                            <li>Enter a name for the key.</li>
-                            <li>Copy the generated API key and paste it into the input field.</li>
-                        </ol>
                     </div>
 
                     <button id="signup-step-2-next-btn" class="auth-btn primary-btn" disabled>

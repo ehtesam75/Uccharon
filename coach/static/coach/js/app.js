@@ -84,6 +84,7 @@
         signupAiProvider: $('#signup-ai-provider'),
         signupApiKeySection: $('#signup-api-key-section'),
         signupApiKey: $('#signup-api-key'),
+        signupKeyGuide: $('#signup-key-guide'),
         signupBtn: $('#signup-btn'),
         showSignup: $('#show-signup'),
         showLogin: $('#show-login'),
@@ -477,6 +478,7 @@
         DOM.signupAiProvider.value = '';
         DOM.signupApiKey.value = '';
         DOM.signupApiKeySection.style.display = 'none';
+        if (DOM.signupKeyGuide) DOM.signupKeyGuide.style.display = 'none';
         window.selectedDailyGoal = null;
         $$('.goal-card').forEach(card => card.classList.remove('selected'));
         DOM.signupNextBtn.disabled = true;
@@ -512,6 +514,9 @@
         const provider = DOM.signupAiProvider.value;
         const apiKey = DOM.signupApiKey.value.trim();
         DOM.signupApiKeySection.style.display = provider ? 'block' : 'none';
+        if (DOM.signupKeyGuide) {
+            DOM.signupKeyGuide.style.display = (provider === 'groq') ? 'block' : 'none';
+        }
         DOM.signupStep2NextBtn.disabled = !(provider && isValidSignupApiKey(apiKey));
     }
 
