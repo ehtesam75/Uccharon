@@ -2182,8 +2182,16 @@
 
         // Line Chart
         const lineCtx = document.getElementById('line-chart');
+        const progressDesc = document.getElementById('progress-over-time-desc');
+        if (progressDesc) {
+            progressDesc.textContent = state.dashboardRange === 'daily' ? 'Hourly score trends' : 'Daily score trends';
+        }
+
         if (lineCtx && data.daily_scores) {
             const labels = data.daily_scores.map(d => {
+                if (state.dashboardRange === 'daily') {
+                    return d.date; // E.g., '14:00'
+                }
                 const date = new Date(d.date);
                 return `${date.getMonth() + 1}/${date.getDate()}`;
             });
@@ -2197,6 +2205,7 @@
                         label: 'Overall Score',
                         data: overallData,
                         borderColor: colors.secondary,
+                        spanGaps: true,
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
                             const gradient = ctx.createLinearGradient(0, 0, 0, 200);

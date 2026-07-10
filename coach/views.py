@@ -476,21 +476,32 @@ def stats_view(request):
         'overall': round(sum(s['overall'] or 0 for s in scores_list) / count, 1),
     }
 
-    # Group scores by day for charting (using local_date)
+    # Group scores by day (or hour) for charting
     from collections import defaultdict
     daily_map = defaultdict(lambda: {'grammar': [], 'vocabulary': [], 'naturalness': [], 'confidence': [], 'overall': []})
+    
+    if range_param == 'daily':
+        for i in range(24):
+            bucket = f"{i:02d}:00"
+            daily_map[bucket] # pre-populate 24 hours
+            
     for s in scores_list:
-        day = s['local_date']
+        if range_param == 'daily':
+            dt = timezone.localtime(timezone.datetime.fromisoformat(s['created_at']))
+            bucket = dt.strftime('%H:00')
+        else:
+            bucket = s['local_date']
+            
         for key in ('grammar', 'vocabulary', 'naturalness', 'confidence', 'overall'):
             if s[key] is not None:
-                daily_map[day][key].append(s[key])
+                daily_map[bucket][key].append(s[key])
 
     daily_scores = []
-    for day in sorted(daily_map.keys()):
-        entry = {'date': day}
+    for bucket in sorted(daily_map.keys()):
+        entry = {'date': bucket}
         for key in ('grammar', 'vocabulary', 'naturalness', 'confidence', 'overall'):
-            vals = daily_map[day][key]
-            entry[key] = round(sum(vals) / len(vals), 1) if vals else 0
+            vals = daily_map[bucket][key]
+            entry[key] = round(sum(vals) / len(vals), 1) if vals else None
         daily_scores.append(entry)
 
     # Best scores (all-time, not filtered)
