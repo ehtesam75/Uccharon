@@ -374,11 +374,11 @@ select {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: center;
-    gap: 10px;
+    gap: 42px;
     position: absolute;
-    left: 56px;
-    right: 56px;
-    top: 34px;
+    left: calc(16.666% + 20px);
+    right: calc(16.666% + 20px);
+    top: 32px;
     z-index: 0;
     pointer-events: none;
 }
