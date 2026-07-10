@@ -2258,6 +2258,7 @@ select {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    overflow-x: hidden;
     background: var(--bg-primary);
 }
 
@@ -2756,7 +2757,13 @@ select {
         flex-direction: column;
         align-items: stretch;
         gap: 16px;
-        margin-bottom: 24px;
+        margin: -60px -16px 24px;
+        padding: 60px 16px 24px;
+    }
+
+    .dashboard-header::after {
+        left: 16px;
+        right: 16px;
     }
 
     .dashboard-title-group {
