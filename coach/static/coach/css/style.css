@@ -364,9 +364,7 @@ select {
     gap: 10px;
     margin: -8px 0 18px;
     padding: 14px 0 16px;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    background: transparent;
 }
 
 .signup-progress-track {
