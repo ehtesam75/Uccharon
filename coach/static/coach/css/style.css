@@ -1467,8 +1467,8 @@ select {
     flex-wrap: wrap;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
-    background: var(--bg-glass);
+    padding: 10px 0;
+    background: transparent;
     border-radius: var(--radius-md);
     margin-bottom: 8px;
 }
@@ -1508,8 +1508,8 @@ select {
     flex-wrap: wrap;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
-    background: var(--bg-glass);
+    padding: 10px 0;
+    background: transparent;
     border-radius: var(--radius-md);
     margin-bottom: 8px;
 }
@@ -2805,6 +2805,11 @@ select {
         padding: 10px 12px;
         font-size: 0.8rem;
         border-radius: 8px;
+    }
+
+    #time-range-tabs .time-tab {
+        flex: 1;
+        padding: 10px 4px;
     }
 
     .dash-summary-grid {

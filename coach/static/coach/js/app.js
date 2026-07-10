@@ -1044,7 +1044,8 @@
             renderMessagePair(msg, prevScores);
         });
 
-        scrollLatestMessageIntoView();
+        const instantScroll = options.instantScroll !== false;
+        scrollLatestMessageIntoView(null, instantScroll);
     }
 
     function clearEmptyChatState() {
@@ -1460,7 +1461,7 @@
         });
     }
 
-    function scrollLatestMessageIntoView(targetElement = null) {
+    function scrollLatestMessageIntoView(targetElement = null, instant = false) {
         const element = targetElement || DOM.chatMessages.querySelector('.message-group:last-of-type, .ai-thinking:last-of-type, .empty-chat-state');
         if (!element) {
             updateScrollToBottomButton();
@@ -1472,7 +1473,7 @@
             const maxTop = Math.max(0, DOM.chatMessages.scrollHeight - DOM.chatMessages.clientHeight);
             DOM.chatMessages.scrollTo({
                 top: Math.min(targetTop, maxTop),
-                behavior: 'smooth'
+                behavior: instant ? 'auto' : 'smooth'
             });
             updateScrollToBottomButton();
         });
@@ -1990,6 +1991,7 @@
         DOM.chatArea.style.display = 'none';
         DOM.learningHistoryScreen.style.display = 'none';
         DOM.dashboardScreen.style.display = 'flex';
+        updateScrollToBottomButton();
 
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
@@ -2299,6 +2301,7 @@
         DOM.chatArea.style.display = 'none';
         DOM.dashboardScreen.style.display = 'none';
         DOM.learningHistoryScreen.style.display = 'flex';
+        updateScrollToBottomButton();
 
         // Close mobile sidebar
         DOM.sidebar.classList.remove('mobile-open');
