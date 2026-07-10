@@ -1102,14 +1102,16 @@
         if (msg.ai_response && Object.keys(msg.ai_response).length > 0) {
             const aiMsg = document.createElement('div');
             aiMsg.className = 'ai-message';
-            aiMsg.appendChild(buildFeedbackCard(msg.ai_response, msg.scores, prevScores));
+            aiMsg.appendChild(buildFeedbackCard(msg.ai_response, msg.scores, prevScores, msg.ai_provider_name, msg.ai_model_name));
             group.appendChild(aiMsg);
         }
 
         DOM.chatMessages.appendChild(group);
     }
 
-    function buildFeedbackCard(response, currentScores, prevScores) {
+    function buildFeedbackCard(response, currentScores, prevScores, providerName, modelName) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'ai-feedback-wrapper';
         const card = document.createElement('div');
         card.className = 'ai-feedback-card';
 
@@ -1320,7 +1322,24 @@
             });
         }, 200);
 
-        return card;
+        wrapper.appendChild(card);
+
+        // Model attribution label
+        if (providerName || modelName) {
+            const PROVIDER_DISPLAY = {
+                gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter', cerebras: 'Cerebras'
+            };
+            const displayProvider = PROVIDER_DISPLAY[providerName] || providerName;
+            const parts = [displayProvider, modelName].filter(Boolean);
+            if (parts.length) {
+                const label = document.createElement('div');
+                label.className = 'ai-model-label';
+                label.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/></svg> ${escapeHtml(parts.join(' • '))}`;
+                wrapper.appendChild(label);
+            }
+        }
+
+        return wrapper;
     }
 
     function createFeedbackSection(icon, title, bodyHtml, collapsible = true) {
@@ -1439,7 +1458,9 @@
                 {
                     user_text: text,
                     ai_response: aiResponse,
-                    scores: scores
+                    scores: scores,
+                    ai_provider_name: provider,
+                    ai_model_name: model || ''
                 }
             );
 
@@ -1450,7 +1471,7 @@
             const aiMsgEl = document.createElement('div');
             aiMsgEl.className = 'ai-message';
             aiMsgEl.style.animation = 'messageSlideIn 0.35s ease-out';
-            aiMsgEl.appendChild(buildFeedbackCard(aiResponse, scores, state.previousScores));
+            aiMsgEl.appendChild(buildFeedbackCard(aiResponse, scores, state.previousScores, provider, model));
             userMsgEl.appendChild(aiMsgEl);
 
             // Update state

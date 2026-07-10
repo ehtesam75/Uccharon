@@ -78,6 +78,10 @@ class Message(models.Model):
     score_confidence = models.FloatField(null=True, blank=True)
     score_overall = models.FloatField(null=True, blank=True)
 
+    # AI model attribution
+    ai_provider_name = models.CharField(max_length=50, blank=True, default='')
+    ai_model_name = models.CharField(max_length=100, blank=True, default='')
+
     # Whether this message counts toward user statistics (word count, message count, etc.)
     # False for non-English or gibberish input — determined by AI's input_status classification
     counts_for_stats = models.BooleanField(default=True)

@@ -339,6 +339,8 @@ def messages_view(request, convo_id):
                         'confidence': m.score_confidence,
                         'overall': m.score_overall,
                     },
+                    'ai_provider_name': m.ai_provider_name,
+                    'ai_model_name': m.ai_model_name,
                     'created_at': m.created_at.isoformat(),
                 }
                 for m in msgs
@@ -349,6 +351,8 @@ def messages_view(request, convo_id):
     user_text = data.get('user_text', '')
     ai_response = data.get('ai_response', {})
     scores = data.get('scores', {})
+    ai_provider_name = data.get('ai_provider_name', '')
+    ai_model_name = data.get('ai_model_name', '')
 
     if not user_text:
         return JsonResponse({'error': 'User text is required.'}, status=400)
@@ -372,6 +376,8 @@ def messages_view(request, convo_id):
         score_naturalness=scores.get('naturalness'),
         score_confidence=scores.get('confidence'),
         score_overall=scores.get('overall'),
+        ai_provider_name=ai_provider_name,
+        ai_model_name=ai_model_name,
         counts_for_stats=counts_for_stats,
     )
 
@@ -412,6 +418,8 @@ def messages_view(request, convo_id):
             'confidence': msg.score_confidence,
             'overall': msg.score_overall,
         },
+        'ai_provider_name': msg.ai_provider_name,
+        'ai_model_name': msg.ai_model_name,
         'counts_for_stats': msg.counts_for_stats,
         'created_at': msg.created_at.isoformat(),
     })
