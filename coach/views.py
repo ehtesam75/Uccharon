@@ -24,6 +24,22 @@ def json_body(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+def validate_signup_step1_view(request):
+    """Validate username and email before proceeding to signup step 2."""
+    data = json_body(request)
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+
+    if User.objects.filter(username=username).exists():
+        return JsonResponse({'error': 'Username already taken.'}, status=400)
+
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({'error': 'Email already registered.'}, status=400)
+
+    return JsonResponse({'valid': True})
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def signup_view(request):
     """Register a new user."""
     data = json_body(request)

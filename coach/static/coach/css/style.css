@@ -325,7 +325,6 @@ select {
 
 .signup-card {
     max-height: min(90dvh, 860px);
-    overflow-y: auto;
     overscroll-behavior: contain;
     position: relative;
     isolation: isolate;
@@ -356,9 +355,7 @@ select {
 }
 
 .signup-progress {
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
@@ -493,8 +490,8 @@ select {
 }
 
 .signup-step-scroll-step2 {
-    max-height: none;
-    margin-bottom: 16px;
+    max-height: calc(100dvh - 470px);
+    margin-bottom: 8px;
 }
 
 .signup-provider-panel,
@@ -576,7 +573,6 @@ select {
     .signup-progress-track {
         left: 44px;
         right: 44px;
-        top: 34px;
     }
 
     .signup-grid-2col,
@@ -593,7 +589,8 @@ select {
         padding-right: 0;
     }
 
-    .signup-step-scroll-step1 {
+    .signup-step-scroll-step1,
+    .signup-step-scroll-step2 {
         max-height: calc(100dvh - 420px);
     }
 }

@@ -9,6 +9,7 @@ urlpatterns = [
 
     # Auth API
     path('api/auth/signup/', views.signup_view, name='api-signup'),
+    path('api/auth/validate-signup-step1/', views.validate_signup_step1_view, name='api-validate-signup-step1'),
     path('api/auth/login/', views.login_view, name='api-login'),
     path('api/auth/logout/', views.logout_view, name='api-logout'),
     path('api/auth/user/', views.current_user_view, name='api-user'),

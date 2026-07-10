@@ -343,7 +343,7 @@
         }
     }
 
-    function handleSignupNext() {
+    async function handleSignupNext() {
         const username = DOM.signupUsername.value.trim();
         const email = DOM.signupEmail.value.trim();
         const password = DOM.signupPassword.value;
@@ -366,7 +366,18 @@
             return;
         }
 
-        setSignupStep(2);
+        DOM.signupNextBtn.classList.add('btn-loading');
+        DOM.signupNextBtn.disabled = true;
+
+        try {
+            await api('/api/auth/validate-signup-step1/', 'POST', { username, email });
+            setSignupStep(2);
+        } catch (err) {
+            showAuthError('signup1', err.message);
+        } finally {
+            DOM.signupNextBtn.classList.remove('btn-loading');
+            DOM.signupNextBtn.disabled = false;
+        }
     }
 
     function handleSignupStep2Next() {
