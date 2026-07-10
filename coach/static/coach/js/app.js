@@ -1462,7 +1462,21 @@
     }
 
     function scrollLatestMessageIntoView(targetElement = null, instant = false) {
-        const element = targetElement || DOM.chatMessages.querySelector('.message-group:last-of-type, .ai-thinking:last-of-type, .empty-chat-state');
+        let element = targetElement;
+        if (!element) {
+            const children = Array.from(DOM.chatMessages.children);
+            for (let i = children.length - 1; i >= 0; i--) {
+                const child = children[i];
+                if (child.classList.contains('ai-thinking') || child.classList.contains('empty-chat-state')) {
+                    element = child;
+                    break;
+                } else if (child.classList.contains('message-group')) {
+                    element = child.querySelector('.user-message') || child;
+                    break;
+                }
+            }
+        }
+
         if (!element) {
             updateScrollToBottomButton();
             return;

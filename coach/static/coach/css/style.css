@@ -2864,6 +2864,44 @@ select {
     .line-chart-container {
         height: 220px;
     }
+
+    .history-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-top: 16px;
+        margin-left: -16px;
+        margin-right: -16px;
+        border-radius: 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        border-left: none;
+        border-right: none;
+        background: var(--bg-primary);
+    }
+
+    .history-card {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
+    }
+
+    .history-card:last-child {
+        border-bottom: none;
+    }
+
+    .history-card:hover {
+        transform: none;
+        box-shadow: none;
+        background: var(--bg-glass);
+    }
+
+    .history-card .feedback-section {
+        padding: 12px 16px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -3053,39 +3091,24 @@ select {
 /* ═══════════════ LEARNING HISTORY ═══════════════ */
 
 .history-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 16px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    background: var(--bg-primary);
-    overflow: hidden;
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
 }
 
 .history-card {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--border-color);
-    border-radius: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    transition: background 0.2s;
-    box-shadow: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px var(--shadow-color);
     animation: dashCardSlideUp 0.5s ease-out both;
 }
 
-.history-card:last-child {
-    border-bottom: none;
-}
-
 .history-card:hover {
-    transform: none;
-    box-shadow: none;
-    background: var(--bg-glass);
-}
-
-.history-card .feedback-section {
-    padding: 12px 16px;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--shadow-color);
 }
 
 .history-card .grammar-item {
