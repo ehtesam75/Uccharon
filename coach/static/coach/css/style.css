@@ -56,6 +56,7 @@
 
 /* ─── Light Theme ────────────────────────────────────────── */
 [data-theme="light"] {
+    color-scheme: light;
     --bg-primary: #f4f5fa;
     --bg-secondary: #ffffff;
     --bg-tertiary: #ecedf5;
@@ -2378,7 +2379,7 @@ select {
 .dashboard-filter-select {
     appearance: none;
     background: var(--bg-glass);
-    border: 1px solid transparent;
+    border: none;
     border-radius: var(--radius-full);
     padding: 6px 32px 6px 14px;
     color: var(--text-primary);
@@ -2392,16 +2393,18 @@ select {
     white-space: nowrap;
     overflow: hidden;
     transition: all var(--transition-fast);
+    color-scheme: inherit;
 }
 
 .dashboard-filter-select:hover,
 .dashboard-filter-select:focus {
-    border-color: var(--accent-primary);
+    background: var(--bg-glass-hover);
 }
 
 .dashboard-filter-select option {
-    background-color: var(--bg-card);
+    background-color: var(--bg-secondary);
     color: var(--text-primary);
+    border: none;
 }
 
 .dashboard-filter-icon {

@@ -651,45 +651,56 @@ def learning_history_view(request):
         ai_resp = m.ai_response
         if not isinstance(ai_resp, dict):
             continue
+
+        try:
+            local_date = timezone.localtime(m.created_at).isoformat()
             
-        local_date = timezone.localtime(m.created_at).isoformat()
-        
-        for gc in ai_resp.get('grammar_corrections', []):
-            history_items.append({
-                'type': 'grammar',
-                'date': local_date,
-                'original': gc.get('original', ''),
-                'suggestion': gc.get('corrected', ''),
-                'explanation': gc.get('explanation', ''),
-            })
-            
-        for si in ai_resp.get('sentence_improvements', []):
-            history_items.append({
-                'type': 'sentence',
-                'date': local_date,
-                'original': si.get('original', ''),
-                'suggestion': si.get('improved', ''),
-                'explanation': si.get('explanation', ''),
-            })
-            
-        for vi in ai_resp.get('vocabulary_improvements', []):
-            history_items.append({
-                'type': 'vocabulary',
-                'date': local_date,
-                'original': vi.get('original', ''),
-                'suggestion': vi.get('suggestion', ''),
-                'explanation': vi.get('context', ''),
-                'synonyms': vi.get('synonyms', [])
-            })
-            
-        for pg in ai_resp.get('pronunciation_guidance', []):
-            history_items.append({
-                'type': 'pronunciation',
-                'date': local_date,
-                'original': pg.get('word', ''),
-                'suggestion': pg.get('phonetic', '') or pg.get('spelling', ''),
-                'explanation': pg.get('tip', ''),
-            })
+            for gc in (ai_resp.get('grammar_corrections') or []):
+                if not isinstance(gc, dict):
+                    continue
+                history_items.append({
+                    'type': 'grammar',
+                    'date': local_date,
+                    'original': gc.get('original', ''),
+                    'suggestion': gc.get('corrected', ''),
+                    'explanation': gc.get('explanation', ''),
+                })
+                
+            for si in (ai_resp.get('sentence_improvements') or []):
+                if not isinstance(si, dict):
+                    continue
+                history_items.append({
+                    'type': 'sentence',
+                    'date': local_date,
+                    'original': si.get('original', ''),
+                    'suggestion': si.get('improved', ''),
+                    'explanation': si.get('explanation', ''),
+                })
+                
+            for vi in (ai_resp.get('vocabulary_improvements') or []):
+                if not isinstance(vi, dict):
+                    continue
+                history_items.append({
+                    'type': 'vocabulary',
+                    'date': local_date,
+                    'original': vi.get('original', ''),
+                    'suggestion': vi.get('suggestion', ''),
+                    'explanation': vi.get('context', ''),
+                    'synonyms': vi.get('synonyms', [])
+                })
+                
+            for pg in (ai_resp.get('pronunciation_guidance') or []):
+                if not isinstance(pg, dict):
+                    continue
+                history_items.append({
+                    'type': 'pronunciation',
+                    'date': local_date,
+                    'original': pg.get('word', ''),
+                    'suggestion': pg.get('phonetic', '') or pg.get('spelling', ''),
+                    'explanation': pg.get('tip', ''),
+                })
+        except Exception:
+            continue
 
     return JsonResponse({'items': history_items})
 
