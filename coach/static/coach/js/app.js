@@ -1981,6 +1981,11 @@
     // ═══════════════════════════════════════════════════════
 
     async function showDashboard() {
+        // Delete empty conversation before navigating away
+        if (state.currentConversation && state.currentMessages.length === 0) {
+            void deleteConversationById(state.currentConversation.id);
+        }
+
         DOM.welcomeScreen.style.display = 'none';
         DOM.chatArea.style.display = 'none';
         DOM.learningHistoryScreen.style.display = 'none';
@@ -2285,6 +2290,11 @@
     // ═══════════════════════════════════════════════════════
 
     async function showLearningHistory() {
+        // Delete empty conversation before navigating away
+        if (state.currentConversation && state.currentMessages.length === 0) {
+            void deleteConversationById(state.currentConversation.id);
+        }
+
         DOM.welcomeScreen.style.display = 'none';
         DOM.chatArea.style.display = 'none';
         DOM.dashboardScreen.style.display = 'none';
@@ -2297,6 +2307,12 @@
         // Clear active conversation selection
         state.currentConversation = null;
         document.querySelectorAll('.convo-item').forEach(el => el.classList.remove('active'));
+
+        // Reset filter to 'All' on every page entry
+        state.learningHistoryFilter = 'all';
+        document.querySelectorAll('#history-filter-tabs .time-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.filter === 'all');
+        });
 
         await loadLearningHistoryData();
     }
@@ -2432,6 +2448,8 @@
                     e.target.classList.add('active');
                     state.learningHistoryFilter = e.target.dataset.filter;
                     renderLearningHistory();
+                    // Scroll to top so user sees filtered results from the beginning
+                    DOM.learningHistoryScreen.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
         }
