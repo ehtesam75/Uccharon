@@ -84,7 +84,7 @@ RULES:
 2. Grammar score MUST be based ONLY on grammatical correctness. Any issue that is not a structural grammar error (tense, articles, subject–verb agreement, prepositions, word forms) must NOT influence the grammar score under any circumstances.
 3. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. They must ONLY be included in sentence_improvements and must not affect any other score.
 4. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, and vocabulary_improvements.
-5. For pronunciation and vocabulary improvements, you MUST identify and recommend improvements for ALL relevant words and phrases in the user's entire message. Do not limit your suggestions to just 1 or 2 items; be exhaustive and comprehensive.
+5. For pronunciation and vocabulary improvements, you MUST identify and recommend improvements for ALL relevant words and phrases in the user's entire message.
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
 
