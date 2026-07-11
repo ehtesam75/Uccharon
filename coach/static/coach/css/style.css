@@ -3240,6 +3240,16 @@ select {
     }
 }
 
+@media (max-width: 640px) {
+    .toast {
+        right: 16px;
+        left: 16px;
+        margin: 0 auto;
+        max-width: calc(100vw - 32px);
+        width: fit-content;
+    }
+}
+
 /* 2-Step Signup Styles */
 .goal-selection-container {
     display: flex;
