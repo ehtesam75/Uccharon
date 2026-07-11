@@ -18,11 +18,11 @@
             gemini_api_key: '',
             groq_api_key: '',
             openrouter_api_key: '',
-            cerebras_api_key: '',
+
             gemini_model: 'gemini-2.0-flash',
             groq_model: 'llama-3.3-70b-versatile',
-            openrouter_model: 'openrouter/free',
-            cerebras_model: 'gpt-oss-120b',
+            openrouter_model: 'meta-llama/llama-3.3-70b-instruct',
+
             voice_provider: 'browser',    // 'browser' | 'openai' | 'gemini-stt'
             openai_api_key: ''             // used for Whisper STT
         },
@@ -61,19 +61,16 @@
         'gemini-1.5-flash-8b': 'Gemini 1.5 Flash 8B',
         'llama-3.3-70b-versatile': 'Llama 3.3 70B',
         'llama-3.1-8b-instant': 'Llama 3.1 8B',
-        'deepseek-r1-distill-llama-70b': 'DeepSeek R1 Llama 70B',
-        'mixtral-8x7b-32768': 'Mixtral 8x7B',
-        'openrouter/free': 'Free Models Router',
-        'google/gemma-4-31b-it:free': 'Google: Gemma 4 31B',
-        'nvidia/nemotron-3-super-120b-a12b:free': 'NVIDIA: Nemotron 3 120B',
-        'qwen/qwen3-next-80b-a3b-instruct:free': 'Qwen: Qwen3 Next 80B',
-        'openai/gpt-oss-120b:free': 'OpenAI: GPT OSS 120B',
-        'liquid/lfm-2.5-1.2b-thinking:free': 'LiquidAI: LFM 2.5 1.2B',
-        'poolside/laguna-xs-2.1:free': 'Poolside: Laguna XS 2.1',
-        'cohere/north-mini-code:free': 'Cohere: North Mini Code',
-        'gpt-oss-120b': 'OpenAI GPT OSS 120B',
-        'zai-glm-4.7': 'Z.ai GLM 4.7',
-        'gemma-4-31b': 'Gemma 4 31B'
+        'deepseek/deepseek-chat': 'DeepSeek V3',
+        'deepseek/deepseek-r1': 'DeepSeek R1',
+        'openai/gpt-oss-120b': 'GPT OSS 120B',
+        'qwen/qwen3-235b-a22b-2507': 'Qwen3 235B',
+        'qwen/qwen3-30b-a3b-instruct-2507': 'Qwen3 30B',
+        'meta-llama/llama-3.3-70b-instruct': 'Llama 3.3 70B',
+        'google/gemma-3-27b-it': 'Gemma 3 27B',
+        'openai/gpt-3.5-turbo': 'GPT-3.5 Turbo',
+        'nvidia/nemotron-3-super-120b-a12b': 'NVIDIA Nemotron 3 Super',
+        'openrouter/auto': 'Auto (OpenRouter Choice)'
     };
 
     // ═══════════════════════════════════════════════════════
@@ -153,12 +150,12 @@
         geminiApiKey: $('#gemini-api-key'),
         groqApiKey: $('#groq-api-key'),
         openrouterApiKey: $('#openrouter-api-key'),
-        cerebrasApiKey: $('#cerebras-api-key'),
+
         openaiApiKey: $('#openai-api-key'),
         geminiModelSelect: $('#gemini-model-select'),
         groqModelSelect: $('#groq-model-select'),
         openrouterModelSelect: $('#openrouter-model-select'),
-        cerebrasModelSelect: $('#cerebras-model-select'),
+
         saveSettingsBtn: $('#save-settings-btn'),
         openaiKeyGroup: $('#openai-key-group'),
         voiceBrowserNotice: $('#voice-browser-notice'),
@@ -168,7 +165,7 @@
         statsBtn: $('#stats-btn'),
         dashboardScreen: $('#dashboard-screen'),
         timeRangeTabs: $('#time-range-tabs'),
-        dashboardModelFilter: $('#model-filter'),
+
         dashLoading: $('#dashboard-loading'),
         dashEmpty: $('#dashboard-empty'),
         dashData: $('#dashboard-data'),
@@ -469,7 +466,7 @@
                 gemini_api_key: ai_provider === 'gemini' ? apiKey : '',
                 groq_api_key: ai_provider === 'groq' ? apiKey : '',
                 openrouter_api_key: ai_provider === 'openrouter' ? apiKey : '',
-                cerebras_api_key: ai_provider === 'cerebras' ? apiKey : '',
+
                 daily_word_goal
             });
             state.user = data.user;
@@ -676,8 +673,8 @@
             state.settings = { ...state.settings, ...settingsData };
             state.settings.gemini_model = localStorage.getItem('uccharon_gemini_model') || 'gemini-2.0-flash';
             state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
-            state.settings.openrouter_model = localStorage.getItem('uccharon_openrouter_model') || 'openrouter/free';
-            state.settings.cerebras_model = localStorage.getItem('uccharon_cerebras_model') || 'gpt-oss-120b';
+            state.settings.openrouter_model = localStorage.getItem('uccharon_openrouter_model') || 'meta-llama/llama-3.3-70b-instruct';
+
             state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
             state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
         } catch (e) { /* ignore */ }
@@ -1354,7 +1351,7 @@
         // Model attribution label
         if (providerName || modelName) {
             const PROVIDER_DISPLAY = {
-                gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter', cerebras: 'Cerebras'
+                gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter'
             };
             const displayProvider = PROVIDER_DISPLAY[providerName] || providerName;
             const displayModel = MODEL_DISPLAY_NAMES[modelName] || modelName;
@@ -1423,7 +1420,7 @@
 
         if (!apiKey) {
             const providerNames = {
-                gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter', cerebras: 'Cerebras'
+                gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter'
             };
             showToast(`Please set your ${providerNames[provider] || provider} API key in Settings.`, 'error');
             openSettings();
@@ -1955,7 +1952,7 @@
         DOM.geminiApiKey.value = state.settings.gemini_api_key || '';
         DOM.groqApiKey.value = state.settings.groq_api_key || '';
         DOM.openrouterApiKey.value = state.settings.openrouter_api_key || '';
-        DOM.cerebrasApiKey.value = state.settings.cerebras_api_key || '';
+
         DOM.openaiApiKey.value = state.settings.openai_api_key || '';
 
         // AI Provider radios
@@ -1970,7 +1967,7 @@
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.0-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
         DOM.openrouterModelSelect.value = state.settings.openrouter_model || 'openrouter/free';
-        DOM.cerebrasModelSelect.value = state.settings.cerebras_model || 'gpt-oss-120b';
+
 
         // Voice Provider radios
         const vp = state.settings.voice_provider || 'browser';
@@ -1988,7 +1985,7 @@
 
     /** Show/hide the AI Provider settings based on selected AI provider */
     function _updateAiProviderUI(provider) {
-        ['gemini', 'groq', 'openrouter', 'cerebras'].forEach(p => {
+        ['gemini', 'groq', 'openrouter'].forEach(p => {
             const container = document.getElementById(`${p}-settings-container`);
             if (container) container.style.display = provider === p ? 'block' : 'none';
         });
@@ -1999,12 +1996,12 @@
         const geminiKey = DOM.geminiApiKey.value.trim();
         const groqKey = DOM.groqApiKey.value.trim();
         const openrouterKey = DOM.openrouterApiKey.value.trim();
-        const cerebrasKey = DOM.cerebrasApiKey.value.trim();
+
         const openaiKey = DOM.openaiApiKey.value.trim();
         const geminiModel = DOM.geminiModelSelect.value;
         const groqModel = DOM.groqModelSelect.value;
         const openrouterModel = DOM.openrouterModelSelect.value;
-        const cerebrasModel = DOM.cerebrasModelSelect.value;
+
         const voiceProvider = document.querySelector('input[name="voice-provider"]:checked')?.value || 'browser';
         const dailyWordGoal = DOM.dailyWordGoalSelect.value;
 
@@ -2021,19 +2018,19 @@
         state.settings.gemini_api_key = geminiKey;
         state.settings.groq_api_key = groqKey;
         state.settings.openrouter_api_key = openrouterKey;
-        state.settings.cerebras_api_key = cerebrasKey;
+
         state.settings.openai_api_key = openaiKey;
         state.settings.gemini_model = geminiModel;
         state.settings.groq_model = groqModel;
         state.settings.openrouter_model = openrouterModel;
-        state.settings.cerebras_model = cerebrasModel;
+
         state.settings.voice_provider = voiceProvider;
 
         // Save model selections to localStorage
         localStorage.setItem('uccharon_gemini_model', geminiModel);
         localStorage.setItem('uccharon_groq_model', groqModel);
         localStorage.setItem('uccharon_openrouter_model', openrouterModel);
-        localStorage.setItem('uccharon_cerebras_model', cerebrasModel);
+
         localStorage.setItem('uccharon_voice_provider', state.settings.voice_provider);
         localStorage.setItem('uccharon_openai_api_key', openaiKey);
 
@@ -2046,7 +2043,7 @@
                 gemini_api_key: geminiKey,
                 groq_api_key: groqKey,
                 openrouter_api_key: openrouterKey,
-                cerebras_api_key: cerebrasKey,
+
                 daily_word_goal: dailyWordGoal
             });
             state.settings.daily_word_goal = parseInt(dailyWordGoal);
@@ -2138,17 +2135,7 @@
         try {
             const data = await api(`/api/stats/?range=${range}&model=${model}`);
 
-            if (data.available_models) {
-                const currentVal = DOM.dashboardModelFilter.value;
-                
-                let optionsHtml = '<option value="all">All Models</option>';
-                data.available_models.forEach(mName => {
-                    const displayName = MODEL_DISPLAY_NAMES[mName] || mName;
-                    optionsHtml += `<option value="${escapeHtml(mName)}">${escapeHtml(displayName)}</option>`;
-                });
-                DOM.dashboardModelFilter.innerHTML = optionsHtml;
-                DOM.dashboardModelFilter.value = currentVal;
-            }
+
 
             if (data.total_messages === 0) {
                 DOM.dashLoading.style.display = 'none';
@@ -2417,11 +2404,7 @@
             }
         });
 
-        if (DOM.dashboardModelFilter) {
-            DOM.dashboardModelFilter.addEventListener('change', (e) => {
-                loadDashboardData(state.dashboardRange, e.target.value);
-            });
-        }
+
     }
 
     // ═══════════════════════════════════════════════════════

@@ -194,7 +194,7 @@
                                     <option value="">Select a provider</option>
                                     <option value="groq">Groq</option>
                                     <option value="openrouter">OpenRouter</option>
-                                    <option value="cerebras">Cerebras</option>
+
                                     <option value="cohere">Cohere</option>
                                 </select>
                             </div>
@@ -540,12 +540,7 @@
                             <p class="dashboard-subtitle">Track your learning journey and performance trends</p>
                         </div>
                         <div class="dashboard-filters">
-                            <div class="dashboard-filter-wrapper">
-                                <select id="model-filter" class="dashboard-filter-select">
-                                    <option value="all">All Models</option>
-                                </select>
-                                <svg class="dashboard-filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </div>
+
                             <div class="time-range-tabs" id="time-range-tabs">
                                 <button class="time-tab" data-range="daily">Today</button>
                                 <button class="time-tab" data-range="weekly">Week</button>
@@ -780,17 +775,7 @@
                                 <div class="provider-radio-circle"></div>
                             </div>
                         </label>
-                        <label class="provider-card" id="provider-cerebras-card">
-                            <input type="radio" name="ai-provider" value="cerebras">
-                            <div class="provider-card-content">
-                                <div class="provider-icon">🧠</div>
-                                <div class="provider-info">
-                                    <div class="provider-name">Cerebras</div>
-                                    <div class="provider-desc">High-speed Llama</div>
-                                </div>
-                                <div class="provider-radio-circle"></div>
-                            </div>
-                        </label>
+
                     </div>
                 </div>
 
@@ -892,49 +877,21 @@
                         <h3>OpenRouter Model</h3>
                         <p class="settings-desc">Select the OpenRouter model to use</p>
                         <select id="openrouter-model-select" class="settings-select">
+                            <option value="openai/gpt-oss-120b">GPT OSS 120B</option>
+                            <option value="qwen/qwen3-235b-a22b-2507">Qwen3 235B</option>
+                            <option value="qwen/qwen3-30b-a3b-instruct-2507">Qwen3 30B</option>
+                            <option value="deepseek/deepseek-chat">DeepSeek V3</option>
+                            <option value="deepseek/deepseek-r1">DeepSeek R1</option>
+                            <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B</option>
+                            <option value="google/gemma-3-27b-it">Gemma 3 27B</option>
+                            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="nvidia/nemotron-3-super-120b-a12b">NVIDIA Nemotron 3 Super</option>
                             <option value="openrouter/auto">Auto (OpenRouter Choice)</option>
-                            <option value="deepseek/deepseek-chat:free">DeepSeek V3 (Free)</option>
-                            <option value="deepseek/deepseek-r1:free">DeepSeek R1 (Reasoning, Free)</option>
-                            <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
-                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Free)</option>
-                            <option value="qwen/qwen-2.5-coder-32b-instruct:free">Qwen 2.5 Coder 32B (Free)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Cerebras Specific Settings -->
-                <div id="cerebras-settings-container" style="display:none;">
-                    <div class="settings-section">
-                        <h3>Cerebras API Key</h3>
-                        <p class="settings-desc">Your key is stored securely in your profile</p>
-                        <div class="form-group" id="cerebras-key-group">
-                            <div class="key-input-wrapper">
-                                <input type="password" id="cerebras-api-key" placeholder="Enter your Cerebras API key">
-                                <button class="toggle-key-vis" data-target="cerebras-api-key" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="api-key-guide">
-                                Get your key from <a href="https://cloud.cerebras.ai/" target="_blank"
-                                    rel="noopener noreferrer">Cerebras Cloud</a>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="settings-section">
-                        <h3>Cerebras Model</h3>
-                        <p class="settings-desc">Select the Cerebras model to use</p>
-                        <select id="cerebras-model-select" class="settings-select">
-                            <option value="llama-3.3-70b">Llama 3.3 70B (Balanced)</option>
-                            <option value="llama3.1-70b">Llama 3.1 70B</option>
-                            <option value="llama3.1-8b">Llama 3.1 8B (Fast)</option>
-                        </select>
-                    </div>
-                </div>
 
                 <!-- Cohere Specific Settings -->
                 <div id="cohere-settings-container" style="display:none;">
