@@ -851,8 +851,7 @@
             await selectConversation(data, { loadMessages: false });
 
             // Close mobile sidebar
-            DOM.sidebar.classList.remove('mobile-open');
-            DOM.sidebarOverlay.classList.remove('active');
+            closeMobileSidebar();
         } catch (err) {
             showToast('Failed to create conversation', 'error');
         }
@@ -962,8 +961,7 @@
         }
 
         // Close mobile sidebar
-        DOM.sidebar.classList.remove('mobile-open');
-        DOM.sidebarOverlay.classList.remove('active');
+        closeMobileSidebar();
     }
 
     async function queueEmptyConversationDeletion(convoId, messages = []) {
@@ -2261,8 +2259,7 @@
         updateScrollToBottomButton();
 
         // Close mobile sidebar
-        DOM.sidebar.classList.remove('mobile-open');
-        DOM.sidebarOverlay.classList.remove('active');
+        closeMobileSidebar();
 
         // Clear active conversation selection
         state.currentConversation = null;
@@ -2576,8 +2573,7 @@
         updateScrollToBottomButton();
 
         // Close mobile sidebar
-        DOM.sidebar.classList.remove('mobile-open');
-        DOM.sidebarOverlay.classList.remove('active');
+        closeMobileSidebar();
 
         // Clear active conversation selection
         state.currentConversation = null;
@@ -2739,8 +2735,7 @@
             e.preventDefault();
             e.stopPropagation();
             if (window.matchMedia('(max-width: 768px)').matches) {
-                DOM.sidebar.classList.remove('mobile-open');
-                DOM.sidebarOverlay.classList.remove('active');
+                closeMobileSidebar();
             } else {
                 DOM.sidebar.classList.toggle('collapsed');
             }
@@ -2766,17 +2761,22 @@
             }
         });
 
-        // Close mobile sidebar on overlay click or outside click
+        // Overlay click closes the sidebar and blocks interaction with the background
+        DOM.sidebarOverlay.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeMobileSidebar();
+        });
+
+        // Fallback: close on any outside click not already handled by the overlay
         document.addEventListener('click', (e) => {
             if (DOM.sidebar.classList.contains('mobile-open') &&
                 !DOM.sidebar.contains(e.target) &&
                 e.target !== DOM.mobileSidebarToggle &&
                 !DOM.mobileSidebarToggle.contains(e.target) &&
+                !DOM.sidebarOverlay.contains(e.target) &&
                 !DOM.settingsDrawer.contains(e.target) &&
                 e.target !== DOM.settingsOverlay) {
-                DOM.sidebar.classList.remove('mobile-open');
-                DOM.sidebarOverlay.classList.remove('active');
-                updateScrollToBottomButton();
+                closeMobileSidebar();
             }
         });
 
@@ -2785,6 +2785,12 @@
         DOM.deleteConvoBtn.addEventListener('click', deleteConversation);
 
         window.addEventListener('resize', updateScrollToBottomButton);
+    }
+
+    function closeMobileSidebar() {
+        DOM.sidebar.classList.remove('mobile-open');
+        DOM.sidebarOverlay.classList.remove('active');
+        updateScrollToBottomButton();
     }
 
     // ═══════════════════════════════════════════════════════
