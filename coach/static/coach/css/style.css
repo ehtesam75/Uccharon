@@ -2812,13 +2812,70 @@ select {
         padding-right: 0;
     }
 
+    .welcome-screen {
+        padding: 20px 16px;
+    }
+
+    .welcome-content {
+        max-width: 100%;
+    }
+
+    .welcome-icon {
+        margin-bottom: 14px;
+    }
+
+    .welcome-icon img {
+        width: 52px;
+        height: 52px;
+    }
+
+    .welcome-title {
+        font-size: 1.3rem;
+        margin-bottom: 6px;
+    }
+
+    .welcome-desc {
+        font-size: 0.825rem;
+        line-height: 1.5;
+        margin-bottom: 16px;
+    }
+
     .welcome-suggestions {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: 6px;
+        margin-bottom: 16px;
     }
 
     .suggestion-card {
-        padding: 14px 12px;
+        padding: 10px 12px;
+        gap: 8px;
+        border-radius: var(--radius-md);
+    }
+
+    .suggestion-icon {
+        font-size: 1.15rem;
+    }
+
+    .suggestion-text h4 {
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+    }
+
+    .suggestion-text p {
+        font-size: 0.7rem;
+        line-height: 1.35;
+    }
+
+    .welcome-start-btn {
+        padding: 10px 18px;
+        font-size: 0.825rem;
+        gap: 6px;
+        margin-top: 4px !important;
+    }
+
+    .welcome-start-btn svg {
+        width: 16px;
+        height: 16px;
     }
 
     .chat-messages {
