@@ -246,18 +246,102 @@
         return date.toLocaleDateString();
     }
 
-    function getPersistedConversationId() {
+    function getConversationStorageKey(userId) {
+        return userId ? `${ACTIVE_CONVERSATION_STORAGE_KEY}_${userId}` : ACTIVE_CONVERSATION_STORAGE_KEY;
+    }
+
+    function getPersistedConversationId(userId = state.user?.id) {
+        if (userId) {
+            return sessionStorage.getItem(getConversationStorageKey(userId));
+        }
         return sessionStorage.getItem(ACTIVE_CONVERSATION_STORAGE_KEY);
     }
 
     function setPersistedConversationId(conversationId) {
-        if (conversationId) {
-            sessionStorage.setItem(ACTIVE_CONVERSATION_STORAGE_KEY, String(conversationId));
+        if (conversationId && state.user?.id) {
+            sessionStorage.setItem(getConversationStorageKey(state.user.id), String(conversationId));
         }
     }
 
-    function clearPersistedConversationId() {
+    function clearPersistedConversationId(userId = state.user?.id) {
         sessionStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+        if (userId) {
+            sessionStorage.removeItem(getConversationStorageKey(userId));
+        }
+    }
+
+    function clearAllPersistedConversationIds() {
+        sessionStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+        Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith(`${ACTIVE_CONVERSATION_STORAGE_KEY}_`)) {
+                sessionStorage.removeItem(key);
+            }
+        });
+    }
+
+    function clearOtherUsersConversationIds(currentUserId) {
+        sessionStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+        Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith(`${ACTIVE_CONVERSATION_STORAGE_KEY}_`) && key !== getConversationStorageKey(currentUserId)) {
+                sessionStorage.removeItem(key);
+            }
+        });
+    }
+
+    function migrateLegacyConversationId(userId) {
+        const legacyId = sessionStorage.getItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+        if (legacyId && userId && !getPersistedConversationId(userId)) {
+            sessionStorage.setItem(getConversationStorageKey(userId), legacyId);
+        }
+        sessionStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+    }
+
+    function showWelcomeScreen() {
+        DOM.welcomeScreen.style.display = 'flex';
+        DOM.chatArea.style.display = 'none';
+        DOM.dashboardScreen.style.display = 'none';
+        DOM.learningHistoryScreen.style.display = 'none';
+    }
+
+    function resetChatState() {
+        state.conversationLoadToken++;
+        state.conversations = [];
+        state.currentConversation = null;
+        state.currentMessages = [];
+        state.previousScores = null;
+        state.pendingConversationLoads.clear();
+        state.emptyConversationDeletionQueue.clear();
+        state.learningHistory = null;
+
+        DOM.chatMessages.innerHTML = '';
+        DOM.chatLoading.style.display = 'none';
+        DOM.chatMessages.style.visibility = 'visible';
+        DOM.chatInput.value = '';
+        DOM.chatInput.style.height = 'auto';
+        if (DOM.chatTitle) {
+            DOM.chatTitle.textContent = 'New Conversation';
+        }
+        renderConversationList();
+        showWelcomeScreen();
+    }
+
+    async function restoreActiveConversation() {
+        const persistedConversationId = getPersistedConversationId();
+        if (persistedConversationId) {
+            const conversation = state.conversations.find(c => String(c.id) === persistedConversationId);
+            if (conversation) {
+                await selectConversation(conversation);
+                return;
+            }
+            clearPersistedConversationId();
+        }
+
+        if (state.conversations.length > 0) {
+            await selectConversation(state.conversations[0]);
+            return;
+        }
+
+        showWelcomeScreen();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -357,16 +441,12 @@
 
         try {
             const data = await api('/api/auth/login/', 'POST', { username, password });
+            resetChatState();
             state.user = data.user;
-            await loadUserData(true); // Pass true to skip auto-selecting the first conversation
-
-            // Automatically create a new chat session on login if they aren't a new user
-            if (state.conversations.length > 0) {
-                await createConversation();
-            } else {
-                await createConversation(); // Also create one if they have 0
-            }
-
+            migrateLegacyConversationId(state.user.id);
+            clearOtherUsersConversationIds(state.user.id);
+            await loadUserData(true);
+            await restoreActiveConversation();
             showApp();
         } catch (err) {
             showAuthError('login', err.message);
@@ -469,6 +549,8 @@
 
                 daily_word_goal
             });
+            clearAllPersistedConversationIds();
+            resetChatState();
             state.user = data.user;
 
             // Explicitly force defaults for local settings on new signup
@@ -476,7 +558,8 @@
             localStorage.setItem('uccharon_voice_provider', 'browser');
             localStorage.removeItem('uccharon_openai_api_key');
 
-            await loadUserData();
+            await loadUserData(true);
+            showWelcomeScreen();
             DOM.authScreen.style.display = 'none';
             showApp();
         } catch (err) {
@@ -597,27 +680,22 @@
                 state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
                 state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
                 state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
+                resetChatState();
+                migrateLegacyConversationId(state.user.id);
+                clearOtherUsersConversationIds(state.user.id);
                 await loadConversations(true);
-
-                const persistedConversationId = getPersistedConversationId();
-                if (persistedConversationId) {
-                    const conversation = state.conversations.find(c => String(c.id) === persistedConversationId);
-                    if (conversation) {
-                        await selectConversation(conversation);
-                    } else {
-                        await createConversation();
-                    }
-                } else {
-                    await createConversation();
-                }
-
+                await restoreActiveConversation();
                 showApp();
             } else {
+                clearAllPersistedConversationIds();
+                resetChatState();
                 DOM.authScreen.style.display = 'flex';
                 hideGlobalSplash();
             }
         } catch (e) {
             // Not logged in, show auth screen
+            clearAllPersistedConversationIds();
+            resetChatState();
             DOM.authScreen.style.display = 'flex';
             hideGlobalSplash();
         }
@@ -631,11 +709,9 @@
             }
 
             await api('/api/auth/logout/', 'POST');
+            clearAllPersistedConversationIds();
+            resetChatState();
             state.user = null;
-            state.conversations = [];
-            state.currentConversation = null;
-            state.currentMessages = [];
-            clearPersistedConversationId();
             DOM.app.style.display = 'none';
             DOM.dashboardScreen.style.display = 'none';
             DOM.learningHistoryScreen.style.display = 'none';
