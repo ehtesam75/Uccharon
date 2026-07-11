@@ -317,7 +317,7 @@
         DOM.chatLoading.style.display = 'none';
         DOM.chatMessages.style.visibility = 'visible';
         DOM.chatInput.value = '';
-        DOM.chatInput.style.height = 'auto';
+        resizeChatInput();
         if (DOM.chatTitle) {
             DOM.chatTitle.textContent = 'New Conversation';
         }
@@ -867,10 +867,7 @@
         
         // Populate the input
         DOM.chatInput.value = promptText;
-        
-        // Trigger auto-resize logic manually if needed
-        DOM.chatInput.style.height = 'auto';
-        DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
+        resizeChatInput();
         
         // Auto-send
         sendMessage();
@@ -1509,7 +1506,7 @@
 
         state.isSending = true;
         DOM.chatInput.value = '';
-        DOM.chatInput.style.height = 'auto';
+        resizeChatInput();
         DOM.sendBtn.disabled = true;
         clearEmptyChatState();
 
@@ -1728,11 +1725,33 @@
             ? 0
             : Math.max(0, sidebarExpandedWidth / 2);
         const shouldShow = chatVisible && state.currentConversation && DOM.chatMessages && !isChatScrolledToBottom() && !sidebarOpenOnMobile;
+        const defaultBottom = isMobile ? 96 : 104;
+        const buttonGap = 12;
+        const inputContainer = DOM.chatInput?.closest('.chat-input-container');
 
         DOM.scrollToBottomBtn.style.setProperty('--scroll-to-bottom-offset-x', `${horizontalOffset}px`);
 
+        if (chatVisible && inputContainer) {
+            const inputTop = inputContainer.getBoundingClientRect().top;
+            const bottomOffset = Math.max(defaultBottom, Math.ceil(window.innerHeight - inputTop + buttonGap));
+            DOM.scrollToBottomBtn.style.setProperty('--scroll-to-bottom-offset-y', `${bottomOffset}px`);
+        } else {
+            DOM.scrollToBottomBtn.style.setProperty('--scroll-to-bottom-offset-y', `${defaultBottom}px`);
+        }
+
         DOM.scrollToBottomBtn.classList.toggle('visible', Boolean(shouldShow));
         DOM.scrollToBottomBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
+    }
+
+    function resizeChatInput() {
+        DOM.chatInput.style.height = 'auto';
+        DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
+        if (DOM.chatInput.scrollHeight > 120) {
+            DOM.chatInput.style.overflowY = 'auto';
+        } else {
+            DOM.chatInput.style.overflowY = 'hidden';
+        }
+        updateScrollToBottomButton();
     }
 
     // ─── Auto-resize textarea ────────────────────────────
@@ -1749,15 +1768,15 @@
         window.addEventListener('resize', updatePlaceholder);
         updatePlaceholder(); // Call once on init
 
-        DOM.chatInput.addEventListener('input', () => {
-            DOM.chatInput.style.height = 'auto';
-            DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
-            if (DOM.chatInput.scrollHeight > 120) {
-                DOM.chatInput.style.overflowY = 'auto';
-            } else {
-                DOM.chatInput.style.overflowY = 'hidden';
-            }
-        });
+        DOM.chatInput.addEventListener('input', resizeChatInput);
+
+        const inputContainer = DOM.chatInput?.closest('.chat-input-container');
+        if (inputContainer && typeof ResizeObserver !== 'undefined') {
+            const inputResizeObserver = new ResizeObserver(() => {
+                updateScrollToBottomButton();
+            });
+            inputResizeObserver.observe(inputContainer);
+        }
 
         DOM.chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -1820,8 +1839,7 @@
             }
 
             DOM.chatInput.value = prefix + transcript;
-            DOM.chatInput.style.height = 'auto';
-            DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
+            resizeChatInput();
         };
 
         state.recognition.onerror = (event) => {
@@ -1967,8 +1985,7 @@
                                 prefix += ' ';
                             }
                             DOM.chatInput.value = prefix + transcript.trim();
-                            DOM.chatInput.style.height = 'auto';
-                            DOM.chatInput.style.height = Math.min(DOM.chatInput.scrollHeight, 120) + 'px';
+                            resizeChatInput();
                             DOM.chatInput.focus();
                         }
                     } catch (err) {

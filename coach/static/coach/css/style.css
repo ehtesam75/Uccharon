@@ -1832,7 +1832,7 @@ select {
 .scroll-to-bottom-btn {
     position: fixed;
     left: calc(50% + var(--scroll-to-bottom-offset-x, 0px));
-    bottom: 104px;
+    bottom: var(--scroll-to-bottom-offset-y, 104px);
     width: 42px;
     height: 42px;
     display: inline-flex;
@@ -1849,7 +1849,7 @@ select {
     opacity: 0;
     pointer-events: none;
     z-index: 32;
-    transition: left var(--transition-slow), opacity var(--transition-normal), transform var(--transition-normal), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    transition: left var(--transition-slow), bottom var(--transition-normal), opacity var(--transition-normal), transform var(--transition-normal), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
 .scroll-to-bottom-btn.visible {
@@ -2899,7 +2899,6 @@ select {
     }
 
     .scroll-to-bottom-btn {
-        bottom: 96px;
         width: 40px;
         height: 40px;
     }
