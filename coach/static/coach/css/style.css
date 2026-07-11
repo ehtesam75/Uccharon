@@ -2814,6 +2814,15 @@ select {
         padding-right: 0;
     }
 
+    .ai-message .feedback-section:last-child {
+        padding-bottom: 4px;
+    }
+
+    .ai-model-label {
+        margin-top: 2px;
+        padding-left: 0;
+    }
+
     .welcome-screen {
         padding: 20px 16px;
     }
