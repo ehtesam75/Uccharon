@@ -1894,6 +1894,9 @@ select {
 
 .chat-input {
     flex: 1;
+    align-self: stretch;
+    box-sizing: border-box;
+    min-height: 40px;
     border: none;
     background: transparent;
     color: var(--text-primary);
