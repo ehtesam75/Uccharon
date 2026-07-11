@@ -88,6 +88,25 @@ RULES:
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
 
+function formatApiError(status, message, providerName) {
+    if (status === 401 || status === 403) {
+        return `${providerName} API Key is invalid or unauthorized. Please check your Settings.`;
+    }
+    if (status === 429) {
+        return `${providerName} Rate Limit Exceeded. Please wait a moment and try again.`;
+    }
+    if (status === 404) {
+        return `${providerName} could not find the requested model. The model ID might be incorrect or deprecated.`;
+    }
+    if (status === 502 && message && message.toLowerCase().includes('provider returned error')) {
+        return `OpenRouter Routing Error: The specific AI provider for this model is temporarily down or rate-limited. Please try selecting a different model.`;
+    }
+    if (status >= 500) {
+        return `${providerName} Server Error (${status}). The service might be temporarily down.`;
+    }
+    return `${providerName} Error: ${message || `HTTP ${status}`}`;
+}
+
 class GeminiProvider {
     constructor(apiKey, model = 'gemini-2.0-flash') {
         this.apiKey = apiKey;
@@ -146,7 +165,7 @@ class GeminiProvider {
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Gemini API error: ${response.status}`);
+            throw new Error(formatApiError(response.status, err.error?.message, 'Gemini'));
         }
 
         const data = await response.json();
@@ -231,7 +250,7 @@ class GroqProvider {
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Groq API error: ${response.status}`);
+            throw new Error(formatApiError(response.status, err.error?.message, 'Groq'));
         }
 
         const data = await response.json();
@@ -303,7 +322,7 @@ class OpenRouterProvider {
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(err.error?.message || `OpenRouter API error: ${response.status}`);
+            throw new Error(formatApiError(response.status, err.error?.message, 'OpenRouter'));
         }
 
         const data = await response.json();
@@ -368,7 +387,7 @@ class CerebrasProvider {
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Cerebras API error: ${response.status}`);
+            throw new Error(formatApiError(response.status, err.error?.message, 'Cerebras'));
         }
 
         const data = await response.json();
@@ -377,6 +396,72 @@ class CerebrasProvider {
         }
 
         return this._parseResponse(data.choices[0].message.content);
+    }
+
+    _parseResponse(text) {
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (match) return JSON.parse(match[1].trim());
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            throw new Error('Could not parse AI response as JSON');
+        }
+    }
+}
+
+
+class CohereProvider {
+    constructor(apiKey, model = 'command-r-08-2024') {
+        this.apiKey = apiKey;
+        this.model = model;
+        this.name = 'Cohere';
+    }
+
+    async sendMessage(userMessage, conversationHistory = []) {
+        const url = 'https://api.cohere.com/v1/chat';
+        const MAX_HISTORY_TURNS = 8;
+        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+
+        const chatHistory = [];
+        for (const msg of recentHistory) {
+            chatHistory.push({ role: 'USER', message: msg.user_text });
+            if (msg.ai_response && msg.ai_response.conversational_reply) {
+                chatHistory.push({ role: 'CHATBOT', message: msg.ai_response.conversational_reply });
+            }
+        }
+
+        const body = {
+            model: this.model,
+            message: userMessage,
+            chat_history: chatHistory,
+            preamble: SYSTEM_PROMPT,
+            temperature: 0.8,
+            response_format: { type: 'json_object' }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            const errMsg = err.message || err.text;
+            throw new Error(formatApiError(response.status, errMsg, 'Cohere'));
+        }
+
+        const data = await response.json();
+        if (!data.text) {
+            throw new Error('Invalid response from Cohere API');
+        }
+
+        return this._parseResponse(data.text);
     }
 
     _parseResponse(text) {
@@ -404,6 +489,8 @@ class ProviderFactory {
                 return new OpenRouterProvider(apiKey, model);
             case 'cerebras':
                 return new CerebrasProvider(apiKey, model);
+            case 'cohere':
+                return new CohereProvider(apiKey, model);
             default:
                 throw new Error(`Unknown provider: ${providerName}`);
         }

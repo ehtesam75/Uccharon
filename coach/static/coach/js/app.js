@@ -1524,7 +1524,13 @@
             const errEl = document.createElement('div');
             errEl.className = 'ai-thinking';
             errEl.style.borderLeft = '3px solid var(--accent-error)';
-            errEl.innerHTML = `<span style="color: var(--accent-error); font-size: 0.85rem;">⚠️ ${escapeHtml(err.message)}</span>`;
+            
+            let displayMsg = err.message;
+            if (displayMsg.includes('Failed to fetch') || displayMsg.includes('NetworkError') || displayMsg.includes('fetch failed')) {
+                displayMsg = 'Network Error: Unable to reach the API. Please check your internet connection or if an ad blocker/firewall is blocking the request.';
+            }
+
+            errEl.innerHTML = `<span style="color: var(--accent-error); font-size: 0.85rem;">⚠️ ${escapeHtml(displayMsg)}</span>`;
             DOM.chatMessages.appendChild(errEl);
             scrollLatestMessageIntoView(errEl);
         } finally {
