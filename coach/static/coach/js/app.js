@@ -1413,18 +1413,17 @@
             return;
         }
 
-        // Check for API key
-        const provider = state.settings.ai_provider;
-        let apiKeyField = `${provider}_api_key`;
-        const apiKey = state.settings[apiKeyField];
-
-        if (!apiKey) {
-            const providerNames = {
-                gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter'
-            };
-            showToast(`Please set your ${providerNames[provider] || provider} API key in Settings.`, 'error');
+        // Determine active providers
+        const activeProviders = ['gemini', 'groq', 'openrouter'].filter(p => state.settings[`${p}_api_key`]);
+        if (activeProviders.length === 0) {
+            showToast(`Please set an AI provider API key in Settings.`, 'error');
             openSettings();
             return;
+        }
+
+        let startProvider = state.settings.ai_provider;
+        if (!activeProviders.includes(startProvider)) {
+            startProvider = activeProviders[0];
         }
 
         // Create conversation if needed
@@ -1464,11 +1463,71 @@
         DOM.chatMessages.appendChild(thinkingEl);
         scrollLatestMessageIntoView(userMsgEl);
 
-        try {
-            // Get AI response
+        const thinkingTextEl = thinkingEl.querySelector('.thinking-text');
+        
+        let currentProviderIndex = activeProviders.indexOf(startProvider);
+        let attempts = 0;
+        const maxAttempts = activeProviders.length;
+        
+        let aiResponse = null;
+        let finalProvider = null;
+        let finalModel = null;
+        let lastError = null;
+
+        while (attempts < maxAttempts) {
+            const provider = activeProviders[currentProviderIndex];
+            const apiKey = state.settings[`${provider}_api_key`];
             const model = state.settings[`${provider}_model`];
-            const aiProvider = ProviderFactory.create(provider, apiKey, model);
-            const aiResponse = await aiProvider.sendMessage(text, state.currentMessages);
+            const displayModel = MODEL_DISPLAY_NAMES[model] || model;
+
+            try {
+                if (attempts > 0) {
+                    thinkingTextEl.textContent = `The provider failed. Switching to another model...`;
+                    await new Promise(r => setTimeout(r, 800));
+                    thinkingTextEl.textContent = `Analyzing your English with ${displayModel}...`;
+                } else {
+                    thinkingTextEl.textContent = 'Analyzing your English...';
+                }
+
+                const aiProvider = ProviderFactory.create(provider, apiKey, model);
+                aiResponse = await aiProvider.sendMessage(text, state.currentMessages);
+                
+                finalProvider = provider;
+                finalModel = model;
+                break; // success!
+            } catch (err) {
+                lastError = err;
+                console.error(`Provider ${provider} failed:`, err);
+                attempts++;
+                currentProviderIndex = (currentProviderIndex + 1) % activeProviders.length;
+                
+                if (attempts < maxAttempts) {
+                    thinkingTextEl.textContent = `Model limit reached. Trying another model...`;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+        }
+
+        try {
+            if (!aiResponse) {
+                throw lastError || new Error("All configured providers failed.");
+            }
+
+            // If a fallback occurred, update settings and inform user
+            if (finalProvider !== state.settings.ai_provider) {
+                state.settings.ai_provider = finalProvider;
+                
+                const displayModel = MODEL_DISPLAY_NAMES[finalModel] || finalModel;
+                showToast(`Switched to ${displayModel} due to provider errors.`, 'info');
+                
+                // Update UI Settings silently
+                const providerRadio = document.querySelector(`input[name="ai-provider"][value="${finalProvider}"]`);
+                if (providerRadio) providerRadio.checked = true;
+                _updateAiProviderUI(finalProvider);
+                
+                // Persist settings to backend
+                api('/api/settings/', 'PUT', { ai_provider: finalProvider }).catch(e => console.error('Failed to sync provider fallback:', e));
+            }
 
             // Extract scores
             const scores = aiResponse.performance_rating || {};
@@ -1484,8 +1543,8 @@
                     user_text: text,
                     ai_response: aiResponse,
                     scores: scores,
-                    ai_provider_name: provider,
-                    ai_model_name: model || ''
+                    ai_provider_name: finalProvider,
+                    ai_model_name: finalModel || ''
                 }
             );
 
@@ -1496,7 +1555,7 @@
             const aiMsgEl = document.createElement('div');
             aiMsgEl.className = 'ai-message';
             aiMsgEl.style.animation = 'messageSlideIn 0.35s ease-out';
-            aiMsgEl.appendChild(buildFeedbackCard(aiResponse, scores, state.previousScores, provider, model));
+            aiMsgEl.appendChild(buildFeedbackCard(aiResponse, scores, state.previousScores, finalProvider, finalModel));
             userMsgEl.appendChild(aiMsgEl);
 
             // Update state
