@@ -48,7 +48,8 @@
         radarChart: null,
         lineChart: null,
         learningHistory: null,
-        learningHistoryFilter: 'all'
+        learningHistoryFilter: 'all',
+        collapsedSections: {}
     };
 
     const MODEL_DISPLAY_NAMES = {
@@ -296,6 +297,33 @@
         sessionStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
     }
 
+    function getCollapsedSectionsKey(userId = state.user?.id) {
+        return `uccharon_collapsed_sections_${userId ?? 'guest'}`;
+    }
+
+    function loadCollapsedSections() {
+        state.collapsedSections = {};
+        try {
+            const raw = localStorage.getItem(getCollapsedSectionsKey());
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') {
+                    state.collapsedSections = parsed;
+                }
+            }
+        } catch (e) {
+            state.collapsedSections = {};
+        }
+    }
+
+    function saveCollapsedSections() {
+        try {
+            localStorage.setItem(getCollapsedSectionsKey(), JSON.stringify(state.collapsedSections));
+        } catch (e) {
+            // ignore storage errors
+        }
+    }
+
     function showWelcomeScreen() {
         DOM.welcomeScreen.style.display = 'flex';
         DOM.chatArea.style.display = 'none';
@@ -445,6 +473,7 @@
             state.user = data.user;
             migrateLegacyConversationId(state.user.id);
             clearOtherUsersConversationIds(state.user.id);
+            loadCollapsedSections();
             await loadUserData(true);
             await restoreActiveConversation();
             showApp();
@@ -552,6 +581,7 @@
             clearAllPersistedConversationIds();
             resetChatState();
             state.user = data.user;
+            loadCollapsedSections();
 
             // Explicitly force defaults for local settings on new signup
             // so they don't inherit a previous user's settings on the same machine
@@ -682,6 +712,7 @@
                 state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
                 resetChatState();
                 migrateLegacyConversationId(state.user.id);
+                loadCollapsedSections();
                 clearOtherUsersConversationIds(state.user.id);
                 await loadConversations(true);
                 await restoreActiveConversation();
@@ -1462,9 +1493,20 @@
             const body = section.querySelector('.feedback-body');
             const toggle = section.querySelector('.feedback-toggle');
 
+            if (state.collapsedSections[title]) {
+                body.classList.add('collapsed');
+                toggle.classList.add('collapsed');
+            }
+
             header.addEventListener('click', () => {
-                body.classList.toggle('collapsed');
+                const nowCollapsed = body.classList.toggle('collapsed');
                 toggle.classList.toggle('collapsed');
+                if (nowCollapsed) {
+                    state.collapsedSections[title] = true;
+                } else {
+                    delete state.collapsedSections[title];
+                }
+                saveCollapsedSections();
             });
         }
 
