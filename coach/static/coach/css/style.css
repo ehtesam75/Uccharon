@@ -2112,6 +2112,18 @@ select {
     padding: 24px;
 }
 
+.drawer-footer {
+    flex-shrink: 0;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.drawer-footer .auth-btn {
+    width: 100%;
+    margin-top: 0;
+}
+
 .settings-section {
     margin-bottom: 28px;
 }
@@ -2949,6 +2961,10 @@ select {
 
     .drawer-content {
         padding: 16px 20px;
+    }
+
+    .drawer-footer {
+        padding: 14px 20px;
     }
 
     .settings-section {
