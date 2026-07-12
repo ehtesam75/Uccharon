@@ -55,8 +55,26 @@
         lineChart: null,
         learningHistory: null,
         learningHistoryFilter: 'all',
-        collapsedSections: {}
+        collapsedSections: {},
+
+        // API key validation tracking
+        signupValidatedKey: null,
+        signupValidatedProvider: null,
+        settingsKeyValidation: {}   // inputId -> 'valid' | 'invalid' | 'unvalidated'
     };
+
+    // Set a validation status message ('success' | 'error' | 'checking') on a status element
+    function setKeyValidationStatus(statusEl, type, message) {
+        if (!statusEl) return;
+        statusEl.classList.remove('status-success', 'status-error', 'status-checking', 'show');
+        if (!type) {
+            statusEl.textContent = '';
+            return;
+        }
+        statusEl.classList.add('show', `status-${type}`);
+        statusEl.textContent = message;
+    }
+
 
     const MODEL_DISPLAY_NAMES = {
         'gemini-2.5-pro': 'Gemini 2.5 Pro',
@@ -118,6 +136,9 @@
         signupAiProvider: $('#signup-ai-provider'),
         signupApiKeySection: $('#signup-api-key-section'),
         signupApiKey: $('#signup-api-key'),
+        signupValidateBtn: $('#signup-validate-btn'),
+        signupValidateStatus: $('#signup-validate-status'),
+
         signupKeyGuide: $('#signup-key-guide'),
         signupBtn: $('#signup-btn'),
         showSignup: $('#show-signup'),
@@ -415,8 +436,25 @@
         DOM.signupEmail.addEventListener('input', updateSignupStep1State);
         DOM.signupPassword.addEventListener('input', updateSignupStep1State);
         DOM.signupConfirmPassword.addEventListener('input', updateSignupStep1State);
-        DOM.signupAiProvider.addEventListener('change', updateSignupStep2State);
-        DOM.signupApiKey.addEventListener('input', updateSignupStep2State);
+        DOM.signupAiProvider.addEventListener('change', () => {
+            // Provider changed -> previous validation no longer applies
+            state.signupValidatedKey = null;
+            state.signupValidatedProvider = null;
+            setKeyValidationStatus(DOM.signupValidateStatus, null);
+            updateSignupStep2State();
+        });
+        DOM.signupApiKey.addEventListener('input', () => {
+            // Key edited -> previous validation no longer applies
+            if (!isSignupKeyValidated()) {
+                setKeyValidationStatus(DOM.signupValidateStatus, null);
+            }
+            updateSignupStep2State();
+        });
+        if (DOM.signupValidateBtn) {
+
+            DOM.signupValidateBtn.addEventListener('click', handleSignupValidate);
+        }
+
 
         // Goal cards selection
         const goalCards = $$('.goal-card');
@@ -542,8 +580,65 @@
             return;
         }
 
+        if (!isSignupKeyValidated()) {
+            showAuthError('signup2', 'Please validate your API key before continuing.');
+            return;
+        }
+
         setSignupStep(3);
     }
+
+    // Returns true if the current provider+key combination has been successfully validated
+    function isSignupKeyValidated() {
+        const provider = DOM.signupAiProvider.value;
+        const apiKey = DOM.signupApiKey.value.trim();
+        return Boolean(
+            provider &&
+            apiKey &&
+            state.signupValidatedProvider === provider &&
+            state.signupValidatedKey === apiKey
+        );
+    }
+
+    async function handleSignupValidate() {
+        const provider = DOM.signupAiProvider.value;
+        const apiKey = DOM.signupApiKey.value.trim();
+
+        if (!provider) {
+            showAuthError('signup2', 'Please select an AI provider.');
+            return;
+        }
+        if (!isValidSignupApiKey(apiKey)) {
+            showAuthError('signup2', 'Please enter a valid API key.');
+            return;
+        }
+
+        DOM.signupValidateBtn.classList.add('is-validating');
+        DOM.signupValidateBtn.disabled = true;
+        setKeyValidationStatus(DOM.signupValidateStatus, 'checking', 'Checking API key…');
+
+        try {
+            const result = await ProviderFactory.validateApiKey(provider, apiKey);
+            if (result.valid) {
+                state.signupValidatedProvider = provider;
+                state.signupValidatedKey = apiKey;
+                setKeyValidationStatus(DOM.signupValidateStatus, 'success', '✓ API key verified');
+            } else {
+                state.signupValidatedProvider = null;
+                state.signupValidatedKey = null;
+                setKeyValidationStatus(DOM.signupValidateStatus, 'error', `✗ ${result.error || 'Invalid API key'}`);
+            }
+        } catch (e) {
+            state.signupValidatedProvider = null;
+            state.signupValidatedKey = null;
+            setKeyValidationStatus(DOM.signupValidateStatus, 'error', '✗ Invalid API key');
+        } finally {
+            DOM.signupValidateBtn.classList.remove('is-validating');
+            DOM.signupValidateBtn.disabled = false;
+            updateSignupStep2State();
+        }
+    }
+
 
     async function handleSignup() {
         const username = DOM.signupUsername.value.trim();
@@ -682,8 +777,14 @@
         if (DOM.signupKeyGuide) {
             DOM.signupKeyGuide.style.display = (provider === 'groq') ? 'block' : 'none';
         }
-        DOM.signupStep2NextBtn.disabled = !(provider && isValidSignupApiKey(apiKey));
+        // Validate button is enabled only when a provider + a well-formed key is present
+        if (DOM.signupValidateBtn) {
+            DOM.signupValidateBtn.disabled = !(provider && isValidSignupApiKey(apiKey));
+        }
+        // Next Step is enabled only after the key has been successfully validated
+        DOM.signupStep2NextBtn.disabled = !(provider && isValidSignupApiKey(apiKey) && isSignupKeyValidated());
     }
+
 
     function updateSignupStep3State() {
         DOM.signupBtn.disabled = !window.selectedDailyGoal;
@@ -2291,7 +2392,10 @@
     function openSettings() {
         DOM.settingsOverlay.style.display = 'block';
         DOM.settingsDrawer.classList.add('open');
+        // Treat pre-filled keys as validated and refresh the Save button gating
+        seedSettingsKeyValidation();
     }
+
 
     function closeSettings() {
         DOM.settingsOverlay.style.display = 'none';
@@ -2355,8 +2459,95 @@
         });
     }
 
+    // ─── Settings API Key Validation ─────────────────────
+
+    // Returns the list of settings key-validation controls
+    function getSettingsKeyControls() {
+        return Array.from(document.querySelectorAll('#settings-drawer .validate-key-btn'))
+            .map(btn => {
+                const inputId = btn.dataset.keyInput;
+                const input = document.getElementById(inputId);
+                const statusEl = document.getElementById(`${inputId}-status`);
+                return { btn, input, statusEl, inputId, provider: btn.dataset.provider };
+            })
+            .filter(c => c.input);
+    }
+
+    // Enable Save only when every entered key has been successfully validated
+    function updateSaveSettingsState() {
+        const controls = getSettingsKeyControls();
+        let allEnteredValid = true;
+        controls.forEach(({ btn, input, inputId }) => {
+            const val = (input.value || '').trim();
+            if (val && state.settingsKeyValidation[inputId] !== 'valid') {
+                allEnteredValid = false;
+            }
+            // Toggle each Validate button: enabled only if a value is present
+            if (btn) btn.disabled = !val;
+        });
+        DOM.saveSettingsBtn.disabled = !allEnteredValid;
+
+    }
+
+    async function handleSettingsKeyValidate(control) {
+        const { btn, input, statusEl, inputId, provider } = control;
+        const key = (input.value || '').trim();
+        if (!key) {
+            setKeyValidationStatus(statusEl, 'error', '✗ Please enter an API key first');
+            return;
+        }
+
+        btn.classList.add('is-validating');
+        btn.disabled = true;
+        setKeyValidationStatus(statusEl, 'checking', 'Checking API key…');
+
+        try {
+            const result = await ProviderFactory.validateApiKey(provider, key);
+            if (result.valid) {
+                state.settingsKeyValidation[inputId] = 'valid';
+                setKeyValidationStatus(statusEl, 'success', '✓ API key verified');
+            } else {
+                state.settingsKeyValidation[inputId] = 'invalid';
+                setKeyValidationStatus(statusEl, 'error', `✗ ${result.error || 'Invalid API key'}`);
+            }
+        } catch (e) {
+            state.settingsKeyValidation[inputId] = 'invalid';
+            setKeyValidationStatus(statusEl, 'error', '✗ Invalid API key');
+        } finally {
+            btn.classList.remove('is-validating');
+            updateSaveSettingsState();
+        }
+    }
+
+    function initSettingsKeyValidation() {
+        getSettingsKeyControls().forEach(control => {
+            control.btn.addEventListener('click', () => handleSettingsKeyValidate(control));
+            control.input.addEventListener('input', () => {
+                // Editing a key invalidates its previous validation result
+                delete state.settingsKeyValidation[control.inputId];
+                setKeyValidationStatus(control.statusEl, null);
+                updateSaveSettingsState();
+            });
+        });
+    }
+
+    // Treat already-saved (pre-filled, unchanged) keys as validated so the user
+    // isn't forced to re-validate existing keys just to change other settings.
+    function seedSettingsKeyValidation() {
+        state.settingsKeyValidation = {};
+        getSettingsKeyControls().forEach(({ input, statusEl, inputId }) => {
+            const val = (input.value || '').trim();
+            if (val) {
+                state.settingsKeyValidation[inputId] = 'valid';
+            }
+            setKeyValidationStatus(statusEl, null);
+        });
+        updateSaveSettingsState();
+    }
+
     async function saveSettings() {
         const provider = document.querySelector('input[name="ai-provider"]:checked')?.value || 'gemini';
+
         const geminiKey = DOM.geminiApiKey.value.trim();
         const geminiKey2 = (document.getElementById('gemini-api-key-2')?.value || '').trim();
         const geminiKey3 = (document.getElementById('gemini-api-key-3')?.value || '').trim();
@@ -2467,7 +2658,13 @@
             });
         });
 
+        // Wire up per-key "Validate" buttons and Save-gating
+        // (openSettings() re-seeds validation state each time the drawer opens)
+        initSettingsKeyValidation();
+
         DOM.chatMessages.addEventListener('scroll', updateScrollToBottomButton, { passive: true });
+
+
         window.addEventListener('resize', updateScrollToBottomButton);
         DOM.scrollToBottomBtn.addEventListener('click', () => {
             scrollToBottom();

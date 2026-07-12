@@ -432,7 +432,74 @@ class ProviderFactory {
                 throw new Error(`Unknown provider: ${providerName}`);
         }
     }
+
+    /**
+     * Validate an API key by making a lightweight request to the provider.
+     * Returns { valid: boolean, error?: string }.
+     */
+    static async validateApiKey(providerName, apiKey) {
+        const key = (apiKey || '').trim();
+        if (!key) {
+            return { valid: false, error: 'API key is empty.' };
+        }
+
+        try {
+            let response;
+            switch (providerName) {
+                case 'gemini':
+                    response = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`
+                    );
+                    break;
+                case 'groq':
+                    response = await fetch('https://api.groq.com/openai/v1/models', {
+                        headers: { 'Authorization': `Bearer ${key}` }
+                    });
+                    break;
+                case 'openrouter':
+                    response = await fetch('https://openrouter.ai/api/v1/key', {
+                        headers: { 'Authorization': `Bearer ${key}` }
+                    });
+                    break;
+                case 'cohere':
+                    response = await fetch('https://api.cohere.com/v1/models', {
+                        headers: { 'Authorization': `Bearer ${key}` }
+                    });
+                    break;
+                case 'openai':
+                    response = await fetch('https://api.openai.com/v1/models', {
+                        headers: { 'Authorization': `Bearer ${key}` }
+                    });
+                    break;
+                default:
+                    return { valid: false, error: `Unknown provider: ${providerName}` };
+            }
+
+            if (response.ok) {
+                return { valid: true };
+            }
+
+            // A rate-limit response still means the key itself is authorized.
+            if (response.status === 429) {
+                return { valid: true };
+            }
+
+            if (response.status === 401 || response.status === 403) {
+                return { valid: false, error: 'Invalid API key' };
+            }
+
+            const err = await response.json().catch(() => ({}));
+            const providerLabel = providerName.charAt(0).toUpperCase() + providerName.slice(1);
+            return {
+                valid: false,
+                error: formatApiError(response.status, err.error?.message || err.message, providerLabel)
+            };
+        } catch (e) {
+            return { valid: false, error: 'Network error. Please check your connection and try again.' };
+        }
+    }
 }
+
 
 // Export for use in app.js
 window.ProviderFactory = ProviderFactory;

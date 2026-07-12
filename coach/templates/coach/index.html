@@ -199,20 +199,28 @@
                                 <div id="signup-api-key-section" style="display:none;">
                                     <div class="form-group">
                                         <label for="signup-api-key">API Key</label>
-                                        <div class="key-input-wrapper">
-                                            <input type="password" id="signup-api-key"
-                                                placeholder="Enter your Groq API key" autocomplete="off">
-                                            <button class="toggle-key-vis" data-target="signup-api-key"
-                                                title="Show/hide key">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                    <circle cx="12" cy="12" r="3" />
-                                                </svg>
+                                        <div class="key-validate-row">
+                                            <div class="key-input-wrapper">
+                                                <input type="password" id="signup-api-key"
+                                                    placeholder="Enter your Groq API key" autocomplete="off">
+                                                <button class="toggle-key-vis" data-target="signup-api-key"
+                                                    title="Show/hide key">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                        <circle cx="12" cy="12" r="3" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <button type="button" class="validate-key-btn" id="signup-validate-btn"
+                                                data-key-input="signup-api-key">
+                                                <span>Validate</span>
                                             </button>
                                         </div>
+                                        <div class="key-validate-status" id="signup-validate-status"></div>
                                     </div>
                                 </div>
+
                             </div>
                             <div class="signup-key-guide" id="signup-key-guide" style="display:none;">
                                 <p class="signup-key-guide-title">How to get a Groq API key</p>
@@ -783,47 +791,66 @@
                         <p class="settings-desc">Add up to 3 API keys from different accounts to reduce interruptions when one key reaches its rate limit.</p>
                         <div class="form-group" id="gemini-key-group">
                             <label class="multi-key-label">Key 1 (Primary)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key">
-                                <button class="toggle-key-vis" data-target="gemini-api-key" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key">
+                                    <button class="toggle-key-vis" data-target="gemini-api-key" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="gemini-api-key" data-provider="gemini">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="gemini-api-key-status"></div>
                         </div>
                         <div class="form-group">
                             <label class="multi-key-label">Key 2 (Optional)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="gemini-api-key-2" placeholder="Enter backup Gemini API key">
-                                <button class="toggle-key-vis" data-target="gemini-api-key-2" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="gemini-api-key-2" placeholder="Enter backup Gemini API key">
+                                    <button class="toggle-key-vis" data-target="gemini-api-key-2" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="gemini-api-key-2" data-provider="gemini">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="gemini-api-key-2-status"></div>
                         </div>
                         <div class="form-group">
                             <label class="multi-key-label">Key 3 (Optional)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="gemini-api-key-3" placeholder="Enter backup Gemini API key">
-                                <button class="toggle-key-vis" data-target="gemini-api-key-3" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="gemini-api-key-3" placeholder="Enter backup Gemini API key">
+                                    <button class="toggle-key-vis" data-target="gemini-api-key-3" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="gemini-api-key-3" data-provider="gemini">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="gemini-api-key-3-status"></div>
                             <div class="api-key-guide">
                                 Get your key from <a href="https://aistudio.google.com/app/api-keys" target="_blank"
                                     rel="noopener noreferrer">Google AI Studio</a>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="settings-section">
@@ -846,47 +873,66 @@
                         <p class="settings-desc">Add up to 3 API keys from different accounts to reduce interruptions when one key reaches its rate limit.</p>
                         <div class="form-group" id="groq-key-group">
                             <label class="multi-key-label">Key 1 (Primary)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="groq-api-key" placeholder="Enter your Groq API key">
-                                <button class="toggle-key-vis" data-target="groq-api-key" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="groq-api-key" placeholder="Enter your Groq API key">
+                                    <button class="toggle-key-vis" data-target="groq-api-key" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="groq-api-key" data-provider="groq">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="groq-api-key-status"></div>
                         </div>
                         <div class="form-group">
                             <label class="multi-key-label">Key 2 (Optional)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="groq-api-key-2" placeholder="Enter backup Groq API key">
-                                <button class="toggle-key-vis" data-target="groq-api-key-2" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="groq-api-key-2" placeholder="Enter backup Groq API key">
+                                    <button class="toggle-key-vis" data-target="groq-api-key-2" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="groq-api-key-2" data-provider="groq">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="groq-api-key-2-status"></div>
                         </div>
                         <div class="form-group">
                             <label class="multi-key-label">Key 3 (Optional)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="groq-api-key-3" placeholder="Enter backup Groq API key">
-                                <button class="toggle-key-vis" data-target="groq-api-key-3" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="groq-api-key-3" placeholder="Enter backup Groq API key">
+                                    <button class="toggle-key-vis" data-target="groq-api-key-3" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="groq-api-key-3" data-provider="groq">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="groq-api-key-3-status"></div>
                             <div class="api-key-guide">
                                 Get your key from <a href="https://console.groq.com/keys" target="_blank"
                                     rel="noopener noreferrer">Groq Console</a>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="settings-section">
@@ -908,47 +954,66 @@
                         <p class="settings-desc">Add up to 3 API keys from different accounts to reduce interruptions when one key reaches its rate limit.</p>
                         <div class="form-group" id="openrouter-key-group">
                             <label class="multi-key-label">Key 1 (Primary)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="openrouter-api-key" placeholder="Enter your OpenRouter API key">
-                                <button class="toggle-key-vis" data-target="openrouter-api-key" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="openrouter-api-key" placeholder="Enter your OpenRouter API key">
+                                    <button class="toggle-key-vis" data-target="openrouter-api-key" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="openrouter-api-key" data-provider="openrouter">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="openrouter-api-key-status"></div>
                         </div>
                         <div class="form-group">
                             <label class="multi-key-label">Key 2 (Optional)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="openrouter-api-key-2" placeholder="Enter backup OpenRouter API key">
-                                <button class="toggle-key-vis" data-target="openrouter-api-key-2" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="openrouter-api-key-2" placeholder="Enter backup OpenRouter API key">
+                                    <button class="toggle-key-vis" data-target="openrouter-api-key-2" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="openrouter-api-key-2" data-provider="openrouter">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="openrouter-api-key-2-status"></div>
                         </div>
                         <div class="form-group">
                             <label class="multi-key-label">Key 3 (Optional)</label>
-                            <div class="key-input-wrapper">
-                                <input type="password" id="openrouter-api-key-3" placeholder="Enter backup OpenRouter API key">
-                                <button class="toggle-key-vis" data-target="openrouter-api-key-3" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="openrouter-api-key-3" placeholder="Enter backup OpenRouter API key">
+                                    <button class="toggle-key-vis" data-target="openrouter-api-key-3" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="openrouter-api-key-3" data-provider="openrouter">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="openrouter-api-key-3-status"></div>
                             <div class="api-key-guide">
                                 Get your key from <a href="https://openrouter.ai/settings/keys" target="_blank"
                                     rel="noopener noreferrer">OpenRouter</a>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="settings-section">
@@ -977,21 +1042,28 @@
                         <h3>Cohere API Key</h3>
                         <p class="settings-desc">Your key is stored securely in your profile</p>
                         <div class="form-group" id="cohere-key-group">
-                            <div class="key-input-wrapper">
-                                <input type="password" id="cohere-api-key" placeholder="Enter your Cohere API key">
-                                <button class="toggle-key-vis" data-target="cohere-api-key" title="Show/hide key">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                            <div class="key-validate-row">
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="cohere-api-key" placeholder="Enter your Cohere API key">
+                                    <button class="toggle-key-vis" data-target="cohere-api-key" title="Show/hide key">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="button" class="validate-key-btn" data-key-input="cohere-api-key" data-provider="cohere">
+                                    <span>Validate</span>
                                 </button>
                             </div>
+                            <div class="key-validate-status" id="cohere-api-key-status"></div>
                             <div class="api-key-guide">
                                 Get your key from <a href="https://dashboard.cohere.com/api-keys" target="_blank"
                                     rel="noopener noreferrer">Cohere Dashboard</a>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="settings-section">
