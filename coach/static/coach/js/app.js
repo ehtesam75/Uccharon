@@ -41,6 +41,8 @@
         currentMessages: [],
         isRecording: false,
         isSending: false,
+        abortController: null,   // AbortController for the in-flight AI generation
+        generationCancelled: false,
         recognition: null,       // Web Speech API instance
         mediaRecorder: null,     // MediaRecorder for Whisper / Gemini audio
         activeStream: null,      // active microphone MediaStream
@@ -1768,9 +1770,35 @@
 
     // ─── Send Message ───────────────────────────────────
 
+    // Toggle the send button between its normal (Send) and generating (Stop) states
+    function setGeneratingUI(isGenerating) {
+        if (!DOM.sendBtn) return;
+        DOM.sendBtn.classList.toggle('generating', isGenerating);
+        DOM.sendBtn.disabled = false;
+        DOM.sendBtn.title = isGenerating ? 'Stop generating' : 'Send message';
+        DOM.sendBtn.setAttribute('aria-label', isGenerating ? 'Stop generating' : 'Send message');
+    }
+
+    // User-initiated cancellation of an in-flight AI response.
+    // Aborts the network request; sendMessage() handles all cleanup so no
+    // partial response, feedback, history, or stats are ever saved.
+    function stopGeneration() {
+        if (!state.isSending) return;
+        state.generationCancelled = true;
+        if (state.abortController) {
+            try { state.abortController.abort(); } catch (e) { /* ignore */ }
+        }
+    }
+
     async function sendMessage() {
+        // If a generation is in progress, the button acts as a Stop button.
+        if (state.isSending) {
+            stopGeneration();
+            return;
+        }
+
         const text = DOM.chatInput.value.trim();
-        if (!text || state.isSending) return;
+        if (!text) return;
 
         // Word count check
         const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
@@ -1800,9 +1828,12 @@
         }
 
         state.isSending = true;
+        state.generationCancelled = false;
+        state.abortController = new AbortController();
+        const abortSignal = state.abortController.signal;
         DOM.chatInput.value = '';
         resizeChatInput();
-        DOM.sendBtn.disabled = true;
+        setGeneratingUI(true);   // Turn the Send button into a Stop button
         clearEmptyChatState();
 
         // Show user message immediately
@@ -1874,18 +1905,40 @@
                 }
 
                 const aiProvider = ProviderFactory.create(provider, key, model, state.settings.explanation_language);
-                aiResponse = await aiProvider.sendMessage(text, state.currentMessages);
+                aiResponse = await aiProvider.sendMessage(text, state.currentMessages, { signal: abortSignal });
                 
                 finalProvider = provider;
                 finalModel = model;
                 finalKeyIndex = keyIndex;
                 break; // success!
             } catch (err) {
+                // User pressed Stop — abort the whole flow immediately, no fallback.
+                if (state.generationCancelled || err.name === 'AbortError' || abortSignal.aborted) {
+                    lastError = err;
+                    break;
+                }
                 lastError = err;
                 console.error(`[Fallback] ${displayProvider} • ${displayModel} (key ${keyIndex + 1}) failed:`, err.message);
                 prevProvider = provider;
                 prevModel = model;
             }
+        }
+
+        // If the user cancelled, discard everything: no partial response, no save,
+        // no feedback, no stats/history. Clean the UI back to a normal state.
+        if (state.generationCancelled) {
+            thinkingEl.remove();
+            userMsgEl.remove();
+            if (state.currentMessages.length === 0) {
+                renderMessages();   // restore empty-chat placeholder
+            }
+            state.isSending = false;
+            state.abortController = null;
+            state.generationCancelled = false;
+            setGeneratingUI(false);
+            DOM.chatInput.focus();
+            updateScrollToBottomButton();
+            return;
         }
 
         // Save last successful combination
@@ -1976,7 +2029,9 @@
             scrollLatestMessageIntoView(errEl);
         } finally {
             state.isSending = false;
-            DOM.sendBtn.disabled = false;
+            state.abortController = null;
+            state.generationCancelled = false;
+            setGeneratingUI(false);   // Restore the Send button
         }
     }
 

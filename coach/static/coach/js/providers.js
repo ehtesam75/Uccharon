@@ -89,7 +89,7 @@ REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text be
 
 
 // Extra instruction appended when the user chooses a non-English explanation language.
-// Only the explanatory/tip text is translated — everything else stays in English.
+// Only the explanatory/tip text is generated in Bengali — everything else stays in English.
 const BENGALI_EXPLANATION_INSTRUCTION = `EXPLANATION LANGUAGE (CRITICAL OVERRIDE):
 Write the explanatory/tip text in Bengali (বাংলা). This applies ONLY to these fields:
 - grammar_corrections[].explanation → Bengali
@@ -141,7 +141,7 @@ class GeminiProvider {
         this.explanationLanguage = explanationLanguage;
     }
 
-    async sendMessage(userMessage, conversationHistory = []) {
+    async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
 
         const MAX_HISTORY_TURNS = 8; // match Groq's setting
@@ -187,7 +187,8 @@ class GeminiProvider {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: options.signal
         });
 
         if (!response.ok) {
@@ -234,7 +235,7 @@ class GroqProvider {
         this.explanationLanguage = explanationLanguage;
     }
 
-    async sendMessage(userMessage, conversationHistory = []) {
+    async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = 'https://api.groq.com/openai/v1/chat/completions';
 
         const MAX_HISTORY_TURNS = 8; // keep last 8 exchanges, tune as needed
@@ -273,7 +274,8 @@ class GroqProvider {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.apiKey}`
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: options.signal
         });
 
         if (!response.ok) {
@@ -317,7 +319,7 @@ class OpenRouterProvider {
         this.explanationLanguage = explanationLanguage;
     }
 
-    async sendMessage(userMessage, conversationHistory = []) {
+    async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = 'https://openrouter.ai/api/v1/chat/completions';
         const MAX_HISTORY_TURNS = 8;
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
@@ -346,7 +348,8 @@ class OpenRouterProvider {
                 'HTTP-Referer': window.location.href, // Recommended for OpenRouter
                 'X-Title': 'Uccharon Coach' // Recommended for OpenRouter
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: options.signal
         });
 
         if (!response.ok) {
@@ -387,7 +390,7 @@ class CohereProvider {
         this.explanationLanguage = explanationLanguage;
     }
 
-    async sendMessage(userMessage, conversationHistory = []) {
+    async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = 'https://api.cohere.com/v1/chat';
         const MAX_HISTORY_TURNS = 8;
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
@@ -415,7 +418,8 @@ class CohereProvider {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.apiKey}`
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: options.signal
         });
 
         if (!response.ok) {

@@ -2026,6 +2026,38 @@ select {
     box-shadow: none;
 }
 
+/* Stop-generation state: send button turns into a stop button */
+.send-btn.generating {
+    background: var(--accent-error);
+    box-shadow: 0 2px 8px rgba(225, 112, 85, 0.3);
+    animation: sendStopPulse 1.6s ease-in-out infinite;
+}
+
+.send-btn.generating:hover {
+    box-shadow: 0 4px 14px rgba(225, 112, 85, 0.45);
+}
+
+.send-btn.generating .send-icon {
+    display: none;
+}
+
+.send-btn.generating .stop-icon {
+    display: block !important;
+}
+
+@keyframes sendStopPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(225, 112, 85, 0.35);
+    }
+
+    50% {
+        box-shadow: 0 0 0 7px rgba(225, 112, 85, 0);
+    }
+}
+
+
 .mic-status {
     display: flex;
     align-items: center;
