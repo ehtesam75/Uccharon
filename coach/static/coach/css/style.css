@@ -1962,6 +1962,14 @@ select {
     right: 0;
 }
 
+.multi-key-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
 .api-key-guide {
     font-size: 0.75rem;
     color: var(--text-tertiary);

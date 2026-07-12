@@ -16,8 +16,14 @@
             theme: 'dark',
             ai_provider: 'gemini',
             gemini_api_key: '',
+            gemini_api_key_2: '',
+            gemini_api_key_3: '',
             groq_api_key: '',
+            groq_api_key_2: '',
+            groq_api_key_3: '',
             openrouter_api_key: '',
+            openrouter_api_key_2: '',
+            openrouter_api_key_3: '',
 
             gemini_model: 'gemini-2.0-flash',
             groq_model: 'llama-3.3-70b-versatile',
@@ -1526,8 +1532,19 @@
             return;
         }
 
-        // Determine active providers
-        const activeProviders = ['gemini', 'groq', 'openrouter'].filter(p => state.settings[`${p}_api_key`]);
+        // Build list of all provider+key attempts (try all keys for preferred provider first, then others)
+        function _getProviderKeys(providerName) {
+            const keys = [];
+            const k1 = state.settings[`${providerName}_api_key`];
+            const k2 = state.settings[`${providerName}_api_key_2`];
+            const k3 = state.settings[`${providerName}_api_key_3`];
+            if (k1) keys.push(k1);
+            if (k2) keys.push(k2);
+            if (k3) keys.push(k3);
+            return keys;
+        }
+
+        const activeProviders = ['gemini', 'groq', 'openrouter'].filter(p => _getProviderKeys(p).length > 0);
         if (activeProviders.length === 0) {
             showToast(`Please set an AI provider API key in Settings.`, 'error');
             openSettings();
@@ -1537,6 +1554,16 @@
         let startProvider = state.settings.ai_provider;
         if (!activeProviders.includes(startProvider)) {
             startProvider = activeProviders[0];
+        }
+
+        // Build ordered attempt list: all keys for startProvider first, then other providers' keys
+        const attemptList = []; // [{provider, key, model}]
+        const orderedProviders = [startProvider, ...activeProviders.filter(p => p !== startProvider)];
+        for (const p of orderedProviders) {
+            const model = state.settings[`${p}_model`];
+            for (const key of _getProviderKeys(p)) {
+                attemptList.push({ provider: p, key, model });
+            }
         }
 
         // Create conversation if needed
@@ -1578,31 +1605,25 @@
 
         const thinkingTextEl = thinkingEl.querySelector('.thinking-text');
         
-        let currentProviderIndex = activeProviders.indexOf(startProvider);
-        let attempts = 0;
-        const maxAttempts = activeProviders.length;
-        
         let aiResponse = null;
         let finalProvider = null;
         let finalModel = null;
         let lastError = null;
 
-        while (attempts < maxAttempts) {
-            const provider = activeProviders[currentProviderIndex];
-            const apiKey = state.settings[`${provider}_api_key`];
-            const model = state.settings[`${provider}_model`];
+        for (let i = 0; i < attemptList.length; i++) {
+            const { provider, key, model } = attemptList[i];
             const displayModel = MODEL_DISPLAY_NAMES[model] || model;
 
             try {
-                if (attempts > 0) {
-                    thinkingTextEl.textContent = `The provider failed. Switching to another model...`;
+                if (i > 0) {
+                    thinkingTextEl.textContent = `Key/provider failed. Trying next key...`;
                     await new Promise(r => setTimeout(r, 800));
                     thinkingTextEl.textContent = `Analyzing your English with ${displayModel}...`;
                 } else {
                     thinkingTextEl.textContent = 'Analyzing your English...';
                 }
 
-                const aiProvider = ProviderFactory.create(provider, apiKey, model);
+                const aiProvider = ProviderFactory.create(provider, key, model);
                 aiResponse = await aiProvider.sendMessage(text, state.currentMessages);
                 
                 finalProvider = provider;
@@ -1610,12 +1631,10 @@
                 break; // success!
             } catch (err) {
                 lastError = err;
-                console.error(`Provider ${provider} failed:`, err);
-                attempts++;
-                currentProviderIndex = (currentProviderIndex + 1) % activeProviders.length;
+                console.error(`Provider ${provider} (key ${i + 1}) failed:`, err);
                 
-                if (attempts < maxAttempts) {
-                    thinkingTextEl.textContent = `Model limit reached. Trying another model...`;
+                if (i < attemptList.length - 1) {
+                    thinkingTextEl.textContent = `Rate limit reached. Trying backup key...`;
                     await new Promise(r => setTimeout(r, 1000));
                 }
             }
@@ -2142,8 +2161,22 @@
 
     function applySettingsToUI() {
         DOM.geminiApiKey.value = state.settings.gemini_api_key || '';
+        const geminiKey2El = document.getElementById('gemini-api-key-2');
+        const geminiKey3El = document.getElementById('gemini-api-key-3');
+        if (geminiKey2El) geminiKey2El.value = state.settings.gemini_api_key_2 || '';
+        if (geminiKey3El) geminiKey3El.value = state.settings.gemini_api_key_3 || '';
+
         DOM.groqApiKey.value = state.settings.groq_api_key || '';
+        const groqKey2El = document.getElementById('groq-api-key-2');
+        const groqKey3El = document.getElementById('groq-api-key-3');
+        if (groqKey2El) groqKey2El.value = state.settings.groq_api_key_2 || '';
+        if (groqKey3El) groqKey3El.value = state.settings.groq_api_key_3 || '';
+
         DOM.openrouterApiKey.value = state.settings.openrouter_api_key || '';
+        const openrouterKey2El = document.getElementById('openrouter-api-key-2');
+        const openrouterKey3El = document.getElementById('openrouter-api-key-3');
+        if (openrouterKey2El) openrouterKey2El.value = state.settings.openrouter_api_key_2 || '';
+        if (openrouterKey3El) openrouterKey3El.value = state.settings.openrouter_api_key_3 || '';
 
         DOM.openaiApiKey.value = state.settings.openai_api_key || '';
 
@@ -2186,8 +2219,14 @@
     async function saveSettings() {
         const provider = document.querySelector('input[name="ai-provider"]:checked')?.value || 'gemini';
         const geminiKey = DOM.geminiApiKey.value.trim();
+        const geminiKey2 = (document.getElementById('gemini-api-key-2')?.value || '').trim();
+        const geminiKey3 = (document.getElementById('gemini-api-key-3')?.value || '').trim();
         const groqKey = DOM.groqApiKey.value.trim();
+        const groqKey2 = (document.getElementById('groq-api-key-2')?.value || '').trim();
+        const groqKey3 = (document.getElementById('groq-api-key-3')?.value || '').trim();
         const openrouterKey = DOM.openrouterApiKey.value.trim();
+        const openrouterKey2 = (document.getElementById('openrouter-api-key-2')?.value || '').trim();
+        const openrouterKey3 = (document.getElementById('openrouter-api-key-3')?.value || '').trim();
 
         const openaiKey = DOM.openaiApiKey.value.trim();
         const geminiModel = DOM.geminiModelSelect.value;
@@ -2208,8 +2247,14 @@
 
         state.settings.ai_provider = provider;
         state.settings.gemini_api_key = geminiKey;
+        state.settings.gemini_api_key_2 = geminiKey2;
+        state.settings.gemini_api_key_3 = geminiKey3;
         state.settings.groq_api_key = groqKey;
+        state.settings.groq_api_key_2 = groqKey2;
+        state.settings.groq_api_key_3 = groqKey3;
         state.settings.openrouter_api_key = openrouterKey;
+        state.settings.openrouter_api_key_2 = openrouterKey2;
+        state.settings.openrouter_api_key_3 = openrouterKey3;
 
         state.settings.openai_api_key = openaiKey;
         state.settings.gemini_model = geminiModel;
@@ -2233,8 +2278,14 @@
             await api('/api/settings/', 'PUT', {
                 ai_provider: provider,
                 gemini_api_key: geminiKey,
+                gemini_api_key_2: geminiKey2,
+                gemini_api_key_3: geminiKey3,
                 groq_api_key: groqKey,
+                groq_api_key_2: groqKey2,
+                groq_api_key_3: groqKey3,
                 openrouter_api_key: openrouterKey,
+                openrouter_api_key_2: openrouterKey2,
+                openrouter_api_key_3: openrouterKey3,
 
                 daily_word_goal: dailyWordGoal
             });

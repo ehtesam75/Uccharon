@@ -163,8 +163,14 @@ def current_user_view(request):
                 'theme': profile.theme,
                 'ai_provider': profile.ai_provider,
                 'gemini_api_key': profile.gemini_api_key,
+                'gemini_api_key_2': profile.gemini_api_key_2,
+                'gemini_api_key_3': profile.gemini_api_key_3,
                 'groq_api_key': profile.groq_api_key,
+                'groq_api_key_2': profile.groq_api_key_2,
+                'groq_api_key_3': profile.groq_api_key_3,
                 'openrouter_api_key': profile.openrouter_api_key,
+                'openrouter_api_key_2': profile.openrouter_api_key_2,
+                'openrouter_api_key_3': profile.openrouter_api_key_3,
 
                 'daily_word_goal': profile.daily_word_goal,
             }
@@ -186,8 +192,14 @@ def settings_view(request):
             'theme': profile.theme,
             'ai_provider': profile.ai_provider,
             'gemini_api_key': profile.gemini_api_key,
+            'gemini_api_key_2': profile.gemini_api_key_2,
+            'gemini_api_key_3': profile.gemini_api_key_3,
             'groq_api_key': profile.groq_api_key,
+            'groq_api_key_2': profile.groq_api_key_2,
+            'groq_api_key_3': profile.groq_api_key_3,
             'openrouter_api_key': profile.openrouter_api_key,
+            'openrouter_api_key_2': profile.openrouter_api_key_2,
+            'openrouter_api_key_3': profile.openrouter_api_key_3,
 
             'daily_word_goal': profile.daily_word_goal,
         })
@@ -199,10 +211,22 @@ def settings_view(request):
         profile.ai_provider = data['ai_provider']
     if 'gemini_api_key' in data:
         profile.gemini_api_key = data['gemini_api_key']
+    if 'gemini_api_key_2' in data:
+        profile.gemini_api_key_2 = data['gemini_api_key_2']
+    if 'gemini_api_key_3' in data:
+        profile.gemini_api_key_3 = data['gemini_api_key_3']
     if 'groq_api_key' in data:
         profile.groq_api_key = data['groq_api_key']
+    if 'groq_api_key_2' in data:
+        profile.groq_api_key_2 = data['groq_api_key_2']
+    if 'groq_api_key_3' in data:
+        profile.groq_api_key_3 = data['groq_api_key_3']
     if 'openrouter_api_key' in data:
         profile.openrouter_api_key = data['openrouter_api_key']
+    if 'openrouter_api_key_2' in data:
+        profile.openrouter_api_key_2 = data['openrouter_api_key_2']
+    if 'openrouter_api_key_3' in data:
+        profile.openrouter_api_key_3 = data['openrouter_api_key_3']
 
     if 'daily_word_goal' in data:
         new_goal = int(data['daily_word_goal'])
