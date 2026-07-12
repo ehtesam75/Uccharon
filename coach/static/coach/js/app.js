@@ -112,6 +112,7 @@
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => document.querySelectorAll(sel);
     const ACTIVE_CONVERSATION_STORAGE_KEY = 'uccharon_active_conversation_id';
+    const ACTIVE_VIEW_STORAGE_KEY = 'uccharon_active_view';
 
     const DOM = {
         authScreen: $('#auth-screen'),
@@ -335,6 +336,60 @@
         sessionStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
     }
 
+    // ─── Active view persistence (chat | stats | history) ────
+    // Persisted per-user in sessionStorage so a page refresh can reopen the
+    // exact page the user was on. sessionStorage is per-tab-session, so a fresh
+    // browser session / PWA launch starts empty automatically.
+
+    function getViewStorageKey(userId) {
+        return userId ? `${ACTIVE_VIEW_STORAGE_KEY}_${userId}` : ACTIVE_VIEW_STORAGE_KEY;
+    }
+
+    function getPersistedView(userId = state.user?.id) {
+        if (userId) {
+            return sessionStorage.getItem(getViewStorageKey(userId));
+        }
+        return sessionStorage.getItem(ACTIVE_VIEW_STORAGE_KEY);
+    }
+
+    function setPersistedView(view) {
+        if (view && state.user?.id) {
+            sessionStorage.setItem(getViewStorageKey(state.user.id), view);
+        }
+    }
+
+    function clearPersistedView(userId = state.user?.id) {
+        sessionStorage.removeItem(ACTIVE_VIEW_STORAGE_KEY);
+        if (userId) {
+            sessionStorage.removeItem(getViewStorageKey(userId));
+        }
+    }
+
+    function clearAllPersistedViews() {
+        sessionStorage.removeItem(ACTIVE_VIEW_STORAGE_KEY);
+        Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith(`${ACTIVE_VIEW_STORAGE_KEY}_`)) {
+                sessionStorage.removeItem(key);
+            }
+        });
+    }
+
+    // Returns true only when the current page load is an actual reload/refresh
+    // (as opposed to a fresh navigation, PWA launch, or new browser session).
+    function isPageRefresh() {
+        try {
+            const navEntries = performance.getEntriesByType('navigation');
+            if (navEntries && navEntries.length > 0) {
+                return navEntries[0].type === 'reload';
+            }
+        } catch (e) { /* ignore */ }
+        // Legacy fallback for older browsers
+        if (performance.navigation) {
+            return performance.navigation.type === 1; // TYPE_RELOAD
+        }
+        return false;
+    }
+
     function getCollapsedSectionsKey(userId = state.user?.id) {
         return `uccharon_collapsed_sections_${userId ?? 'guest'}`;
     }
@@ -391,6 +446,8 @@
         showWelcomeScreen();
     }
 
+    // Restore whichever chat the user had open (used on refresh). Falls back to
+    // the welcome screen if the persisted conversation no longer exists.
     async function restoreActiveConversation() {
         const persistedConversationId = getPersistedConversationId();
         if (persistedConversationId) {
@@ -402,12 +459,49 @@
             clearPersistedConversationId();
         }
 
-        if (state.conversations.length > 0) {
-            await selectConversation(state.conversations[0]);
+        showWelcomeScreen();
+    }
+
+    // Decide what to show on initial page load:
+    //  • Page refresh  → reopen the exact page/chat the user was on.
+    //  • New session (fresh launch, new tab, PWA open) → start a new chat.
+    // sessionStorage is per-tab-session, so a brand-new session has no persisted
+    // view/conversation and naturally lands on a fresh chat.
+    async function restoreSession() {
+        if (!isPageRefresh()) {
+            // New browser/PWA session: never auto-restore the previous chat.
+            clearPersistedView();
+            clearPersistedConversationId();
+            await startNewSession();
             return;
         }
 
-        showWelcomeScreen();
+        // Page refresh: reopen the same page the user was on.
+        const persistedView = getPersistedView();
+
+        if (persistedView === 'stats') {
+            await showDashboard();
+            return;
+        }
+        if (persistedView === 'history') {
+            await showLearningHistory();
+            return;
+        }
+
+        // Default: restore the chat they had open.
+        await restoreActiveConversation();
+    }
+
+    // Fresh-session entry point: reopen a new, empty chat rather than the
+    // previous conversation.
+    async function startNewSession() {
+        setPersistedView('chat');
+        if (state.conversations.length > 0 && state.conversations[0].title === 'New Conversation') {
+            // Reuse an existing blank conversation instead of piling up new ones.
+            await selectConversation(state.conversations[0], { loadMessages: false });
+        } else {
+            await createConversation();
+        }
     }
 
     // ═══════════════════════════════════════════════════════
@@ -530,7 +624,10 @@
             clearOtherUsersConversationIds(state.user.id);
             loadCollapsedSections();
             await loadUserData(true);
-            await restoreActiveConversation();
+            // A fresh login is a new session — start a new chat, don't restore.
+            clearPersistedView();
+            clearPersistedConversationId();
+            await startNewSession();
             showApp();
         } catch (err) {
             showAuthError('login', err.message);
@@ -835,7 +932,7 @@
                 loadCollapsedSections();
                 clearOtherUsersConversationIds(state.user.id);
                 await loadConversations(true);
-                await restoreActiveConversation();
+                await restoreSession();
                 showApp();
             } else {
                 clearAllPersistedConversationIds();
@@ -861,6 +958,7 @@
 
             await api('/api/auth/logout/', 'POST');
             clearAllPersistedConversationIds();
+            clearAllPersistedViews();
             resetChatState();
             state.user = null;
             DOM.app.style.display = 'none';
@@ -1038,6 +1136,7 @@
         state.currentConversation = convo;
         state.previousScores = null;
         setPersistedConversationId(convo.id);
+        setPersistedView('chat');
 
         DOM.welcomeScreen.style.display = 'none';
         DOM.dashboardScreen.style.display = 'none';
@@ -3017,6 +3116,10 @@
         DOM.dashboardScreen.style.display = 'flex';
         updateScrollToBottomButton();
 
+        // Remember that the user is on Stats so a refresh reopens it
+        setPersistedView('stats');
+        clearPersistedConversationId();
+
         // Close mobile sidebar
         closeMobileSidebar();
 
@@ -3330,6 +3433,10 @@
         DOM.dashboardScreen.style.display = 'none';
         DOM.learningHistoryScreen.style.display = 'flex';
         updateScrollToBottomButton();
+
+        // Remember that the user is on Learning History so a refresh reopens it
+        setPersistedView('history');
+        clearPersistedConversationId();
 
         // Close mobile sidebar
         closeMobileSidebar();
