@@ -2842,7 +2842,7 @@
         if (providerRadio) providerRadio.checked = true;
         _updateAiProviderUI(aiProvider);
 
-        DOM.dailyWordGoalSelect.value = state.settings.daily_word_goal || '50';
+        DOM.dailyWordGoalSelect.value = state.settings.daily_word_goal || '250';
 
         if (DOM.explanationLanguageSelect) {
             DOM.explanationLanguageSelect.value = state.settings.explanation_language || 'en';

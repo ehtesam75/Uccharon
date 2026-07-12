@@ -259,25 +259,25 @@
                     <div class="auth-error" id="signup-error-3"></div>
 
                     <div class="goal-selection-container">
-                        <div class="goal-card" data-goal="50">
-                            <div class="goal-number">50</div>
-                            <div class="goal-label">Words/Day</div>
-                            <div class="goal-desc">Casual</div>
-                        </div>
                         <div class="goal-card" data-goal="100">
                             <div class="goal-number">100</div>
                             <div class="goal-label">Words/Day</div>
-                            <div class="goal-desc">Steady</div>
+                            <div class="goal-desc">Light Practice</div>
                         </div>
-                        <div class="goal-card" data-goal="200">
-                            <div class="goal-number">200</div>
+                        <div class="goal-card" data-goal="250">
+                            <div class="goal-number">250</div>
                             <div class="goal-label">Words/Day</div>
-                            <div class="goal-desc">Intensive</div>
+                            <div class="goal-desc">Recommended</div>
                         </div>
                         <div class="goal-card" data-goal="500">
-                            <div class="goal-number">500+</div>
+                            <div class="goal-number">500</div>
                             <div class="goal-label">Words/Day</div>
-                            <div class="goal-desc">Immersive</div>
+                            <div class="goal-desc">Serious Learner</div>
+                        </div>
+                        <div class="goal-card" data-goal="1000">
+                            <div class="goal-number">1000+</div>
+                            <div class="goal-label">Words/Day</div>
+                            <div class="goal-desc">Intensive Practice</div>
                         </div>
                     </div>
 
@@ -741,10 +741,10 @@
                     <p class="settings-desc">Set your daily learning goal. <strong>Note:</strong> Any changes made will
                         only take effect starting the next day.</p>
                     <select id="daily-word-goal" class="settings-select">
-                        <option value="50">50 words/day</option>
-                        <option value="100">100 words/day</option>
-                        <option value="200">200 words/day</option>
-                        <option value="500">500+ words/day</option>
+                        <option value="100">100 words/day (Light Practice)</option>
+                        <option value="250">250 words/day (Recommended)</option>
+                        <option value="500">500 words/day (Serious Learner)</option>
+                        <option value="1000">1000+ words/day (Intensive Practice)</option>
                     </select>
                 </div>
 
@@ -1225,33 +1225,27 @@
 
             <div class="goal-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <label class="goal-option">
-                    <input type="radio" name="onboarding-goal" value="50" checked style="display:none;">
-                    <div class="goal-card"
-                        style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
-                        <span class="goal-num"
-                            style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">50</span>
-                        <span class="goal-text"
-                            style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
-                    </div>
-                </label>
-                <label class="goal-option">
-                    <input type="radio" name="onboarding-goal" value="100" style="display:none;">
+                    <input type="radio" name="onboarding-goal" value="100" checked style="display:none;">
                     <div class="goal-card"
                         style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
                         <span class="goal-num"
                             style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">100</span>
                         <span class="goal-text"
                             style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
+                        <span class="goal-remark"
+                            style="display: block; font-size: 0.72rem; color: var(--text-tertiary);">Light Practice</span>
                     </div>
                 </label>
                 <label class="goal-option">
-                    <input type="radio" name="onboarding-goal" value="200" style="display:none;">
+                    <input type="radio" name="onboarding-goal" value="250" style="display:none;">
                     <div class="goal-card"
                         style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
                         <span class="goal-num"
-                            style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">200</span>
+                            style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">250</span>
                         <span class="goal-text"
                             style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
+                        <span class="goal-remark"
+                            style="display: block; font-size: 0.72rem; color: var(--text-tertiary);">Recommended</span>
                     </div>
                 </label>
                 <label class="goal-option">
@@ -1259,9 +1253,23 @@
                     <div class="goal-card"
                         style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
                         <span class="goal-num"
-                            style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">500+</span>
+                            style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">500</span>
                         <span class="goal-text"
                             style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
+                        <span class="goal-remark"
+                            style="display: block; font-size: 0.72rem; color: var(--text-tertiary);">Serious Learner</span>
+                    </div>
+                </label>
+                <label class="goal-option">
+                    <input type="radio" name="onboarding-goal" value="1000" style="display:none;">
+                    <div class="goal-card"
+                        style="border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                        <span class="goal-num"
+                            style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">1000+</span>
+                        <span class="goal-text"
+                            style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">words/day</span>
+                        <span class="goal-remark"
+                            style="display: block; font-size: 0.72rem; color: var(--text-tertiary);">Intensive Practice</span>
                     </div>
                 </label>
             </div>

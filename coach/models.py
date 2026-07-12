@@ -40,7 +40,7 @@ class UserProfile(models.Model):
     openrouter_api_key_2 = models.CharField(max_length=255, blank=True, default='')
     openrouter_api_key_3 = models.CharField(max_length=255, blank=True, default='')
 
-    daily_word_goal = models.IntegerField(default=50)
+    daily_word_goal = models.IntegerField(default=250)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
