@@ -1519,6 +1519,139 @@
         return section;
     }
 
+    // ─── Fallback System Constants ──────────────────────
+
+    const PROVIDER_MODELS = {
+        gemini: [
+            'gemini-2.0-flash',
+            'gemini-2.0-pro-exp-02-05',
+            'gemini-1.5-pro',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-8b'
+        ],
+        groq: [
+            'llama-3.3-70b-versatile',
+            'llama-3.1-8b-instant',
+            'deepseek-r1-distill-llama-70b',
+            'mixtral-8x7b-32768'
+        ],
+        openrouter: [
+            'meta-llama/llama-3.3-70b-instruct',
+            'openai/gpt-oss-120b',
+            'qwen/qwen3-235b-a22b-2507',
+            'qwen/qwen3-30b-a3b-instruct-2507',
+            'deepseek/deepseek-chat',
+            'deepseek/deepseek-r1',
+            'google/gemma-3-27b-it',
+            'openai/gpt-3.5-turbo',
+            'nvidia/nemotron-3-super-120b-a12b',
+            'openrouter/auto'
+        ]
+    };
+
+    const PROVIDER_DISPLAY = { gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter' };
+
+    function _getLastSuccess() {
+        try {
+            const raw = localStorage.getItem('uccharon_last_success');
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    }
+
+    function _saveLastSuccess(provider, model, keyIndex) {
+        localStorage.setItem('uccharon_last_success', JSON.stringify({ provider, model, keyIndex }));
+    }
+
+    function _getProviderKeys(providerName) {
+        const keys = [];
+        const k1 = state.settings[`${providerName}_api_key`];
+        const k2 = state.settings[`${providerName}_api_key_2`];
+        const k3 = state.settings[`${providerName}_api_key_3`];
+        if (k1) keys.push(k1);
+        if (k2) keys.push(k2);
+        if (k3) keys.push(k3);
+        return keys;
+    }
+
+    /**
+     * Build the full ordered attempt list following the priority:
+     * 1. Current provider + current model + last successful key first, then other keys
+     * 2. Current provider + other models + all keys
+     * 3. Other providers + their models + their keys
+     */
+    function _buildAttemptList() {
+        const lastSuccess = _getLastSuccess();
+        const startProvider = state.settings.ai_provider;
+        const startModel = state.settings[`${startProvider}_model`];
+        const allProviders = ['gemini', 'groq', 'openrouter'];
+        const attemptList = []; // [{provider, model, key, keyIndex, label}]
+        const seen = new Set(); // dedup: "provider|model|keyIndex"
+
+        function addAttempts(provider, model, keys, priorityKeyIndex) {
+            // Add priority key first if valid
+            if (priorityKeyIndex !== undefined && priorityKeyIndex < keys.length) {
+                const sig = `${provider}|${model}|${priorityKeyIndex}`;
+                if (!seen.has(sig)) {
+                    seen.add(sig);
+                    attemptList.push({ provider, model, key: keys[priorityKeyIndex], keyIndex: priorityKeyIndex });
+                }
+            }
+            // Then other keys
+            for (let i = 0; i < keys.length; i++) {
+                const sig = `${provider}|${model}|${i}`;
+                if (!seen.has(sig)) {
+                    seen.add(sig);
+                    attemptList.push({ provider, model, key: keys[i], keyIndex: i });
+                }
+            }
+        }
+
+        // Phase 1: Current provider + current model + all keys (last successful key first)
+        const startKeys = _getProviderKeys(startProvider);
+        if (startKeys.length > 0) {
+            const priorityKey = (lastSuccess && lastSuccess.provider === startProvider && lastSuccess.model === startModel)
+                ? lastSuccess.keyIndex : undefined;
+            addAttempts(startProvider, startModel, startKeys, priorityKey);
+        }
+
+        // Phase 2: Current provider + other models + all keys
+        const otherModels = (PROVIDER_MODELS[startProvider] || []).filter(m => m !== startModel);
+        for (const model of otherModels) {
+            if (startKeys.length > 0) {
+                const priorityKey = (lastSuccess && lastSuccess.provider === startProvider && lastSuccess.model === model)
+                    ? lastSuccess.keyIndex : undefined;
+                addAttempts(startProvider, model, startKeys, priorityKey);
+            }
+        }
+
+        // Phase 3: Other providers + their selected model first, then other models
+        const otherProviders = allProviders.filter(p => p !== startProvider);
+        for (const provider of otherProviders) {
+            const keys = _getProviderKeys(provider);
+            if (keys.length === 0) continue;
+
+            const selectedModel = state.settings[`${provider}_model`];
+            const providerModels = PROVIDER_MODELS[provider] || [];
+
+            // Selected model first
+            if (selectedModel) {
+                const priorityKey = (lastSuccess && lastSuccess.provider === provider && lastSuccess.model === selectedModel)
+                    ? lastSuccess.keyIndex : undefined;
+                addAttempts(provider, selectedModel, keys, priorityKey);
+            }
+
+            // Then other models for this provider
+            for (const model of providerModels) {
+                if (model === selectedModel) continue;
+                const priorityKey = (lastSuccess && lastSuccess.provider === provider && lastSuccess.model === model)
+                    ? lastSuccess.keyIndex : undefined;
+                addAttempts(provider, model, keys, priorityKey);
+            }
+        }
+
+        return attemptList;
+    }
+
     // ─── Send Message ───────────────────────────────────
 
     async function sendMessage() {
@@ -1532,18 +1665,6 @@
             return;
         }
 
-        // Build list of all provider+key attempts (try all keys for preferred provider first, then others)
-        function _getProviderKeys(providerName) {
-            const keys = [];
-            const k1 = state.settings[`${providerName}_api_key`];
-            const k2 = state.settings[`${providerName}_api_key_2`];
-            const k3 = state.settings[`${providerName}_api_key_3`];
-            if (k1) keys.push(k1);
-            if (k2) keys.push(k2);
-            if (k3) keys.push(k3);
-            return keys;
-        }
-
         const activeProviders = ['gemini', 'groq', 'openrouter'].filter(p => _getProviderKeys(p).length > 0);
         if (activeProviders.length === 0) {
             showToast(`Please set an AI provider API key in Settings.`, 'error');
@@ -1551,19 +1672,12 @@
             return;
         }
 
-        let startProvider = state.settings.ai_provider;
-        if (!activeProviders.includes(startProvider)) {
-            startProvider = activeProviders[0];
-        }
-
-        // Build ordered attempt list: all keys for startProvider first, then other providers' keys
-        const attemptList = []; // [{provider, key, model}]
-        const orderedProviders = [startProvider, ...activeProviders.filter(p => p !== startProvider)];
-        for (const p of orderedProviders) {
-            const model = state.settings[`${p}_model`];
-            for (const key of _getProviderKeys(p)) {
-                attemptList.push({ provider: p, key, model });
-            }
+        // Build the comprehensive attempt list
+        const attemptList = _buildAttemptList();
+        if (attemptList.length === 0) {
+            showToast(`No valid API key/model combinations available.`, 'error');
+            openSettings();
+            return;
         }
 
         // Create conversation if needed
@@ -1608,19 +1722,41 @@
         let aiResponse = null;
         let finalProvider = null;
         let finalModel = null;
+        let finalKeyIndex = 0;
         let lastError = null;
 
+        let prevProvider = null;
+        let prevModel = null;
+        let allKeysFailedForCurrentModel = false;
+
         for (let i = 0; i < attemptList.length; i++) {
-            const { provider, key, model } = attemptList[i];
+            const { provider, model, key, keyIndex } = attemptList[i];
+            const displayProvider = PROVIDER_DISPLAY[provider] || provider;
             const displayModel = MODEL_DISPLAY_NAMES[model] || model;
 
+            // Determine what changed to show appropriate status message
+            const providerChanged = prevProvider !== null && provider !== prevProvider;
+            const modelChanged = prevModel !== null && model !== prevModel && !providerChanged;
+            const keyChanged = i > 0 && !providerChanged && !modelChanged;
+
             try {
-                if (i > 0) {
-                    thinkingTextEl.textContent = `Key/provider failed. Trying next key...`;
+                if (i === 0) {
+                    thinkingTextEl.textContent = `Analyzing your English...`;
+                    // Brief pause then show model info
+                    await new Promise(r => setTimeout(r, 300));
+                    thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
+                } else if (providerChanged) {
+                    thinkingTextEl.textContent = `Provider unavailable. Switching to another provider...`;
+                    await new Promise(r => setTimeout(r, 1000));
+                    thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
+                } else if (modelChanged) {
+                    thinkingTextEl.textContent = `All API keys failed. Trying another model...`;
                     await new Promise(r => setTimeout(r, 800));
-                    thinkingTextEl.textContent = `Analyzing your English with ${displayModel}...`;
-                } else {
-                    thinkingTextEl.textContent = 'Analyzing your English...';
+                    thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
+                } else if (keyChanged) {
+                    thinkingTextEl.textContent = `API key limit reached. Trying another API key...`;
+                    await new Promise(r => setTimeout(r, 800));
+                    thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
                 }
 
                 const aiProvider = ProviderFactory.create(provider, key, model);
@@ -1628,16 +1764,19 @@
                 
                 finalProvider = provider;
                 finalModel = model;
+                finalKeyIndex = keyIndex;
                 break; // success!
             } catch (err) {
                 lastError = err;
-                console.error(`Provider ${provider} (key ${i + 1}) failed:`, err);
-                
-                if (i < attemptList.length - 1) {
-                    thinkingTextEl.textContent = `Rate limit reached. Trying backup key...`;
-                    await new Promise(r => setTimeout(r, 1000));
-                }
+                console.error(`[Fallback] ${displayProvider} • ${displayModel} (key ${keyIndex + 1}) failed:`, err.message);
+                prevProvider = provider;
+                prevModel = model;
             }
+        }
+
+        // Save last successful combination
+        if (aiResponse && finalProvider) {
+            _saveLastSuccess(finalProvider, finalModel, finalKeyIndex);
         }
 
         try {
