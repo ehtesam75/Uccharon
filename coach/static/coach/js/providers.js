@@ -34,7 +34,7 @@ For every user message, you MUST respond with this exact JSON structure:
 
 {
   "input_status": "valid | gibberish | non_english | mixed_language",
-  "conversational_reply": "A warm, natural conversational response to what the user said. Be engaging and friendly.",
+  "conversational_reply": "A warm, natural conversational response to what the user said. Be engaging and friendly. Do not ask follow-up questions, as follow-up questions are generated separately in the dedicated Follow-up Questions section."
   "grammar_corrections": [
     {
       "original": "ONLY a phrase or sentence containing a structural grammar error (tense, articles, subject-verb agreement, prepositions, or word forms)",

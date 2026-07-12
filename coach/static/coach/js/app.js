@@ -29,8 +29,10 @@
             groq_model: 'llama-3.3-70b-versatile',
             openrouter_model: 'meta-llama/llama-3.3-70b-instruct',
 
-            voice_provider: 'browser',    // 'browser' | 'openai' | 'gemini-stt'
-            openai_api_key: ''             // used for Whisper STT
+            voice_provider: 'browser',    // 'browser' | 'openai' | 'gemini-stt' | 'groq-whisper'
+            openai_api_key: '',            // used for Whisper STT
+            groq_whisper_model: 'whisper-large-v3-turbo'   // Groq Whisper STT model
+
         },
         conversations: [],
         currentConversation: null,
@@ -39,6 +41,7 @@
         isSending: false,
         recognition: null,       // Web Speech API instance
         mediaRecorder: null,     // MediaRecorder for Whisper / Gemini audio
+        activeStream: null,      // active microphone MediaStream
         audioChunks: [],         // accumulated audio blobs
         previousScores: null,
         conversationLoadToken: 0,
@@ -186,8 +189,11 @@
 
         saveSettingsBtn: $('#save-settings-btn'),
         openaiKeyGroup: $('#openai-key-group'),
+        groqWhisperGroup: $('#groq-whisper-group'),
+        groqWhisperModelSelect: $('#groq-whisper-model-select'),
         voiceBrowserNotice: $('#voice-browser-notice'),
         geminiSttNotice: $('#gemini-stt-notice'),
+
 
         // Dashboard
         statsBtn: $('#stats-btn'),
@@ -817,7 +823,9 @@
                 state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
                 state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
                 state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
+                state.settings.groq_whisper_model = localStorage.getItem('uccharon_groq_whisper_model') || 'whisper-large-v3-turbo';
                 resetChatState();
+
                 migrateLegacyConversationId(state.user.id);
                 loadCollapsedSections();
                 clearOtherUsersConversationIds(state.user.id);
@@ -891,8 +899,10 @@
 
             state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
             state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
+            state.settings.groq_whisper_model = localStorage.getItem('uccharon_groq_whisper_model') || 'whisper-large-v3-turbo';
         } catch (e) { /* ignore */ }
         await loadConversations(skipAutoSelect);
+
     }
 
     function updateUserInfo() {
@@ -2247,6 +2257,14 @@
                 return;
             }
             _startMediaRecorder('gemini-stt');
+
+        } else if (provider === 'groq-whisper') {
+            if (_getProviderKeys('groq').length === 0) {
+                showToast('Please set your Groq API key in Settings to use Groq Whisper.', 'error');
+                openSettings();
+                return;
+            }
+            _startMediaRecorder('groq-whisper');
         }
     }
 
@@ -2289,48 +2307,86 @@
 
     // ─── MediaRecorder-based recording (Whisper / Gemini) ──
 
+    // Reset the status label back to its idle "Listening..." text
+    function _resetMicStatusText() {
+        const statusSpan = DOM.micStatus.querySelector('.mic-status-text');
+        if (statusSpan) statusSpan.textContent = 'Listening...';
+    }
+
+    // Fully tear down any lingering recorder/stream so a new recording starts clean
+    function _cleanupMediaRecorder() {
+        try {
+            if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+                state.mediaRecorder.stop();
+            }
+        } catch (e) { /* ignore */ }
+        try {
+            if (state.activeStream) {
+                state.activeStream.getTracks().forEach(t => t.stop());
+            }
+        } catch (e) { /* ignore */ }
+        state.mediaRecorder = null;
+        state.activeStream = null;
+        state.audioChunks = [];
+    }
+
     function _startMediaRecorder(targetProvider) {
+        // Ensure no previous recorder/stream is still holding the microphone
+        _cleanupMediaRecorder();
+
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
                 state.initialInputText = DOM.chatInput.value;
-                state.audioChunks = [];
+
+                // Use a recording-local chunks array to prevent any cross-recording contamination
+                const chunks = [];
+                state.activeStream = stream;
+
                 // Prefer webm/opus; fall back to whatever the browser offers
                 const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
                     ? 'audio/webm;codecs=opus'
                     : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '');
 
                 const options = mimeType ? { mimeType } : {};
-                state.mediaRecorder = new MediaRecorder(stream, options);
+                const recorder = new MediaRecorder(stream, options);
+                state.mediaRecorder = recorder;
 
-                state.mediaRecorder.ondataavailable = (e) => {
-                    if (e.data && e.data.size > 0) state.audioChunks.push(e.data);
+                recorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) chunks.push(e.data);
                 };
 
-                state.mediaRecorder.onstop = async () => {
-                    // Stop all tracks to release the microphone
-                    stream.getTracks().forEach(t => t.stop());
-                    const blob = new Blob(state.audioChunks, { type: mimeType || 'audio/webm' });
-                    state.audioChunks = [];
+                recorder.onstop = async () => {
+                    // Release the microphone immediately and drop stale references
+                    try { stream.getTracks().forEach(t => t.stop()); } catch (e) { /* ignore */ }
+                    if (state.activeStream === stream) state.activeStream = null;
+                    if (state.mediaRecorder === recorder) state.mediaRecorder = null;
 
-                    if (blob.size === 0) return;
+                    const blob = new Blob(chunks, { type: mimeType || 'audio/webm' });
+                    chunks.length = 0;
 
-                    // Show "Transcribing..." indicator
+                    // Guard against empty / too-short recordings that cause hallucinated output
+                    if (blob.size < 1200) {
+                        DOM.micStatus.style.display = 'none';
+                        _resetMicStatusText();
+                        DOM.micBtn.disabled = false;
+                        if (blob.size > 0) {
+                            showToast('No speech detected. Please try again.', 'error');
+                        }
+                        return;
+                    }
+
+                    // Show "Transcribing..." indicator (target the dedicated text span, not the pulse dot)
                     DOM.micStatus.style.display = 'flex';
-                    const statusSpan = DOM.micStatus.querySelector('span:not(.mic-provider-badge)');
+                    const statusSpan = DOM.micStatus.querySelector('.mic-status-text');
                     if (statusSpan) statusSpan.textContent = 'Transcribing...';
                     DOM.micBtn.disabled = true;
 
                     try {
-                        let transcript = '';
-                        if (targetProvider === 'openai') {
-                            transcript = await _transcribeWithWhisper(blob);
-                        } else if (targetProvider === 'gemini-stt') {
-                            transcript = await _transcribeWithGemini(blob);
-                        }
+                        const transcript = await _transcribeWithSttFallback(blob, targetProvider, statusSpan);
 
-                        if (transcript) {
+                        if (transcript && transcript.trim()) {
                             let prefix = state.initialInputText || '';
-                            if (prefix && !prefix.endsWith(' ') && transcript && !transcript.startsWith(' ')) {
+                            if (prefix && !prefix.endsWith(' ') && !transcript.startsWith(' ')) {
                                 prefix += ' ';
                             }
                             DOM.chatInput.value = prefix + transcript.trim();
@@ -2341,16 +2397,19 @@
                         showToast('Transcription failed: ' + err.message, 'error');
                     } finally {
                         DOM.micStatus.style.display = 'none';
-                        if (statusSpan) statusSpan.textContent = 'Listening...';
+                        _resetMicStatusText();
                         DOM.micBtn.disabled = false;
                     }
                 };
 
-                state.mediaRecorder.start();
-                const label = targetProvider === 'openai' ? 'Whisper' : 'Gemini';
+                recorder.start();
+                const STT_LABELS = { openai: 'Whisper', 'gemini-stt': 'Gemini', 'groq-whisper': 'Groq' };
+                const label = STT_LABELS[targetProvider] || 'Voice';
                 _setRecordingUI(true, label);
             })
             .catch(err => {
+                _cleanupMediaRecorder();
+                _setRecordingUI(false);
                 if (err.name === 'NotAllowedError') {
                     showToast('Microphone access denied. Please allow access in browser settings.', 'error');
                 } else {
@@ -2361,7 +2420,8 @@
 
     // ─── OpenAI Whisper transcription ────────────────────
 
-    async function _transcribeWithWhisper(audioBlob) {
+    async function _transcribeWithWhisper(audioBlob, apiKey) {
+        apiKey = apiKey || state.settings.openai_api_key;
         const formData = new FormData();
         // Whisper requires a filename with a supported extension
         const ext = audioBlob.type.includes('webm') ? 'webm' : 'mp4';
@@ -2371,7 +2431,7 @@
 
         const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${state.settings.openai_api_key}` },
+            headers: { 'Authorization': `Bearer ${apiKey}` },
             body: formData
         });
 
@@ -2386,9 +2446,9 @@
 
     // ─── Gemini audio understanding transcription ─────────
 
-    async function _transcribeWithGemini(audioBlob) {
-        const apiKey = state.settings.gemini_api_key;
-        const model = state.settings.gemini_model || 'gemini-2.0-flash';
+    async function _transcribeWithGemini(audioBlob, apiKey, model) {
+        apiKey = apiKey || state.settings.gemini_api_key;
+        model = model || state.settings.gemini_model || 'gemini-2.0-flash';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         // Convert blob to base64
@@ -2433,6 +2493,152 @@
 
         const data = await res.json();
         return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+
+    // ─── Groq Whisper transcription ──────────────────
+
+    async function _transcribeWithGroq(audioBlob, apiKey, model) {
+        const formData = new FormData();
+        const ext = audioBlob.type.includes('webm') ? 'webm' : 'mp4';
+        formData.append('file', new File([audioBlob], `recording.${ext}`, { type: audioBlob.type }));
+        formData.append('model', model || 'whisper-large-v3-turbo');
+        formData.append('language', 'en');
+        formData.append('response_format', 'json');
+        formData.append('temperature', '0');
+
+        const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${apiKey}` },
+            body: formData
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Groq Whisper error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        return data.text || '';
+    }
+
+    // ─── Speech-to-Text fallback + last-success tracking ───
+
+    function _getSttLastSuccess() {
+        try {
+            const raw = localStorage.getItem('uccharon_stt_last_success');
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    }
+
+    function _saveSttLastSuccess(provider, model, keyIndex) {
+        localStorage.setItem('uccharon_stt_last_success', JSON.stringify({ provider, model, keyIndex }));
+    }
+
+    const GROQ_WHISPER_MODELS = ['whisper-large-v3-turbo', 'whisper-large-v3'];
+
+    /**
+     * Build an ordered STT attempt list.
+     * Priority: chosen provider first (last successful model/key prioritized),
+     * then remaining providers as fallback. Each key is tried before moving on.
+     * Attempt shape: { provider, model, key, keyIndex, label }
+     */
+    function _buildSttAttemptList(primaryProvider) {
+        const last = _getSttLastSuccess();
+        const groqKeys = _getProviderKeys('groq');
+        const geminiKeys = _getProviderKeys('gemini');
+        const openaiKey = state.settings.openai_api_key;
+        const groqModel = state.settings.groq_whisper_model || 'whisper-large-v3-turbo';
+        const geminiModel = state.settings.gemini_model || 'gemini-2.0-flash';
+
+        const builders = {
+            'groq-whisper': () => {
+                const list = [];
+                const models = [groqModel, ...GROQ_WHISPER_MODELS.filter(m => m !== groqModel)];
+                for (const model of models) {
+                    const order = [];
+                    if (last && last.provider === 'groq-whisper' && last.model === model &&
+                        typeof last.keyIndex === 'number' && last.keyIndex < groqKeys.length) {
+                        order.push(last.keyIndex);
+                    }
+                    for (let i = 0; i < groqKeys.length; i++) if (!order.includes(i)) order.push(i);
+                    for (const i of order) {
+                        list.push({ provider: 'groq-whisper', model, key: groqKeys[i], keyIndex: i, label: 'Groq' });
+                    }
+                }
+                return list;
+            },
+            'openai': () => {
+                if (!openaiKey) return [];
+                return [{ provider: 'openai', model: 'whisper-1', key: openaiKey, keyIndex: 0, label: 'Whisper' }];
+            },
+            'gemini-stt': () => {
+                const list = [];
+                const order = [];
+                if (last && last.provider === 'gemini-stt' &&
+                    typeof last.keyIndex === 'number' && last.keyIndex < geminiKeys.length) {
+                    order.push(last.keyIndex);
+                }
+                for (let i = 0; i < geminiKeys.length; i++) if (!order.includes(i)) order.push(i);
+                for (const i of order) {
+                    list.push({ provider: 'gemini-stt', model: geminiModel, key: geminiKeys[i], keyIndex: i, label: 'Gemini' });
+                }
+                return list;
+            }
+        };
+
+        const providerOrder = [primaryProvider, ...Object.keys(builders).filter(p => p !== primaryProvider)];
+        const attempts = [];
+        for (const prov of providerOrder) {
+            if (builders[prov]) attempts.push(...builders[prov]());
+        }
+        return attempts;
+    }
+
+    async function _transcribeAttempt(attempt, blob) {
+        if (attempt.provider === 'groq-whisper') {
+            return _transcribeWithGroq(blob, attempt.key, attempt.model);
+        } else if (attempt.provider === 'openai') {
+            return _transcribeWithWhisper(blob, attempt.key);
+        } else if (attempt.provider === 'gemini-stt') {
+            return _transcribeWithGemini(blob, attempt.key, attempt.model);
+        }
+        throw new Error('Unknown STT provider: ' + attempt.provider);
+    }
+
+    /**
+     * Transcribe with automatic fallback across keys and providers.
+     * Remembers the last successful provider/model/key for future prioritization.
+     */
+    async function _transcribeWithSttFallback(blob, primaryProvider, statusSpan) {
+        const attempts = _buildSttAttemptList(primaryProvider);
+        if (attempts.length === 0) {
+            throw new Error('No available speech-to-text provider is configured.');
+        }
+
+        let lastError = null;
+        let prevLabel = null;
+        for (let i = 0; i < attempts.length; i++) {
+            const attempt = attempts[i];
+            if (statusSpan) {
+                if (i === 0) {
+                    statusSpan.textContent = 'Transcribing...';
+                } else if (attempt.label !== prevLabel) {
+                    statusSpan.textContent = `Switching to ${attempt.label}...`;
+                } else {
+                    statusSpan.textContent = 'Trying another key...';
+                }
+            }
+            try {
+                const transcript = await _transcribeAttempt(attempt, blob);
+                _saveSttLastSuccess(attempt.provider, attempt.model, attempt.keyIndex);
+                return transcript;
+            } catch (err) {
+                lastError = err;
+                console.error(`[STT Fallback] ${attempt.label} (${attempt.model}, key ${attempt.keyIndex + 1}) failed:`, err.message);
+                prevLabel = attempt.label;
+            }
+        }
+        throw lastError || new Error('All speech-to-text providers failed.');
     }
 
     // ═══════════════════════════════════════════════════════
@@ -2485,6 +2691,7 @@
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.0-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
         DOM.openrouterModelSelect.value = state.settings.openrouter_model || 'openrouter/free';
+        if (DOM.groqWhisperModelSelect) DOM.groqWhisperModelSelect.value = state.settings.groq_whisper_model || 'whisper-large-v3-turbo';
 
 
         // Voice Provider radios
@@ -2499,6 +2706,7 @@
         DOM.openaiKeyGroup.style.display = provider === 'openai' ? 'block' : 'none';
         DOM.geminiSttNotice.style.display = provider === 'gemini-stt' ? 'flex' : 'none';
         DOM.voiceBrowserNotice.style.display = provider === 'browser' ? 'flex' : 'none';
+        if (DOM.groqWhisperGroup) DOM.groqWhisperGroup.style.display = provider === 'groq-whisper' ? 'block' : 'none';
     }
 
     /** Show/hide the AI Provider settings based on selected AI provider */
@@ -2612,6 +2820,7 @@
         const geminiModel = DOM.geminiModelSelect.value;
         const groqModel = DOM.groqModelSelect.value;
         const openrouterModel = DOM.openrouterModelSelect.value;
+        const groqWhisperModel = DOM.groqWhisperModelSelect?.value || 'whisper-large-v3-turbo';
 
         const voiceProvider = document.querySelector('input[name="voice-provider"]:checked')?.value || 'browser';
         const dailyWordGoal = DOM.dailyWordGoalSelect.value;
@@ -2622,6 +2831,10 @@
         }
         if (voiceProvider === 'gemini-stt' && !geminiKey) {
             showToast('Gemini API key is required for Gemini voice input.', 'error');
+            return;
+        }
+        if (voiceProvider === 'groq-whisper' && !groqKey) {
+            showToast('Groq API key is required for Groq Whisper voice input.', 'error');
             return;
         }
 
@@ -2642,6 +2855,7 @@
         state.settings.openrouter_model = openrouterModel;
 
         state.settings.voice_provider = voiceProvider;
+        state.settings.groq_whisper_model = groqWhisperModel;
 
         // Save model selections to localStorage
         localStorage.setItem('uccharon_gemini_model', geminiModel);
@@ -2650,6 +2864,7 @@
 
         localStorage.setItem('uccharon_voice_provider', state.settings.voice_provider);
         localStorage.setItem('uccharon_openai_api_key', openaiKey);
+        localStorage.setItem('uccharon_groq_whisper_model', groqWhisperModel);
 
         DOM.saveSettingsBtn.classList.add('btn-loading');
         DOM.saveSettingsBtn.disabled = true;

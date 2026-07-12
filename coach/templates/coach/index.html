@@ -519,7 +519,7 @@
                     </div>
                     <div id="mic-status" class="mic-status" style="display:none">
                         <span class="mic-pulse"></span>
-                        <span>Listening...</span>
+                        <span class="mic-status-text">Listening...</span>
                     </div>
                 </div>
             </div>
@@ -1115,7 +1115,35 @@
                                 <div class="provider-radio-circle"></div>
                             </div>
                         </label>
+                        <label class="provider-card" id="voice-provider-groq-card">
+                            <input type="radio" name="voice-provider" value="groq-whisper">
+                            <div class="provider-card-content">
+                                <div class="provider-icon">⚡</div>
+                                <div class="provider-info">
+                                    <div class="provider-name">Groq Whisper</div>
+                                    <div class="provider-desc">Ultra-fast Whisper transcription</div>
+                                </div>
+                                <div class="provider-radio-circle"></div>
+                            </div>
+                        </label>
                     </div>
+
+                    <!-- Groq Whisper model + notice -->
+                    <div id="groq-whisper-group" style="margin-top:20px; display:none;">
+                        <div class="form-group">
+                            <label for="groq-whisper-model-select">Groq Whisper Model</label>
+                            <select id="groq-whisper-model-select" class="settings-select">
+                                <option value="whisper-large-v3-turbo">Whisper Large v3 Turbo (Fastest)</option>
+                                <option value="whisper-large-v3">Whisper Large v3 (Most Accurate)</option>
+                            </select>
+                        </div>
+                        <div class="voice-provider-notice">
+                            <span class="notice-icon">ℹ️</span>
+                            <span>Groq Whisper uses your existing Groq API keys above, with automatic fallback across
+                                all three keys.</span>
+                        </div>
+                    </div>
+
 
                     <div class="form-group" id="openai-key-group" style="margin-top:20px; display:none;">
                         <label for="openai-api-key">OpenAI API Key <span
