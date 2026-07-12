@@ -2858,7 +2858,7 @@ select {
 
     .sidebar {
         position: fixed;
-        left: -100%;
+        left: 0;
         z-index: 30;
         width: 280px;
         min-width: 280px;
@@ -2866,19 +2866,36 @@ select {
         border-right: none;
         border-top-right-radius: var(--radius-lg);
         border-bottom-right-radius: var(--radius-lg);
-        transition: left var(--transition-slow);
+        /* Animate transform (GPU-accelerated) instead of `left` to avoid
+           per-frame layout reflow and eliminate mobile open lag. */
+        transform: translateX(-100%);
+        transition: transform var(--transition-normal);
+        will-change: transform;
         background: var(--bg-secondary);
     }
 
     .sidebar.mobile-open {
-        left: 0;
+        transform: translateX(0);
     }
 
     .sidebar.collapsed {
-        left: -100%;
+        left: 0;
+        transform: translateX(-100%);
     }
 
+    /* Drop the (per-frame) backdrop blur on mobile — it repaints the whole
+       viewport every animation frame and is the main source of sidebar lag.
+       A plain translucent scrim gives the same visual affordance cheaply. */
+    .sidebar-overlay {
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transition: opacity var(--transition-normal), visibility var(--transition-normal);
+    }
+
+
     .mobile-sidebar-toggle {
+
         display: flex;
         border-radius: var(--radius-full);
         box-shadow: var(--shadow-md);

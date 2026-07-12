@@ -2164,10 +2164,60 @@
         }
     }
 
-    function startRecording() {
+    // Returns the current mic permission state: 'granted' | 'denied' | 'prompt' | 'unknown'
+    async function _getMicPermissionState() {
+        if (navigator.permissions && navigator.permissions.query) {
+            try {
+                const status = await navigator.permissions.query({ name: 'microphone' });
+                return status.state;
+            } catch (e) {
+                // Some browsers (e.g. Firefox) throw for 'microphone' — fall through
+                return 'unknown';
+            }
+        }
+        return 'unknown';
+    }
+
+    // Explicitly prompts the user for mic access. Returns true if granted.
+    async function _requestMicPermission() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showToast('Microphone is not supported in this browser.', 'error');
+            return false;
+        }
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Release immediately — we only wanted to confirm/obtain permission
+            stream.getTracks().forEach(t => t.stop());
+            return true;
+        } catch (err) {
+            if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+                showToast('Microphone access is blocked. Please allow microphone access in your browser settings, then try again.', 'error');
+            } else if (err && err.name === 'NotFoundError') {
+                showToast('No microphone was found. Please connect a microphone and try again.', 'error');
+            } else {
+                showToast('Could not access the microphone: ' + (err?.message || 'Unknown error'), 'error');
+            }
+            return false;
+        }
+    }
+
+    async function startRecording() {
         const provider = state.settings.voice_provider || 'browser';
 
+        // Proactively verify microphone permission before attempting to record.
+        const permissionState = await _getMicPermissionState();
+        if (permissionState === 'denied') {
+            showToast('Microphone access is blocked. Please allow microphone access in your browser settings to use voice input.', 'error');
+            return;
+        }
+        if (permissionState !== 'granted') {
+            // 'prompt' or 'unknown' — ask the user for access up-front so they get a clear prompt
+            const granted = await _requestMicPermission();
+            if (!granted) return;
+        }
+
         if (provider === 'browser') {
+
             if (!state.recognition) {
                 showToast('Browser speech recognition is not supported. Switch to another provider in Settings.', 'error');
                 return;
