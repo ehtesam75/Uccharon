@@ -670,7 +670,9 @@
                         <div class="time-range-tabs" id="history-filter-tabs">
                             <button class="time-tab active" data-filter="all">All</button>
                             <button class="time-tab" data-filter="grammar">Grammar</button>
+                            <button class="time-tab" data-filter="mechanics">Mechanics</button>
                             <button class="time-tab" data-filter="sentence">Sentences</button>
+
                             <button class="time-tab" data-filter="pronunciation">Pronunciation</button>
                             <button class="time-tab" data-filter="vocabulary">Vocabulary</button>
                         </div>
@@ -1281,8 +1283,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <script src="{% static 'coach/js/providers.js' %}?v=5"></script>
-    <script src="{% static 'coach/js/app.js' %}?v=5"></script>
+    <script src="{% static 'coach/js/providers.js' %}?v=6"></script>
+    <script src="{% static 'coach/js/app.js' %}?v=6"></script>
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {

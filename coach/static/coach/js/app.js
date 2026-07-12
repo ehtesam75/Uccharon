@@ -1502,7 +1502,30 @@
             }
         }
 
+        // 1.2 Mechanics Corrections (spelling, capitalization, punctuation)
+        if (showFullFeedback) {
+            if (response.mechanics_corrections && response.mechanics_corrections.length > 0) {
+                let mechanicsHtml = '';
+                response.mechanics_corrections.forEach(mc => {
+                    mechanicsHtml += `
+                        <div class="grammar-item">
+                            <div class="grammar-original">${escapeHtml(mc.original)}</div>
+                            <div class="grammar-corrected">${escapeHtml(mc.corrected)}</div>
+                            <div class="grammar-explanation">${escapeHtml(mc.tip || mc.explanation || '')}</div>
+                        </div>
+                    `;
+                });
+                card.appendChild(createFeedbackSection('✏️', 'Mechanics Corrections', mechanicsHtml));
+            } else {
+                card.appendChild(createFeedbackSection(
+                    '✏️', 'Mechanics Corrections',
+                    '<div style="color: var(--accent-success); font-size: 0.875rem;">✓ No spelling, capitalization, or punctuation issues. Great job!</div>'
+                ));
+            }
+        }
+
         // 1.5 Sentence Improvements
+
         if (response.sentence_improvements && response.sentence_improvements.length > 0) {
             let improvementHtml = '';
             response.sentence_improvements.forEach(si => {
@@ -3528,8 +3551,17 @@
                         <div class="grammar-corrected">${escapeHtml(item.suggestion)}</div>
                         ${item.explanation ? `<div class="grammar-explanation">${escapeHtml(item.explanation)}</div>` : ''}
                     </div>`;
+            } else if (item.type === 'mechanics') {
+                icon = '✏️'; title = 'Mechanics Correction';
+                bodyHtml = `
+                    <div class="grammar-item">
+                        <div class="grammar-original">${escapeHtml(item.original)}</div>
+                        <div class="grammar-corrected">${escapeHtml(item.suggestion)}</div>
+                        ${item.explanation ? `<div class="grammar-explanation">${escapeHtml(item.explanation)}</div>` : ''}
+                    </div>`;
             } else if (item.type === 'sentence') {
                 icon = '✨'; title = 'Sentence Improvement';
+
                 bodyHtml = `
                     <div class="grammar-item">
                         <div class="grammar-original">${escapeHtml(item.original)}</div>

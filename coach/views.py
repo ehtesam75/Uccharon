@@ -704,11 +704,23 @@ def learning_history_view(request):
                     'explanation': gc.get('explanation', ''),
                 })
                 
+            for mc in (ai_resp.get('mechanics_corrections') or []):
+                if not isinstance(mc, dict):
+                    continue
+                history_items.append({
+                    'type': 'mechanics',
+                    'date': local_date,
+                    'original': mc.get('original', ''),
+                    'suggestion': mc.get('corrected', ''),
+                    'explanation': mc.get('tip', '') or mc.get('explanation', ''),
+                })
+
             for si in (ai_resp.get('sentence_improvements') or []):
                 if not isinstance(si, dict):
                     continue
                 history_items.append({
                     'type': 'sentence',
+
                     'date': local_date,
                     'original': si.get('original', ''),
                     'suggestion': si.get('improved', ''),

@@ -16,6 +16,7 @@ Input Validation
 If the message is meaningless or not understandable English:
 - Do not generate Grammar Corrections, Sentence Improvements, Native Versions, Pronunciation Guidance, Vocabulary Improvements, or Performance Rating.
 - Respond only in conversational_reply, explaining that the message was not understandable and asking the user to write a clear English sentence.
+- Do not classify messages with understandable English mistakes as gibberish (grammar errors, poor sentence structure, or simple vocabulary are still evaluatable).
 - IMPORTANT RULE: If a message contains both gibberish and non-English text, classify it as gibberish in input_status.
 
 2. Non-English Input
@@ -49,6 +50,14 @@ For every user message, you MUST respond with this exact JSON structure:
       "explanation": "brief explanation of why it sounds better"
     }
   ],
+  "mechanics_corrections": [
+    {
+      "original": "ONLY a phrase/sentence containing a spelling, capitalization, or punctuation error",
+      "corrected": "Fix ONLY the spelling, capitalization, and punctuation. Do NOT change grammar, word choice, or phrasing.",
+      "tip": "A short, friendly explanation of the mechanics rule (spelling, capitalization, or punctuation) that was fixed."
+    }
+  ],
+
   "native_versions": [
     "Natural everyday conversational English rewrite of the user's ENTIRE message.",
     "A different natural phrasing using alternative wording and sentence structure. Do not make minor word changes only — both versions should feel genuinely different."
@@ -96,9 +105,11 @@ RULES:
 1. All scores must be integers from 0-10. Give honest rating.
 2. Grammar score MUST be based ONLY on grammatical correctness. Any issue that is not a structural grammar error (tense, articles, subject–verb agreement, prepositions, word forms) must NOT influence the grammar score under any circumstances.
 3. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. They must ONLY be included in sentence_improvements and must not affect any other score.
-4. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, and vocabulary_improvements.
+4. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, vocabulary_improvements, and mechanics_corrections.
 5. For pronunciation and vocabulary improvements, you MUST identify and recommend improvements for ALL relevant words and phrases in the user's entire message.
 6. Score each of the five performance metrics (grammar, vocabulary, naturalness, expression, mechanics) independently and strictly according to its own definition above. Do not let one metric influence another.
+7. mechanics_corrections must contain ONLY spelling, capitalization, and punctuation fixes, derived from the Mechanics metric. Keep it SEPARATE from grammar_corrections — never put grammar errors here and never put mechanics errors in grammar_corrections. Ignore casual chat style (e.g., lowercase "i", missing end punctuation) UNLESS it significantly reduces readability or understanding. If there are no mechanics issues, leave mechanics_corrections as [].
+
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
 
@@ -108,6 +119,7 @@ const BENGALI_EXPLANATION_INSTRUCTION = `EXPLANATION LANGUAGE (CRITICAL OVERRIDE
 Write the explanatory/tip text in Bengali (বাংলা). This applies ONLY to these fields:
 - grammar_corrections[].explanation → Bengali
 - sentence_improvements[].explanation → Bengali
+- mechanics_corrections[].tip → Bengali
 - vocabulary_improvements[].context → Bengali
 - pronunciation_guidance[].tip → Bengali
 
