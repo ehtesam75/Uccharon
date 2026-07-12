@@ -744,6 +744,28 @@
                 </div>
 
                 <div class="settings-section">
+                    <h3 style="display: flex; align-items: center; gap: 6px;">
+                        Explanation Language
+                        <span style="cursor: help; color: var(--text-tertiary); display: inline-flex;"
+                            title="Choose the language for explanations and tips (Grammar, Sentence Improvement, Vocabulary, Pronunciation). Corrections, suggested sentences, vocabulary words, and pronunciation targets always stay in English.">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="16" x2="12" y2="12" />
+                                <line x1="12" y1="8" x2="12.01" y2="8" />
+                            </svg>
+                        </span>
+                    </h3>
+                    <p class="settings-desc">Language used only for explanations/tips. Corrections and suggestions
+                        remain in English.</p>
+                    <select id="explanation-language" class="settings-select">
+                        <option value="en">English</option>
+                        <option value="bn">বাংলা (Bengali)</option>
+                    </select>
+                </div>
+
+
+                <div class="settings-section">
                     <h3>AI Provider</h3>
                     <p class="settings-desc">Select your preferred AI provider</p>
                     <div class="provider-cards voice-provider-cards">
@@ -1246,8 +1268,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <script src="{% static 'coach/js/providers.js' %}?v=3"></script>
-    <script src="{% static 'coach/js/app.js' %}?v=3"></script>
+    <script src="{% static 'coach/js/providers.js' %}?v=4"></script>
+    <script src="{% static 'coach/js/app.js' %}?v=4"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {

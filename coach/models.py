@@ -16,10 +16,20 @@ class UserProfile(models.Model):
         ('dark', 'Dark'),
         ('light', 'Light'),
     ]
+    EXPLANATION_LANGUAGE_CHOICES = [
+        ('en', 'English'),
+        ('bn', 'Bengali'),
+    ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='dark')
     ai_provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default='gemini')
+    # Language used ONLY for the explanations/tips (grammar, sentence, vocabulary,
+    # pronunciation). Corrections/suggestions/targets always remain in English.
+    explanation_language = models.CharField(
+        max_length=5, choices=EXPLANATION_LANGUAGE_CHOICES, default='en'
+    )
+
     gemini_api_key = models.CharField(max_length=255, blank=True, default='')
     gemini_api_key_2 = models.CharField(max_length=255, blank=True, default='')
     gemini_api_key_3 = models.CharField(max_length=255, blank=True, default='')

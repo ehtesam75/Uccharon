@@ -15,7 +15,9 @@
         settings: {
             theme: 'dark',
             ai_provider: 'gemini',
+            explanation_language: 'en',   // 'en' | 'bn' — language for explanations/tips only
             gemini_api_key: '',
+
             gemini_api_key_2: '',
             gemini_api_key_3: '',
             groq_api_key: '',
@@ -227,6 +229,7 @@
         goalModalOverlay: $('#goal-modal-overlay'),
         saveOnboardingGoalBtn: $('#save-onboarding-goal-btn'),
         dailyWordGoalSelect: $('#daily-word-goal'),
+        explanationLanguageSelect: $('#explanation-language'),
 
         // Theme
         themeToggleBtn: $('#theme-toggle-btn'),
@@ -1870,7 +1873,7 @@
                     thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
                 }
 
-                const aiProvider = ProviderFactory.create(provider, key, model);
+                const aiProvider = ProviderFactory.create(provider, key, model, state.settings.explanation_language);
                 aiResponse = await aiProvider.sendMessage(text, state.currentMessages);
                 
                 finalProvider = provider;
@@ -2687,6 +2690,10 @@
 
         DOM.dailyWordGoalSelect.value = state.settings.daily_word_goal || '50';
 
+        if (DOM.explanationLanguageSelect) {
+            DOM.explanationLanguageSelect.value = state.settings.explanation_language || 'en';
+        }
+
         // Model selects
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.0-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
@@ -2824,6 +2831,7 @@
 
         const voiceProvider = document.querySelector('input[name="voice-provider"]:checked')?.value || 'browser';
         const dailyWordGoal = DOM.dailyWordGoalSelect.value;
+        const explanationLanguage = DOM.explanationLanguageSelect?.value || 'en';
 
         if (voiceProvider === 'openai' && !openaiKey) {
             showToast('OpenAI API key is required for Whisper voice input.', 'error');
@@ -2856,6 +2864,7 @@
 
         state.settings.voice_provider = voiceProvider;
         state.settings.groq_whisper_model = groqWhisperModel;
+        state.settings.explanation_language = explanationLanguage;
 
         // Save model selections to localStorage
         localStorage.setItem('uccharon_gemini_model', geminiModel);
@@ -2882,6 +2891,7 @@
                 openrouter_api_key_2: openrouterKey2,
                 openrouter_api_key_3: openrouterKey3,
 
+                explanation_language: explanationLanguage,
                 daily_word_goal: dailyWordGoal
             });
             state.settings.daily_word_goal = parseInt(dailyWordGoal);

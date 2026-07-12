@@ -162,7 +162,9 @@ def current_user_view(request):
             'settings': {
                 'theme': profile.theme,
                 'ai_provider': profile.ai_provider,
+                'explanation_language': profile.explanation_language,
                 'gemini_api_key': profile.gemini_api_key,
+
                 'gemini_api_key_2': profile.gemini_api_key_2,
                 'gemini_api_key_3': profile.gemini_api_key_3,
                 'groq_api_key': profile.groq_api_key,
@@ -191,8 +193,10 @@ def settings_view(request):
         return JsonResponse({
             'theme': profile.theme,
             'ai_provider': profile.ai_provider,
+            'explanation_language': profile.explanation_language,
             'gemini_api_key': profile.gemini_api_key,
             'gemini_api_key_2': profile.gemini_api_key_2,
+
             'gemini_api_key_3': profile.gemini_api_key_3,
             'groq_api_key': profile.groq_api_key,
             'groq_api_key_2': profile.groq_api_key_2,
@@ -209,7 +213,12 @@ def settings_view(request):
         profile.theme = data['theme']
     if 'ai_provider' in data:
         profile.ai_provider = data['ai_provider']
+    if 'explanation_language' in data:
+        valid_langs = {choice[0] for choice in UserProfile.EXPLANATION_LANGUAGE_CHOICES}
+        if data['explanation_language'] in valid_langs:
+            profile.explanation_language = data['explanation_language']
     if 'gemini_api_key' in data:
+
         profile.gemini_api_key = data['gemini_api_key']
     if 'gemini_api_key_2' in data:
         profile.gemini_api_key_2 = data['gemini_api_key_2']

@@ -88,7 +88,33 @@ RULES:
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
 
+// Extra instruction appended when the user chooses a non-English explanation language.
+// Only the explanatory/tip text is translated — everything else stays in English.
+const BENGALI_EXPLANATION_INSTRUCTION = `EXPLANATION LANGUAGE (CRITICAL OVERRIDE):
+Write the explanatory/tip text in Bengali (বাংলা). This applies ONLY to these fields:
+- grammar_corrections[].explanation → Bengali
+- sentence_improvements[].explanation → Bengali
+- vocabulary_improvements[].context → Bengali
+- pronunciation_guidance[].tip → Bengali
+
+EVERYTHING ELSE MUST REMAIN IN ENGLISH. Do NOT translate:
+
+Example (Bengali explanation):
+original: "I am go to school." → corrected: "I go to school."
+explanation: "এখানে \"am\" ব্যবহার করা যাবে না, কারণ \"go\" মূল verb হিসেবে ব্যবহৃত হয়েছে।"`;
+
+
+// Build the system prompt, optionally injecting the explanation-language override.
+function buildSystemPrompt(explanationLanguage = 'en') {
+    if (explanationLanguage === 'bn') {
+        return `${SYSTEM_PROMPT}\n\n${BENGALI_EXPLANATION_INSTRUCTION}`;
+    }
+    return SYSTEM_PROMPT;
+}
+
+
 function formatApiError(status, message, providerName) {
+
     if (status === 401 || status === 403) {
         return `${providerName} API Key is invalid or unauthorized. Please check your Settings.`;
     }
@@ -108,10 +134,11 @@ function formatApiError(status, message, providerName) {
 }
 
 class GeminiProvider {
-    constructor(apiKey, model = 'gemini-2.0-flash') {
+    constructor(apiKey, model = 'gemini-2.0-flash', explanationLanguage = 'en') {
         this.apiKey = apiKey;
         this.model = model;
         this.name = 'Gemini';
+        this.explanationLanguage = explanationLanguage;
     }
 
     async sendMessage(userMessage, conversationHistory = []) {
@@ -145,7 +172,7 @@ class GeminiProvider {
 
         const body = {
             system_instruction: {
-                parts: [{ text: SYSTEM_PROMPT }]
+                parts: [{ text: buildSystemPrompt(this.explanationLanguage) }]
             },
             contents: contents,
             generationConfig: {
@@ -200,10 +227,11 @@ class GeminiProvider {
 
 
 class GroqProvider {
-    constructor(apiKey, model = 'llama-3.3-70b-versatile') {
+    constructor(apiKey, model = 'llama-3.3-70b-versatile', explanationLanguage = 'en') {
         this.apiKey = apiKey;
         this.model = model;
         this.name = 'Groq';
+        this.explanationLanguage = explanationLanguage;
     }
 
     async sendMessage(userMessage, conversationHistory = []) {
@@ -214,7 +242,7 @@ class GroqProvider {
 
         // Build messages array
         const messages = [
-            { role: 'system', content: SYSTEM_PROMPT }
+            { role: 'system', content: buildSystemPrompt(this.explanationLanguage) }
         ];
 
         // Add history
@@ -282,10 +310,11 @@ class GroqProvider {
 
 
 class OpenRouterProvider {
-    constructor(apiKey, model = 'openai/gpt-3.5-turbo') {
+    constructor(apiKey, model = 'openai/gpt-3.5-turbo', explanationLanguage = 'en') {
         this.apiKey = apiKey;
         this.model = model;
         this.name = 'OpenRouter';
+        this.explanationLanguage = explanationLanguage;
     }
 
     async sendMessage(userMessage, conversationHistory = []) {
@@ -293,7 +322,7 @@ class OpenRouterProvider {
         const MAX_HISTORY_TURNS = 8;
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
 
-        const messages = [{ role: 'system', content: SYSTEM_PROMPT }];
+        const messages = [{ role: 'system', content: buildSystemPrompt(this.explanationLanguage) }];
         for (const msg of recentHistory) {
             messages.push({ role: 'user', content: msg.user_text });
             if (msg.ai_response && msg.ai_response.conversational_reply) {
@@ -351,10 +380,11 @@ class OpenRouterProvider {
 
 
 class CohereProvider {
-    constructor(apiKey, model = 'command-r-08-2024') {
+    constructor(apiKey, model = 'command-r-08-2024', explanationLanguage = 'en') {
         this.apiKey = apiKey;
         this.model = model;
         this.name = 'Cohere';
+        this.explanationLanguage = explanationLanguage;
     }
 
     async sendMessage(userMessage, conversationHistory = []) {
@@ -374,7 +404,7 @@ class CohereProvider {
             model: this.model,
             message: userMessage,
             chat_history: chatHistory,
-            preamble: SYSTEM_PROMPT,
+            preamble: buildSystemPrompt(this.explanationLanguage),
             temperature: 0.8,
             response_format: { type: 'json_object' }
         };
@@ -417,17 +447,17 @@ class CohereProvider {
 
 
 class ProviderFactory {
-    static create(providerName, apiKey, model) {
+    static create(providerName, apiKey, model, explanationLanguage = 'en') {
         switch (providerName) {
             case 'gemini':
-                return new GeminiProvider(apiKey, model);
+                return new GeminiProvider(apiKey, model, explanationLanguage);
             case 'groq':
-                return new GroqProvider(apiKey, model);
+                return new GroqProvider(apiKey, model, explanationLanguage);
             case 'openrouter':
-                return new OpenRouterProvider(apiKey, model);
+                return new OpenRouterProvider(apiKey, model, explanationLanguage);
 
             case 'cohere':
-                return new CohereProvider(apiKey, model);
+                return new CohereProvider(apiKey, model, explanationLanguage);
             default:
                 throw new Error(`Unknown provider: ${providerName}`);
         }
@@ -504,3 +534,4 @@ class ProviderFactory {
 // Export for use in app.js
 window.ProviderFactory = ProviderFactory;
 window.SYSTEM_PROMPT = SYSTEM_PROMPT;
+window.buildSystemPrompt = buildSystemPrompt;
