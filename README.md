@@ -12,7 +12,8 @@ Uccharon is an interactive AI-powered language learning application that acts as
   - Grammar
   - Vocabulary
   - Naturalness
-  - Confidence
+  - Expression
+  - Mechanics
 - **Progress Tracking:**
   - Set daily word goals and maintain learning streaks.
   - View detailed visual analytics for your historical performance (daily, weekly, monthly).

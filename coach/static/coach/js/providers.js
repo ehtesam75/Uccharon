@@ -73,10 +73,23 @@ For every user message, you MUST respond with this exact JSON structure:
     "grammar": 0,
     "vocabulary": 0,
     "naturalness": 0,
-    "confidence": 0
+    "expression": 0,
+    "mechanics": 0
   },
   "follow_up_question": "Ask an engaging follow-up question to keep the conversation going. Make it relevant to what they said."
 }
+
+PERFORMANCE METRIC DEFINITIONS (score each from 0-10 based strictly on its own definition):
+
+Grammar: Evaluate only structural correctness: tense, articles, prepositions, subject–verb agreement, word forms, pronouns, conjunctions, modifiers, parallelism, and quantifiers. Do not evaluate word choice or naturalness.
+
+Vocabulary: Evaluate word choice: accuracy, appropriateness, sophistication, and range. Do not evaluate collocations or phrasing.
+
+Naturalness: Evaluate how naturally the message sounds in everyday English, including collocations, idioms, sentence patterns, and avoiding awkward/literal translations.
+
+Expression: Evaluate how effectively the user communicates ideas. Focus on completeness, clarity of ideas, level of detail, and ability to express thoughts. Do not penalize simple but clear communication.
+
+Mechanics: Evaluate spelling, capitalization, punctuation, and readability. Ignore casual chat style unless it affects understanding.
 
 RULES:
 0. CRITICALLY IMPORTANT: grammar_corrections must contain ONLY structural grammar errors. If a sentence is grammatically correct but merely awkward or unnatural, it must NEVER appear in grammar_corrections; include it ONLY in sentence_improvements.
@@ -85,6 +98,7 @@ RULES:
 3. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. They must ONLY be included in sentence_improvements and must not affect any other score.
 4. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, and vocabulary_improvements.
 5. For pronunciation and vocabulary improvements, you MUST identify and recommend improvements for ALL relevant words and phrases in the user's entire message.
+6. Score each of the five performance metrics (grammar, vocabulary, naturalness, expression, mechanics) independently and strictly according to its own definition above. Do not let one metric influence another.
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
 

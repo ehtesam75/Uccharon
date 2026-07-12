@@ -90,7 +90,8 @@ class Message(models.Model):
     score_grammar = models.FloatField(null=True, blank=True)
     score_vocabulary = models.FloatField(null=True, blank=True)
     score_naturalness = models.FloatField(null=True, blank=True)
-    score_confidence = models.FloatField(null=True, blank=True)
+    score_expression = models.FloatField(null=True, blank=True)
+    score_mechanics = models.FloatField(null=True, blank=True)
     score_overall = models.FloatField(null=True, blank=True)
 
     # AI model attribution

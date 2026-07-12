@@ -366,7 +366,8 @@ def messages_view(request, convo_id):
                         'grammar': m.score_grammar,
                         'vocabulary': m.score_vocabulary,
                         'naturalness': m.score_naturalness,
-                        'confidence': m.score_confidence,
+                        'expression': m.score_expression,
+                        'mechanics': m.score_mechanics,
                         'overall': m.score_overall,
                     },
                     'ai_provider_name': m.ai_provider_name,
@@ -404,7 +405,8 @@ def messages_view(request, convo_id):
         score_grammar=scores.get('grammar'),
         score_vocabulary=scores.get('vocabulary'),
         score_naturalness=scores.get('naturalness'),
-        score_confidence=scores.get('confidence'),
+        score_expression=scores.get('expression'),
+        score_mechanics=scores.get('mechanics'),
         score_overall=scores.get('overall'),
         ai_provider_name=ai_provider_name,
         ai_model_name=ai_model_name,
@@ -445,7 +447,8 @@ def messages_view(request, convo_id):
             'grammar': msg.score_grammar,
             'vocabulary': msg.score_vocabulary,
             'naturalness': msg.score_naturalness,
-            'confidence': msg.score_confidence,
+            'expression': msg.score_expression,
+            'mechanics': msg.score_mechanics,
             'overall': msg.score_overall,
         },
         'ai_provider_name': msg.ai_provider_name,
@@ -520,14 +523,16 @@ def stats_view(request):
                 'grammar': 0,
                 'vocabulary': 0,
                 'naturalness': 0,
-                'confidence': 0,
+                'expression': 0,
+                'mechanics': 0,
                 'overall': 0,
             },
             'best_scores': {
                 'grammar': 0,
                 'vocabulary': 0,
                 'naturalness': 0,
-                'confidence': 0,
+                'expression': 0,
+                'mechanics': 0,
                 'overall': 0,
             },
             'streak': 0,
@@ -541,13 +546,14 @@ def stats_view(request):
         # Calculate overall score if missing in database
         overall = m.score_overall
         if overall is None and m.score_grammar is not None:
-            overall = round((m.score_grammar * 0.4) + (m.score_naturalness * 0.3) + (m.score_vocabulary * 0.2) + (m.score_confidence * 0.1), 1)
+            overall = round((m.score_grammar * 0.30) + (m.score_vocabulary * 0.20) + (m.score_naturalness * 0.15) + ((m.score_expression or 0) * 0.30) + ((m.score_mechanics or 0) * 0.05), 1)
 
         scores_list.append({
             'grammar': m.score_grammar,
             'vocabulary': m.score_vocabulary,
             'naturalness': m.score_naturalness,
-            'confidence': m.score_confidence,
+            'expression': m.score_expression,
+            'mechanics': m.score_mechanics,
             'overall': overall,
             'local_date': local_dt.date().isoformat(),  # Grouping by local date
             'created_at': m.created_at.isoformat(),
@@ -558,13 +564,14 @@ def stats_view(request):
         'grammar': round(sum(s['grammar'] or 0 for s in scores_list) / count, 1),
         'vocabulary': round(sum(s['vocabulary'] or 0 for s in scores_list) / count, 1),
         'naturalness': round(sum(s['naturalness'] or 0 for s in scores_list) / count, 1),
-        'confidence': round(sum(s['confidence'] or 0 for s in scores_list) / count, 1),
+        'expression': round(sum(s['expression'] or 0 for s in scores_list) / count, 1),
+        'mechanics': round(sum(s['mechanics'] or 0 for s in scores_list) / count, 1),
         'overall': round(sum(s['overall'] or 0 for s in scores_list) / count, 1),
     }
 
     # Group scores by day (or hour) for charting
     from collections import defaultdict
-    daily_map = defaultdict(lambda: {'grammar': [], 'vocabulary': [], 'naturalness': [], 'confidence': [], 'overall': []})
+    daily_map = defaultdict(lambda: {'grammar': [], 'vocabulary': [], 'naturalness': [], 'expression': [], 'mechanics': [], 'overall': []})
     
     if range_param == 'daily':
         for i in range(24):
@@ -578,14 +585,14 @@ def stats_view(request):
         else:
             bucket = s['local_date']
             
-        for key in ('grammar', 'vocabulary', 'naturalness', 'confidence', 'overall'):
+        for key in ('grammar', 'vocabulary', 'naturalness', 'expression', 'mechanics', 'overall'):
             if s[key] is not None:
                 daily_map[bucket][key].append(s[key])
 
     daily_scores = []
     for bucket in sorted(daily_map.keys()):
         entry = {'date': bucket}
-        for key in ('grammar', 'vocabulary', 'naturalness', 'confidence', 'overall'):
+        for key in ('grammar', 'vocabulary', 'naturalness', 'expression', 'mechanics', 'overall'):
             vals = daily_map[bucket][key]
             entry[key] = round(sum(vals) / len(vals), 1) if vals else None
         daily_scores.append(entry)
@@ -593,19 +600,20 @@ def stats_view(request):
     # Best scores (all-time, not filtered)
     all_scores = base_qs.order_by('created_at')
     best_scores = {
-        'grammar': 0, 'vocabulary': 0, 'naturalness': 0, 'confidence': 0, 'overall': 0,
+        'grammar': 0, 'vocabulary': 0, 'naturalness': 0, 'expression': 0, 'mechanics': 0, 'overall': 0,
     }
     for m in all_scores:
         # Calculate overall dynamically if missing
         overall = m.score_overall
         if overall is None and m.score_grammar is not None:
-            overall = round((m.score_grammar * 0.4) + (m.score_naturalness * 0.3) + (m.score_vocabulary * 0.2) + (m.score_confidence * 0.1), 1)
+            overall = round((m.score_grammar * 0.30) + (m.score_vocabulary * 0.20) + (m.score_naturalness * 0.15) + ((m.score_expression or 0) * 0.30) + ((m.score_mechanics or 0) * 0.05), 1)
 
         scores_dict = {
             'grammar': m.score_grammar or 0,
             'vocabulary': m.score_vocabulary or 0,
             'naturalness': m.score_naturalness or 0,
-            'confidence': m.score_confidence or 0,
+            'expression': m.score_expression or 0,
+            'mechanics': m.score_mechanics or 0,
             'overall': overall or 0,
         }
         

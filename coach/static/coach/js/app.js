@@ -1609,7 +1609,7 @@
         if(showFullFeedback && response.performance_rating){
             const pr = response.performance_rating;
             // Calculate overall score
-            const overall = (pr.grammar * 0.40) + (pr.naturalness * 0.30) + (pr.vocabulary * 0.20) + (pr.confidence * 0.10);
+            const overall = (pr.grammar * 0.30) + (pr.vocabulary * 0.20) + (pr.naturalness * 0.15) + ((pr.expression || 0) * 0.30) + ((pr.mechanics || 0) * 0.05);
             const overallRounded = Number(overall.toFixed(1));
 
             // Add to currentScores so backend saves it
@@ -1620,7 +1620,8 @@
                 { label: 'Grammar', value: pr.grammar, key: 'grammar' },
                 { label: 'Vocabulary', value: pr.vocabulary, key: 'vocabulary' },
                 { label: 'Naturalness', value: pr.naturalness, key: 'naturalness' },
-                { label: 'Confidence', value: pr.confidence, key: 'confidence' },
+                { label: 'Expression', value: pr.expression, key: 'expression' },
+                { label: 'Mechanics', value: pr.mechanics, key: 'mechanics' },
             ];
 
             let scoresHtml = '<div class="scores-grid">';
@@ -2069,7 +2070,7 @@
             // Extract scores
             const scores = aiResponse.performance_rating || {};
             if (scores.grammar !== undefined) {
-                scores.overall = Number(((scores.grammar * 0.40) + (scores.naturalness * 0.30) + (scores.vocabulary * 0.20) + (scores.confidence * 0.10)).toFixed(1));
+                scores.overall = Number(((scores.grammar * 0.30) + (scores.vocabulary * 0.20) + (scores.naturalness * 0.15) + ((scores.expression || 0) * 0.30) + ((scores.mechanics || 0) * 0.05)).toFixed(1));
             }
 
             // Save to server
@@ -3179,7 +3180,8 @@
             { label: 'Grammar', value: data.averages.grammar },
             { label: 'Vocabulary', value: data.averages.vocabulary },
             { label: 'Naturalness', value: data.averages.naturalness },
-            { label: 'Confidence', value: data.averages.confidence }
+            { label: 'Expression', value: data.averages.expression },
+            { label: 'Mechanics', value: data.averages.mechanics }
         ]);
 
         // Score Breakdowns (Bests)
@@ -3187,7 +3189,8 @@
             { label: 'Grammar', value: data.best_scores.grammar },
             { label: 'Vocabulary', value: data.best_scores.vocabulary },
             { label: 'Naturalness', value: data.best_scores.naturalness },
-            { label: 'Confidence', value: data.best_scores.confidence }
+            { label: 'Expression', value: data.best_scores.expression },
+            { label: 'Mechanics', value: data.best_scores.mechanics }
         ]);
 
         // Charts
@@ -3291,14 +3294,15 @@
             state.radarChart = new Chart(radarCtx, {
                 type: 'radar',
                 data: {
-                    labels: ['Grammar', 'Vocabulary', 'Naturalness', 'Confidence'],
+                    labels: ['Grammar', 'Vocabulary', 'Naturalness', 'Expression', 'Mechanics'],
                     datasets: [{
                         label: 'Average Score',
                         data: [
                             data.averages.grammar,
                             data.averages.vocabulary,
                             data.averages.naturalness,
-                            data.averages.confidence
+                            data.averages.expression,
+                            data.averages.mechanics
                         ],
                         backgroundColor: colors.accentBg,
                         borderColor: colors.accent,
