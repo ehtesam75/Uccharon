@@ -184,48 +184,134 @@
         font-size: 0.75rem;
     }
 
+    /* ─── Settings Drawer — Mobile Bottom-Sheet Feel ─────── */
     .settings-drawer {
         width: 100vw;
         max-width: 100%;
         border-left: none;
-        border-radius: 0;
+        border-top-left-radius: var(--radius-lg);
+        border-top-right-radius: var(--radius-lg);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
         height: 100dvh;
         top: 0;
         bottom: auto;
         right: -100%;
         transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: none;
+        box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.4);
+        padding-top: env(safe-area-inset-top, 0px);
     }
 
     .settings-drawer.open {
         right: 0;
     }
 
+    /* Show the drag-handle indicator on mobile */
+    .drawer-drag-handle {
+        display: block;
+        position: absolute;
+        top: calc(env(safe-area-inset-top, 0px) + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 42px;
+        height: 4px;
+        border-radius: 4px;
+        background: var(--border-color-hover);
+        z-index: 2;
+    }
+
     .drawer-header {
-        padding: 14px 20px;
+        padding: 20px 18px 14px;
+        gap: 8px;
+    }
+
+    .drawer-header h2 {
+        font-size: 1.05rem;
+    }
+
+    .drawer-subtitle {
+        font-size: 0.72rem;
     }
 
     .drawer-content {
-        padding: 16px 20px;
+        padding: 16px 16px 20px;
     }
 
     .drawer-footer {
-        padding: 14px 20px;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
     }
 
     .settings-section {
-        margin-bottom: 20px;
-        padding-bottom: 16px;
+        margin-bottom: 14px;
+        padding: 14px 14px 16px;
     }
 
+    .settings-section h3 {
+        font-size: 0.9rem;
+    }
+
+    /* AI provider tiles stack cleaner on mobile */
     .provider-cards {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 8px;
     }
 
     .provider-card-content {
-        padding: 12px;
+        padding: 12px 8px;
     }
+
+    .provider-cards:not(.voice-provider-cards) .provider-icon {
+        font-size: 1.35rem;
+    }
+
+    .provider-cards:not(.voice-provider-cards) .provider-name {
+        font-size: 0.82rem;
+    }
+
+    .provider-cards:not(.voice-provider-cards) .provider-desc {
+        font-size: 0.65rem;
+    }
+
+    /* Voice cards keep row layout but tighter */
+    .voice-provider-cards .provider-card-content {
+        padding: 10px 12px;
+    }
+
+    .voice-provider-cards .provider-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.2rem;
+        margin-right: 12px;
+    }
+
+    /* Larger, more tappable inputs & selects */
+    .form-group input,
+    .settings-select {
+        padding: 13px 14px;
+        font-size: 1rem;
+        border-radius: var(--radius-md);
+    }
+
+    .settings-select {
+        padding-right: 40px;
+    }
+
+    /* Validate button — full width under input on very narrow screens */
+    .key-validate-row {
+        gap: 6px;
+    }
+
+    .validate-key-btn {
+        padding: 0 14px;
+        min-height: 44px;
+    }
+
+    /* Ensure last section has bottom breathing room above sticky footer */
+    .drawer-content > *:last-child {
+        margin-bottom: 8px;
+    }
+    /* Additional ultra-narrow tweaks are handled in the 480px block below */
+
 
     /* ─── Dashboard Mobile Redesign ─── */
     .dashboard-container {

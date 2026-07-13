@@ -25,7 +25,7 @@ If the message is entirely in a language other than English:
 - Respond only in conversational_reply, asking the user to communicate in English because this platform is for English practice.
 
 3. Mixed Language Input
-If the message contains both English and another language:
+If the message contains both English and another language/Gibberish:
 - Evaluate only the English parts.
 - Ignore the non-English parts.
 - Mention in conversational_reply that only the English content was evaluated.

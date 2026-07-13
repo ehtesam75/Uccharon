@@ -1,10 +1,14 @@
 {% load static %}
         <!-- Settings Drawer -->
         <div id="settings-overlay" class="settings-overlay" style="display:none"></div>
-        <div id="settings-drawer" class="settings-drawer">
+        <div id="settings-drawer" class="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title">
+            <span class="drawer-drag-handle" aria-hidden="true"></span>
             <div class="drawer-header">
-                <h2>Settings</h2>
-                <button id="close-settings" class="icon-btn">
+                <div class="drawer-header-titles">
+                    <h2 id="settings-drawer-title">Settings</h2>
+                    <span class="drawer-subtitle">Personalize your learning experience &amp; AI providers</span>
+                </div>
+                <button id="close-settings" class="icon-btn" aria-label="Close settings">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <path d="M18 6L6 18M6 6l12 12" />
@@ -13,9 +17,9 @@
             </div>
             <div class="drawer-content">
                 <div class="settings-section">
-                    <h3 style="display: flex; align-items: center; gap: 6px;">
+                    <h3>
                         Daily Word Target
-                        <span style="cursor: help; color: var(--text-tertiary); display: inline-flex;"
+                        <span class="info-tip"
                             title="Set a daily goal for the number of words you want to practice to build a consistent habit.">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -36,9 +40,9 @@
                 </div>
 
                 <div class="settings-section">
-                    <h3 style="display: flex; align-items: center; gap: 6px;">
+                    <h3>
                         Explanation Language
-                        <span style="cursor: help; color: var(--text-tertiary); display: inline-flex;"
+                        <span class="info-tip"
                             title="Choose the language for explanations and tips (Grammar, Sentence Improvement, Vocabulary, Pronunciation). Corrections, suggested sentences, vocabulary words, and pronunciation targets always stay in English.">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -60,7 +64,7 @@
                 <div class="settings-section">
                     <h3>AI Provider</h3>
                     <p class="settings-desc">Select your preferred AI provider</p>
-                    <div class="provider-cards voice-provider-cards">
+                    <div class="provider-cards">
                         <label class="provider-card" id="provider-gemini-card">
                             <input type="radio" name="ai-provider" value="gemini" checked>
                             <div class="provider-card-content">
@@ -393,7 +397,7 @@
 
                 <!-- Voice Input Provider -->
                 <div class="settings-section">
-                    <h3>🎤 Voice Input Provider</h3>
+                    <h3>Voice Input Provider</h3>
                     <p class="settings-desc">Choose how your voice is converted to text</p>
                     <div class="provider-cards voice-provider-cards">
                         <label class="provider-card" id="voice-provider-browser-card">
@@ -402,7 +406,7 @@
                                 <div class="provider-icon">🌐</div>
                                 <div class="provider-info">
                                     <div class="provider-name">Browser Native</div>
-                                    <div class="provider-desc">Web Speech API (Free & built-in)</div>
+                                    <div class="provider-desc">Web Speech API (Free &amp; built-in)</div>
                                 </div>
                                 <div class="provider-radio-circle"></div>
                             </div>
