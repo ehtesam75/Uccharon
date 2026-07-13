@@ -1,0 +1,325 @@
+{% load static %}
+        <!-- Main Chat Area -->
+        <main class="main-content">
+            <!-- Welcome screen (when no conversation selected) -->
+            <div id="welcome-screen" class="welcome-screen">
+                <div class="welcome-content">
+                    <div class="welcome-icon">
+                        <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon Logo" width="80"
+                            height="80" class="logo-img"
+                            style="filter: drop-shadow(0 4px 12px rgba(var(--accent-primary-rgb), 0.3)); border-radius: 50%;">
+                    </div>
+                    <h2 class="welcome-title">How can I help you practice today?</h2>
+                    <p class="welcome-desc">Start speaking to improve your fluency. I'll provide real-time corrections,
+                        better vocabulary, and native-sounding alternatives.</p>
+
+                    <div class="welcome-suggestions">
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('Let\'s practice a realistic job interview for a software engineer role where you act as the interviewer and ask me technical and behavioral questions.')">
+                            <span class="suggestion-icon">💼</span>
+                            <div class="suggestion-text">
+                                <h4>Job Interview</h4>
+                                <p>Practice common questions</p>
+                            </div>
+                        </button>
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('I want to talk about my daily routine. Help me practice describing my schedule, habits, responsibilities, and activities using natural English expressions.')">
+                            <span class="suggestion-icon">🌅</span>
+                            <div class="suggestion-text">
+                                <h4>Daily Routine</h4>
+                                <p>Talk about your day</p>
+                            </div>
+                        </button>
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('Can we do a roleplay where I am ordering food at a restaurant? Act as the waiter and help me practice a realistic conversation from start to finish.')">
+                            <span class="suggestion-icon">🍽️</span>
+                            <div class="suggestion-text">
+                                <h4>Restaurant</h4>
+                                <p>Order food in English</p>
+                            </div>
+                        </button>
+                        <button class="suggestion-card"
+                            onclick="window.startConversationWithPrompt('Let\'s discuss a movie I watched recently. Ask me about the story, characters, opinions, and my thoughts while helping me express my ideas naturally.')">
+                            <span class="suggestion-icon">🎬</span>
+                            <div class="suggestion-text">
+                                <h4>Movie Review</h4>
+                                <p>Discuss your favorite film</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <button id="welcome-new-chat" class="welcome-start-btn" style="margin-top: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        Start Your First Conversation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat area -->
+            <div id="chat-area" class="chat-area" style="display:none">
+                <div class="chat-header">
+                    <div class="chat-header-title">
+                        <h2 class="chat-title" id="chat-title" tabindex="0">New Conversation</h2>
+                        <button id="rename-convo-btn" class="icon-btn" title="Rename conversation"
+                            aria-label="Rename conversation">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.1 2.1 0 113 3L7 19l-4 1 1-4 12.5-12.5z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button id="delete-convo-btn" class="icon-btn" title="Delete conversation">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chat-loading" class="dashboard-loading chat-loading-overlay" style="display:none">
+                    <div class="dash-loader">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <p>Loading your last chat...</p>
+                </div>
+
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages populated by JS -->
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea id="chat-input" class="chat-input" placeholder="Type your message in English..."
+                            rows="1"></textarea>
+                        <div class="chat-input-actions">
+                            <button id="mic-btn" class="mic-btn" title="Voice input">
+                                <svg class="mic-icon-off" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                    <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+                                    <path d="M19 10v2a7 7 0 01-14 0v-2" />
+                                    <line x1="12" y1="19" x2="12" y2="23" />
+                                    <line x1="8" y1="23" x2="16" y2="23" />
+                                </svg>
+                                <svg class="mic-icon-on" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"
+                                    stroke="none" style="display:none">
+                                    <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+                                    <path d="M19 10v2a7 7 0 01-14 0v-2" fill="none" stroke="currentColor"
+                                        stroke-width="2" />
+                                    <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" />
+                                    <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" />
+                                </svg>
+                            </button>
+                            <button id="send-btn" class="send-btn" title="Send message">
+                                <svg class="send-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                </svg>
+                                <svg class="stop-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"
+                                    stroke="none" style="display:none">
+                                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="mic-status" class="mic-status" style="display:none">
+                        <span class="mic-pulse"></span>
+                        <span class="mic-status-text">Listening...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ DASHBOARD SCREEN ═══════════════ -->
+            <div id="dashboard-screen" class="dashboard-screen" style="display:none">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div class="dashboard-title-group">
+                            <h2 class="dashboard-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#dashGrad)"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <defs>
+                                        <linearGradient id="dashGrad" x1="0" y1="0" x2="24" y2="24">
+                                            <stop offset="0%" stop-color="#6c5ce7" />
+                                            <stop offset="100%" stop-color="#00cec9" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M18 20V10M12 20V4M6 20v-6" />
+                                </svg>
+                                Analytics Dashboard
+                            </h2>
+                            <p class="dashboard-subtitle">Track your learning journey and performance trends</p>
+                        </div>
+                        <div class="dashboard-filters">
+
+                            <div class="time-range-tabs" id="time-range-tabs">
+                                <button class="time-tab" data-range="daily">Today</button>
+                                <button class="time-tab" data-range="weekly">Week</button>
+                                <button class="time-tab" data-range="monthly">Month</button>
+                                <button class="time-tab active" data-range="all">All Time</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="dashboard-loading" class="dashboard-loading">
+                        <div class="dash-loader">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <p>Loading your analytics...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="dashboard-empty" class="dashboard-empty" style="display:none">
+                        <div class="dashboard-empty-icon">📝</div>
+                        <h3>No performance data yet.</h3>
+                        <p>Start a conversation to track your progress!</p>
+                    </div>
+
+                    <!-- Dashboard Content -->
+                    <div id="dashboard-data" class="dashboard-data" style="display:none">
+                        <!-- Daily Progress Text -->
+                        <div class="dash-today-text"
+                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 16px; color: var(--text-secondary);">
+                            <div>Words Today: <span id="dash-today-progress"
+                                    style="color: var(--text-primary); font-weight: 600;">0/0</span></div>
+                            <div>Current Streak: <span id="dash-streak"
+                                    style="color: var(--text-primary); font-weight: 600;">0</span></div>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="dash-summary-grid">
+                            <div class="dash-stat-card">
+                                <div class="dash-stat-icon">💬</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-total-messages">0</div>
+                                    <div class="dash-stat-label">Total Messages</div>
+                                </div>
+                            </div>
+                            <div class="dash-stat-card">
+                                <div class="dash-stat-icon">📝</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-total-convos">0</div>
+                                    <div class="dash-stat-label">Conversations</div>
+                                </div>
+                            </div>
+                            <div class="dash-stat-card">
+                                <div class="dash-stat-icon">👑</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-max-streak">0</div>
+                                    <div class="dash-stat-label">Max Streak</div>
+                                </div>
+                            </div>
+                            <div class="dash-stat-card dash-stat-card-accent">
+                                <div class="dash-stat-icon">⭐</div>
+                                <div class="dash-stat-info">
+                                    <div class="dash-stat-number" id="dash-overall-score">0</div>
+                                    <div class="dash-stat-label">Overall Score</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row -->
+                        <div class="dash-charts-grid">
+                            <div class="dash-chart-card">
+                                <h3 class="dash-card-title">Skill Breakdown</h3>
+                                <p class="dash-card-desc">Average scores across categories</p>
+                                <div class="radar-chart-container">
+                                    <canvas id="radar-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="dash-chart-card">
+                                <h3 class="dash-card-title">Progress Over Time</h3>
+                                <p class="dash-card-desc" id="progress-over-time-desc">Daily score trends</p>
+                                <div class="line-chart-container">
+                                    <canvas id="line-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score Breakdown -->
+                        <div class="dash-detail-grid">
+                            <div class="dash-detail-card">
+                                <h3 class="dash-card-title">Average Scores</h3>
+                                <div class="scores-grid" id="dash-avg-scores">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                            <div class="dash-detail-card">
+                                <h3 class="dash-card-title">Personal Bests</h3>
+                                <div class="scores-grid" id="dash-best-scores">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ LEARNING HISTORY SCREEN ═══════════════ -->
+            <div id="learning-history-screen" class="dashboard-screen" style="display:none">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div class="dashboard-title-group">
+                            <h2 class="dashboard-title">
+                                Learning History
+                            </h2>
+                            <p class="dashboard-subtitle">View all corrections in one place</p>
+                        </div>
+                        <div class="time-range-tabs" id="history-filter-tabs">
+                            <button class="time-tab active" data-filter="all">All</button>
+                            <button class="time-tab" data-filter="grammar">Grammar</button>
+                            <button class="time-tab" data-filter="mechanics">Mechanics</button>
+                            <button class="time-tab" data-filter="sentence">Sentences</button>
+
+                            <button class="time-tab" data-filter="pronunciation">Pronunciation</button>
+                            <button class="time-tab" data-filter="vocabulary">Vocabulary</button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="history-loading" class="dashboard-loading">
+                        <div class="dash-loader">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <p>Loading your history...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="history-empty" class="dashboard-empty" style="display:none">
+                        <div class="dashboard-empty-icon">📖</div>
+                        <h3>No learning history yet.</h3>
+                        <p>Start chatting and make some mistakes to get feedback!</p>
+                    </div>
+
+                    <!-- History Content -->
+                    <div id="learning-history-data" class="dashboard-data" style="display:none">
+                        <div class="history-grid" id="learning-history-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="scroll-to-bottom-btn" class="scroll-to-bottom-btn" type="button"
+                title="Scroll to latest message" aria-label="Scroll to latest message" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v12" />
+                    <path d="M7 12l5 5 5-5" />
+                </svg>
+            </button>
+        </main>

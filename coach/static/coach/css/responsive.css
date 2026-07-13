@@ -1,0 +1,578 @@
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .dashboard-filter-wrapper {
+        display: none;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        z-index: 30;
+        width: 280px;
+        min-width: 280px;
+        box-shadow: var(--shadow-lg);
+        border-right: none;
+        border-top-right-radius: var(--radius-lg);
+        border-bottom-right-radius: var(--radius-lg);
+        /* Animate transform (GPU-accelerated) instead of `left` to avoid
+           per-frame layout reflow and eliminate mobile open lag. */
+        transform: translateX(-100%);
+        transition: transform var(--transition-normal);
+        will-change: transform;
+        background: var(--bg-secondary);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+        left: 0;
+        transform: translateX(-100%);
+    }
+
+    /* Drop the (per-frame) backdrop blur on mobile — it repaints the whole
+       viewport every animation frame and is the main source of sidebar lag.
+       A plain translucent scrim gives the same visual affordance cheaply. */
+    .sidebar-overlay {
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transition: opacity var(--transition-normal), visibility var(--transition-normal);
+    }
+
+
+    .mobile-sidebar-toggle {
+
+        display: flex;
+        border-radius: var(--radius-full);
+        box-shadow: var(--shadow-md);
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+    }
+
+    .user-message {
+        max-width: 85%;
+    }
+
+    .ai-message {
+        max-width: 100%;
+    }
+
+    .ai-message .ai-feedback-card {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        backdrop-filter: none;
+    }
+
+    .ai-message .feedback-section {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .ai-message .feedback-section:last-child {
+        padding-bottom: 4px;
+    }
+
+    .ai-model-label {
+        margin-top: 2px;
+        padding-left: 0;
+    }
+
+    .welcome-screen {
+        padding: 20px 16px;
+    }
+
+    .welcome-content {
+        max-width: 100%;
+    }
+
+    .welcome-icon {
+        margin-bottom: 14px;
+    }
+
+    .welcome-icon img {
+        width: 52px;
+        height: 52px;
+    }
+
+    .welcome-title {
+        font-size: 1.3rem;
+        margin-bottom: 6px;
+    }
+
+    .welcome-desc {
+        font-size: 0.825rem;
+        line-height: 1.5;
+        margin-bottom: 16px;
+    }
+
+    .welcome-suggestions {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+
+    .suggestion-card {
+        padding: 10px 12px;
+        gap: 8px;
+        border-radius: var(--radius-md);
+    }
+
+    .suggestion-icon {
+        font-size: 1.15rem;
+    }
+
+    .suggestion-text h4 {
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+    }
+
+    .suggestion-text p {
+        font-size: 0.7rem;
+        line-height: 1.35;
+    }
+
+    .welcome-start-btn {
+        padding: 10px 18px;
+        font-size: 0.825rem;
+        gap: 6px;
+        margin-top: 4px !important;
+    }
+
+    .welcome-start-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .chat-messages {
+        padding: 16px;
+    }
+
+    .empty-chat-content h3 {
+        font-size: 1.25rem;
+    }
+
+    .empty-chat-content p {
+        font-size: 0.9rem;
+    }
+
+    .chat-header {
+        padding-left: 64px;
+    }
+
+    .chat-input-container {
+        padding: 12px 16px 16px;
+    }
+
+    .scroll-to-bottom-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .strength-weakness {
+        grid-template-columns: 1fr;
+    }
+
+    .score-label {
+        min-width: 80px;
+        font-size: 0.75rem;
+    }
+
+    .settings-drawer {
+        width: 100vw;
+        max-width: 100%;
+        border-left: none;
+        border-radius: 0;
+        height: 100dvh;
+        top: 0;
+        bottom: auto;
+        right: -100%;
+        transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: none;
+    }
+
+    .settings-drawer.open {
+        right: 0;
+    }
+
+    .drawer-header {
+        padding: 14px 20px;
+    }
+
+    .drawer-content {
+        padding: 16px 20px;
+    }
+
+    .drawer-footer {
+        padding: 14px 20px;
+    }
+
+    .settings-section {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+    }
+
+    .provider-cards {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .provider-card-content {
+        padding: 12px;
+    }
+
+    /* ─── Dashboard Mobile Redesign ─── */
+    .dashboard-container {
+        padding: 60px 16px 40px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin: -60px -16px 24px;
+        padding: 60px 16px 24px;
+    }
+
+    #learning-history-screen .dashboard-container {
+        padding-top: 16px;
+    }
+
+    #learning-history-screen .dashboard-header {
+        margin-top: -16px;
+        padding-top: 16px;
+    }
+
+    .dashboard-header::after {
+        left: 16px;
+        right: 16px;
+    }
+
+    .dashboard-title-group {
+        text-align: center;
+    }
+
+    .dashboard-title {
+        justify-content: center;
+    }
+
+    .time-range-tabs {
+        width: 100%;
+        display: flex;
+        padding: 4px;
+        border-radius: 12px;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .time-range-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .time-tab {
+        flex: 0 0 auto;
+        text-align: center;
+        padding: 10px 12px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+
+    #time-range-tabs .time-tab {
+        flex: 1;
+        padding: 10px 4px;
+    }
+
+    .dash-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .dash-stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .dash-stat-icon {
+        display: none;
+    }
+
+    .dash-today-text {
+        font-size: 0.8rem !important;
+    }
+
+    .dash-stat-number {
+        font-size: 1.5rem;
+    }
+
+    .dash-stat-label {
+        font-size: 0.7rem;
+    }
+
+    .dash-charts-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .dash-detail-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .dash-chart-card,
+    .dash-detail-card {
+        padding: 20px 16px;
+    }
+
+    .radar-chart-container {
+        max-width: 260px;
+    }
+
+    .line-chart-container {
+        height: 220px;
+    }
+
+    .history-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-top: 16px;
+        margin-left: -16px;
+        margin-right: -16px;
+        border-radius: 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        border-left: none;
+        border-right: none;
+        background: var(--bg-primary);
+    }
+
+    .history-card {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
+    }
+
+    .history-card:last-child {
+        border-bottom: none;
+    }
+
+    .history-card:hover {
+        transform: none;
+        box-shadow: none;
+        background: var(--bg-glass);
+    }
+
+    .history-card .feedback-section {
+        padding: 12px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-features {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-container {
+        padding: 16px;
+    }
+
+    .auth-card {
+        padding: 24px;
+    }
+
+    .vocab-item {
+        gap: 6px;
+    }
+
+    .pronunciation-item {
+        gap: 6px;
+    }
+}
+
+/* ─── Loading Spinner ────────────────────────────────────── */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading span {
+    opacity: 0;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ─── Toast notifications ────────────────────────────────── */
+.toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    z-index: 100;
+    animation: toastSlideIn 0.3s ease-out;
+    box-shadow: var(--shadow-md);
+    max-width: 340px;
+}
+
+.toast.success {
+    background: var(--accent-success);
+    color: white;
+}
+
+.toast.error {
+    background: var(--accent-error);
+    color: white;
+}
+
+.toast.info {
+    background: var(--accent-primary);
+    color: white;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+@media (max-width: 640px) {
+    .toast {
+        right: 16px;
+        left: 16px;
+        margin: 0 auto;
+        max-width: calc(100vw - 32px);
+        width: fit-content;
+    }
+}
+
+/* 2-Step Signup Styles */
+.goal-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.goal-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.goal-card:hover {
+    border-color: var(--accent-primary);
+    background: rgba(var(--accent-primary-rgb), 0.05);
+    transform: translateY(-2px);
+}
+
+.goal-card.selected {
+    border-color: var(--accent-primary);
+    background: rgba(var(--accent-primary-rgb), 0.1);
+    box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.goal-card .goal-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    width: 75px;
+    text-align: center;
+}
+
+.goal-card .goal-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.goal-card .goal-desc {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    text-align: right;
+    flex-grow: 1;
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    margin-bottom: 8px;
+    margin-left: -4px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.back-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+#signup-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-secondary);
+    color: var(--text-tertiary);
+    box-shadow: none;
+}

@@ -1,0 +1,173 @@
+/* ══════════════════════════════════════════════════════════
+   UCCHARON – AI English Speaking Coach
+   Premium Design System
+   ══════════════════════════════════════════════════════════ */
+
+/* ─── CSS Custom Properties (Dark Theme — Default) ──────── */
+:root,
+[data-theme="dark"] {
+    color-scheme: dark;
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #12122a;
+    --bg-tertiary: #1a1a3e;
+    --bg-glass: rgba(255, 255, 255, 0.04);
+    --bg-glass-hover: rgba(255, 255, 255, 0.08);
+    --bg-glass-active: rgba(255, 255, 255, 0.12);
+    --bg-input: rgba(255, 255, 255, 0.06);
+    --bg-card: rgba(18, 18, 42, 0.85);
+
+    --accent-primary: #6c5ce7;
+    --accent-primary-rgb: 108, 92, 231;
+    --accent-secondary: #00cec9;
+    --accent-secondary-rgb: 0, 206, 201;
+    --accent-warning: #fdcb6e;
+    --accent-error: #e17055;
+    --accent-success: #00b894;
+
+    --text-primary: #f0f0f8;
+    --text-secondary: #8888aa;
+    --text-tertiary: #555577;
+    --text-inverse: #0a0a1a;
+
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-color-hover: rgba(255, 255, 255, 0.15);
+
+    --gradient-hero: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0d2137 100%);
+    --gradient-accent: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
+    --gradient-accent-hover: linear-gradient(135deg, #7c6ef7 0%, #10ded9 100%);
+    --gradient-card: linear-gradient(135deg, rgba(108, 92, 231, 0.1) 0%, rgba(0, 206, 201, 0.05) 100%);
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 30px rgba(108, 92, 231, 0.15);
+
+    --sidebar-width: 280px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 50px;
+
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+    --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Light Theme ────────────────────────────────────────── */
+[data-theme="light"] {
+    color-scheme: light;
+    --bg-primary: #f4f5fa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #ecedf5;
+    --bg-glass: rgba(0, 0, 0, 0.03);
+    --bg-glass-hover: rgba(0, 0, 0, 0.06);
+    --bg-glass-active: rgba(0, 0, 0, 0.09);
+    --bg-input: rgba(0, 0, 0, 0.04);
+    --bg-card: rgba(255, 255, 255, 0.9);
+
+    --accent-primary: #5f3dc4;
+    --accent-primary-rgb: 95, 61, 196;
+    --accent-secondary: #0ca6a1;
+    --accent-secondary-rgb: 12, 166, 161;
+
+    --text-primary: #1a1a2e;
+    --text-secondary: #666680;
+    --text-tertiary: #9999aa;
+    --text-inverse: #ffffff;
+
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-hover: rgba(0, 0, 0, 0.15);
+
+    --gradient-hero: linear-gradient(135deg, #ede6d8 0%, #e4e3dc 35%, #dae4e1 65%, #d1dedc 100%);
+    --gradient-card: linear-gradient(135deg, rgba(95, 61, 196, 0.06) 0%, rgba(12, 166, 161, 0.03) 100%);
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 30px rgba(95, 61, 196, 0.08);
+}
+
+/* ─── Reset & Base ───────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--gradient-hero);
+    color: var(--text-primary);
+    min-height: 100dvh;
+    overflow: hidden;
+    line-height: 1.6;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--accent-secondary);
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+    color: inherit;
+}
+
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* ─── Utility ────────────────────────────────────────────── */
+.icon-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    color: var(--text-secondary);
+}
+
+.icon-btn:hover {
+    background: var(--bg-glass-hover);
+    color: var(--text-primary);
+}
+

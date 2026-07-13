@@ -1,0 +1,413 @@
+/* ═══════════════════════════════════════════════════════════
+   ANALYTICS DASHBOARD
+   ═══════════════════════════════════════════════════════════ */
+
+.dashboard-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg-primary);
+}
+
+.dashboard-container {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 32px 48px;
+}
+
+/* ─── Dashboard Header ──────────────────────────────────── */
+
+.dashboard-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    animation: dashFadeIn 0.5s ease-out;
+
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-primary);
+    padding: 32px 32px 24px;
+    margin: -32px -32px 16px;
+}
+
+.dashboard-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 32px;
+    right: 32px;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.dashboard-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.dashboard-title svg {
+    flex-shrink: 0;
+}
+
+.dashboard-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* ─── Time Range Tabs & Filters ───────────────────────────────────── */
+
+.dashboard-filters {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dashboard-filter-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dashboard-filter-select {
+    appearance: none;
+    background: var(--bg-glass);
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 6px 32px 6px 14px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    outline: none;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 140px;
+    max-width: 220px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    color-scheme: inherit;
+}
+
+.dashboard-filter-select:hover,
+.dashboard-filter-select:focus {
+    background: var(--bg-glass-hover);
+}
+
+.dashboard-filter-select option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: none;
+}
+
+.dashboard-filter-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-tertiary);
+}
+
+.time-range-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-glass);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.time-tab {
+    padding: 8px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.time-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-glass-hover);
+}
+
+.time-tab.active {
+    background: var(--gradient-accent);
+    color: white;
+    box-shadow: 0 2px 10px rgba(var(--accent-primary-rgb), 0.3);
+}
+
+/* ─── Loading State ─────────────────────────────────────── */
+
+.dashboard-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+    gap: 20px;
+    font-size: 0.9rem;
+}
+
+.dash-loader {
+    display: flex;
+    gap: 8px;
+}
+
+.dash-loader div {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    animation: dashLoaderBounce 1.4s ease-in-out infinite;
+}
+
+.dash-loader div:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.dash-loader div:nth-child(3) {
+    animation-delay: 0.32s;
+}
+
+@keyframes dashLoaderBounce {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.7);
+    }
+
+    40% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* ─── Empty State ───────────────────────────────────────── */
+
+.dashboard-empty {
+    text-align: center;
+    padding: 80px 20px;
+    animation: dashFadeIn 0.4s ease-out;
+}
+
+.dashboard-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.dashboard-empty h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.dashboard-empty p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ─── Summary Cards Grid ────────────────────────────────── */
+
+.dash-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dash-stat-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 22px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all var(--transition-normal);
+    animation: dashCardSlideUp 0.5s ease-out both;
+}
+
+.dash-stat-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.dash-stat-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.dash-stat-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.dash-stat-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.dash-stat-card:hover {
+    border-color: var(--border-color-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.dash-stat-card-accent {
+    background: var(--gradient-card);
+    border-color: rgba(var(--accent-primary-rgb), 0.2);
+}
+
+.dash-stat-icon {
+    font-size: 1.5rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+    flex-shrink: 0;
+}
+
+.dash-stat-number {
+    font-size: 1.75rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+}
+
+.dash-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* ─── Chart Cards ───────────────────────────────────────── */
+
+.dash-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dash-chart-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    animation: dashCardSlideUp 0.5s ease-out 0.25s both;
+    transition: all var(--transition-normal);
+}
+
+.dash-chart-card:hover {
+    border-color: var(--border-color-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.dash-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.dash-card-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.radar-chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    aspect-ratio: 1;
+}
+
+.line-chart-container {
+    position: relative;
+    width: 100%;
+    height: 280px;
+}
+
+/* ─── Detail Cards ──────────────────────────────────────── */
+
+.dash-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.dash-detail-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    animation: dashCardSlideUp 0.5s ease-out 0.35s both;
+    transition: all var(--transition-normal);
+}
+
+.dash-detail-card:hover {
+    border-color: var(--border-color-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.dash-detail-card .dash-card-title {
+    margin-bottom: 20px;
+}
+
+/* ─── Dashboard Animations ──────────────────────────────── */
+
+@keyframes dashFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dashCardSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
