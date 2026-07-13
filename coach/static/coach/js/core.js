@@ -39,7 +39,7 @@
             openrouter_model: 'meta-llama/llama-3.3-70b-instruct',
             openai_model: 'gpt-4o',
 
-            voice_provider: 'browser',    // 'browser' | 'openai' | 'gemini-stt' | 'groq-whisper'
+            voice_provider: 'groq-whisper',    // 'browser' | 'openai' | 'gemini-stt' | 'groq-whisper'
             groq_whisper_model: 'whisper-large-v3-turbo'   // Groq Whisper STT model
 
 

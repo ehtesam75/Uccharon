@@ -51,7 +51,6 @@ def signup_view(request):
     groq_api_key = data.get('groq_api_key', '').strip()
     openrouter_api_key = data.get('openrouter_api_key', '').strip()
     openai_api_key = data.get('openai_api_key', '').strip()
-    cohere_api_key = data.get('cohere_api_key', '').strip()
 
 
     if not username or not email or not password:
@@ -79,17 +78,12 @@ def signup_view(request):
     if ai_provider == 'openai' and not openai_api_key:
         return JsonResponse({'error': 'An OpenAI API key is required.'}, status=400)
 
-    if ai_provider == 'cohere' and not cohere_api_key:
-        return JsonResponse({'error': 'A Cohere API key is required.'}, status=400)
-
     user = User.objects.create_user(username=username, email=email, password=password)
     user.profile.ai_provider = ai_provider
     user.profile.gemini_api_key = gemini_api_key if ai_provider == 'gemini' else ''
     user.profile.groq_api_key = groq_api_key if ai_provider == 'groq' else ''
     user.profile.openrouter_api_key = openrouter_api_key if ai_provider == 'openrouter' else ''
     user.profile.openai_api_key = openai_api_key if ai_provider == 'openai' else ''
-
-    user.profile.cohere_api_key = cohere_api_key if ai_provider == 'cohere' else ''
 
     
     # Set daily word goal if provided

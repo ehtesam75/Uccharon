@@ -123,11 +123,11 @@ Write the explanatory/tip text in Bengali (বাংলা). This applies ONLY t
 - vocabulary_improvements[].context → Bengali
 - pronunciation_guidance[].tip → Bengali
 
-EVERYTHING ELSE MUST REMAIN IN ENGLISH. Do NOT translate:
+EVERYTHING ELSE MUST REMAIN IN ENGLISH. Do NOT translate corrections, suggestions, vocabulary words, or pronunciation targets.
 
 Example (Bengali explanation):
 original: "I am go to school." → corrected: "I go to school."
-explanation: "এখানে \"am\" ব্যবহার করা যাবে না, কারণ \"go\" মূল verb হিসেবে ব্যবহৃত হয়েছে।"`;
+explanation: "এখানে \"am\" ব্যবহার করা যাবে না, কারণ \"go\" মূল ক্রিয়া হিসেবে ব্যবহৃত হয়েছে।"`;
 
 
 // Build the system prompt, optionally injecting the explanation-language override.
@@ -474,75 +474,8 @@ class OpenAIProvider {
 }
 
 
-class CohereProvider {
-    constructor(apiKey, model = 'command-r-08-2024', explanationLanguage = 'en') {
-        this.apiKey = apiKey;
-        this.model = model;
-        this.name = 'Cohere';
-        this.explanationLanguage = explanationLanguage;
-    }
-
-    async sendMessage(userMessage, conversationHistory = [], options = {}) {
-        const url = 'https://api.cohere.com/v1/chat';
-        const MAX_HISTORY_TURNS = 8;
-        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
-
-        const chatHistory = [];
-        for (const msg of recentHistory) {
-            chatHistory.push({ role: 'USER', message: msg.user_text });
-            if (msg.ai_response && msg.ai_response.conversational_reply) {
-                chatHistory.push({ role: 'CHATBOT', message: msg.ai_response.conversational_reply });
-            }
-        }
-
-        const body = {
-            model: this.model,
-            message: userMessage,
-            chat_history: chatHistory,
-            preamble: buildSystemPrompt(this.explanationLanguage),
-            temperature: 0.8,
-            response_format: { type: 'json_object' }
-        };
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.apiKey}`
-            },
-            body: JSON.stringify(body),
-            signal: options.signal
-        });
-
-        if (!response.ok) {
-            const err = await response.json().catch(() => ({}));
-            const errMsg = err.message || err.text;
-            throw new Error(formatApiError(response.status, errMsg, 'Cohere'));
-        }
-
-        const data = await response.json();
-        if (!data.text) {
-            throw new Error('Invalid response from Cohere API');
-        }
-
-        return this._parseResponse(data.text);
-    }
-
-    _parseResponse(text) {
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-            if (match) return JSON.parse(match[1].trim());
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) return JSON.parse(jsonMatch[0]);
-            throw new Error('Could not parse AI response as JSON');
-        }
-    }
-}
-
-
 class ProviderFactory {
+
     static create(providerName, apiKey, model, explanationLanguage = 'en') {
         switch (providerName) {
             case 'gemini':
@@ -553,10 +486,6 @@ class ProviderFactory {
                 return new OpenRouterProvider(apiKey, model, explanationLanguage);
             case 'openai':
                 return new OpenAIProvider(apiKey, model, explanationLanguage);
-
-            case 'cohere':
-
-                return new CohereProvider(apiKey, model, explanationLanguage);
             default:
                 throw new Error(`Unknown provider: ${providerName}`);
         }
@@ -587,11 +516,6 @@ class ProviderFactory {
                     break;
                 case 'openrouter':
                     response = await fetch('https://openrouter.ai/api/v1/key', {
-                        headers: { 'Authorization': `Bearer ${key}` }
-                    });
-                    break;
-                case 'cohere':
-                    response = await fetch('https://api.cohere.com/v1/models', {
                         headers: { 'Authorization': `Bearer ${key}` }
                     });
                     break;

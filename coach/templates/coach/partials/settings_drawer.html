@@ -55,7 +55,7 @@
                     <p class="settings-desc">Language used only for explanations/tips. Corrections and suggestions
                         remain in English.</p>
                     <select id="explanation-language" class="settings-select">
-                        <option value="en">English</option>
+                        <option value="en">English (Recommended) </option>
                         <option value="bn">বাংলা (Bengali)</option>
                     </select>
                 </div>
@@ -64,20 +64,23 @@
                 <div class="settings-section">
                     <h3>AI Response Provider</h3>
                     <p class="settings-desc">Select the AI provider used to evaluate your English and generate feedback</p>
-                    <div class="provider-cards">
+                    <div class="provider-cards voice-provider-cards">
                         <label class="provider-card" id="provider-openai-card">
                             <input type="radio" name="ai-provider" value="openai">
                             <div class="provider-card-content">
-                                <div class="provider-icon">🤖</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9A6 6 0 0 0 4.98 4.18a5.98 5.98 0 0 0-3.99 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.52 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 4-2.9 6.06 6.06 0 0 0-.75-7.07zM13.26 22.43a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .39-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.3a4.47 4.47 0 0 1-.54-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 22a4.5 4.5 0 0 1-6.14-1.65zM2.34 7.9a4.5 4.5 0 0 1 2.35-1.97v5.68a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0l-4.83-2.79A4.5 4.5 0 0 1 2.34 7.9zm16.6 3.86-5.84-3.4L15.12 7.2a.08.08 0 0 1 .07 0l4.83 2.79a4.5 4.5 0 0 1-.68 8.12v-5.68a.79.79 0 0 0-.4-.68zm2.01-3.03-.14-.09-4.77-2.78a.78.78 0 0 0-.79 0l-5.84 3.37V6.87a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM9.4 12.86 7.38 11.7a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08L9.8 5.46a.79.79 0 0 0-.4.68zm1.1-2.37L13.1 9l2.6 1.5v3l-2.6 1.5-2.6-1.5z"/>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">OpenAI</div>
-                                    <div class="provider-desc">ChatGPT</div>
+                                    <div class="provider-desc">ChatGPT models</div>
                                 </div>
                                 <div class="provider-radio-circle"></div>
                             </div>
                         </label>
                         <label class="provider-card" id="provider-gemini-card">
-
                             <input type="radio" name="ai-provider" value="gemini" checked>
                             <div class="provider-card-content">
                                 <div class="provider-icon">✦</div>
@@ -110,7 +113,6 @@
                                 <div class="provider-radio-circle"></div>
                             </div>
                         </label>
-
                     </div>
                 </div>
 
@@ -142,7 +144,7 @@
                             <label class="multi-key-label">Key 2 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="gemini-api-key-2" placeholder="Enter backup Gemini API key">
+                                    <input type="password" id="gemini-api-key-2" placeholder="Enter Gemini API key">
                                     <button class="toggle-key-vis" data-target="gemini-api-key-2" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -161,7 +163,7 @@
                             <label class="multi-key-label">Key 3 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="gemini-api-key-3" placeholder="Enter backup Gemini API key">
+                                    <input type="password" id="gemini-api-key-3" placeholder="Enter Gemini API key">
                                     <button class="toggle-key-vis" data-target="gemini-api-key-3" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -225,7 +227,7 @@
                             <label class="multi-key-label">Key 2 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="groq-api-key-2" placeholder="Enter backup Groq API key">
+                                    <input type="password" id="groq-api-key-2" placeholder="Enter Groq API key">
                                     <button class="toggle-key-vis" data-target="groq-api-key-2" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -244,7 +246,7 @@
                             <label class="multi-key-label">Key 3 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="groq-api-key-3" placeholder="Enter backup Groq API key">
+                                    <input type="password" id="groq-api-key-3" placeholder="Enter Groq API key">
                                     <button class="toggle-key-vis" data-target="groq-api-key-3" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -306,7 +308,7 @@
                             <label class="multi-key-label">Key 2 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="openrouter-api-key-2" placeholder="Enter backup OpenRouter API key">
+                                    <input type="password" id="openrouter-api-key-2" placeholder="Enter OpenRouter API key">
                                     <button class="toggle-key-vis" data-target="openrouter-api-key-2" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -325,7 +327,7 @@
                             <label class="multi-key-label">Key 3 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="openrouter-api-key-3" placeholder="Enter backup OpenRouter API key">
+                                    <input type="password" id="openrouter-api-key-3" placeholder="Enter OpenRouter API key">
                                     <button class="toggle-key-vis" data-target="openrouter-api-key-3" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -376,7 +378,7 @@
                             <label class="multi-key-label">Key 1 (Primary)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="openai-api-key" placeholder="sk-...">
+                                    <input type="password" id="openai-api-key" placeholder="Enter your OpenAI API key">
                                     <button class="toggle-key-vis" data-target="openai-api-key" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -395,7 +397,7 @@
                             <label class="multi-key-label">Key 2 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="openai-api-key-2" placeholder="Enter backup OpenAI API key">
+                                    <input type="password" id="openai-api-key-2" placeholder="Enter your OpenAI API key">
                                     <button class="toggle-key-vis" data-target="openai-api-key-2" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -414,7 +416,7 @@
                             <label class="multi-key-label">Key 3 (Optional)</label>
                             <div class="key-validate-row">
                                 <div class="key-input-wrapper">
-                                    <input type="password" id="openai-api-key-3" placeholder="Enter backup OpenAI API key">
+                                    <input type="password" id="openai-api-key-3" placeholder="Enter your OpenAI API key">
                                     <button class="toggle-key-vis" data-target="openai-api-key-3" title="Show/hide key">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round">
@@ -451,55 +453,13 @@
                 </div>
 
 
-                <!-- Cohere Specific Settings -->
-                <div id="cohere-settings-container" style="display:none;">
-
-                    <div class="settings-section">
-                        <h3>Cohere API Key</h3>
-                        <p class="settings-desc">Your key is stored securely in your profile</p>
-                        <div class="form-group" id="cohere-key-group">
-                            <div class="key-validate-row">
-                                <div class="key-input-wrapper">
-                                    <input type="password" id="cohere-api-key" placeholder="Enter your Cohere API key">
-                                    <button class="toggle-key-vis" data-target="cohere-api-key" title="Show/hide key">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                            <circle cx="12" cy="12" r="3" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <button type="button" class="validate-key-btn" data-key-input="cohere-api-key" data-provider="cohere">
-                                    <span>Validate</span>
-                                </button>
-                            </div>
-                            <div class="key-validate-status" id="cohere-api-key-status"></div>
-                            <div class="api-key-guide">
-                                Get your key from <a href="https://dashboard.cohere.com/api-keys" target="_blank"
-                                    rel="noopener noreferrer">Cohere Dashboard</a>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="settings-section">
-                        <h3>Cohere Model</h3>
-                        <p class="settings-desc">Select the Cohere model to use</p>
-                        <select id="cohere-model-select" class="settings-select">
-                            <option value="command-r-plus-08-2024">Command R+ (Excellent, Slower)</option>
-                            <option value="command-r-08-2024">Command R (Fast, Balanced)</option>
-                        </select>
-                    </div>
-                </div>
-
-
                 <!-- Voice Input Provider -->
                 <div class="settings-section">
                     <h3>Voice Input Provider</h3>
                     <p class="settings-desc">Choose how your voice is converted to text</p>
                     <div class="provider-cards voice-provider-cards">
                         <label class="provider-card" id="voice-provider-browser-card">
-                            <input type="radio" name="voice-provider" value="browser" checked>
+                            <input type="radio" name="voice-provider" value="browser">
                             <div class="provider-card-content">
                                 <div class="provider-icon">🌐</div>
                                 <div class="provider-info">
@@ -512,7 +472,11 @@
                         <label class="provider-card" id="voice-provider-openai-card">
                             <input type="radio" name="voice-provider" value="openai">
                             <div class="provider-card-content">
-                                <div class="provider-icon">🤖</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9A6 6 0 0 0 4.98 4.18a5.98 5.98 0 0 0-3.99 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.52 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 4-2.9 6.06 6.06 0 0 0-.75-7.07zM13.26 22.43a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .39-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.3a4.47 4.47 0 0 1-.54-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 22a4.5 4.5 0 0 1-6.14-1.65zM2.34 7.9a4.5 4.5 0 0 1 2.35-1.97v5.68a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0l-4.83-2.79A4.5 4.5 0 0 1 2.34 7.9zm16.6 3.86-5.84-3.4L15.12 7.2a.08.08 0 0 1 .07 0l4.83 2.79a4.5 4.5 0 0 1-.68 8.12v-5.68a.79.79 0 0 0-.4-.68zm2.01-3.03-.14-.09-4.77-2.78a.78.78 0 0 0-.79 0l-5.84 3.37V6.87a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM9.4 12.86 7.38 11.7a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08L9.8 5.46a.79.79 0 0 0-.4.68zm1.1-2.37L13.1 9l2.6 1.5v3l-2.6 1.5-2.6-1.5z"/>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">OpenAI Whisper</div>
                                     <div class="provider-desc">Highly accurate transcription</div>
@@ -532,7 +496,7 @@
                             </div>
                         </label>
                         <label class="provider-card" id="voice-provider-groq-card">
-                            <input type="radio" name="voice-provider" value="groq-whisper">
+                            <input type="radio" name="voice-provider" value="groq-whisper" checked>
                             <div class="provider-card-content">
                                 <div class="provider-icon">⚡</div>
                                 <div class="provider-info">

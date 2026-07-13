@@ -300,7 +300,7 @@
 
             // Explicitly force defaults for local settings on new signup
             // so they don't inherit a previous user's settings on the same machine
-            localStorage.setItem('uccharon_voice_provider', 'browser');
+            localStorage.setItem('uccharon_voice_provider', 'groq-whisper');
             localStorage.removeItem('uccharon_openai_api_key');
 
             await loadUserData(true);
@@ -429,7 +429,7 @@
                 // Restore local-only settings from localStorage
                 state.settings.gemini_model = localStorage.getItem('uccharon_gemini_model') || 'gemini-2.0-flash';
                 state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
-                state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'browser';
+                state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'groq-whisper';
                 state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
                 state.settings.groq_whisper_model = localStorage.getItem('uccharon_groq_whisper_model') || 'whisper-large-v3-turbo';
                 resetChatState();
