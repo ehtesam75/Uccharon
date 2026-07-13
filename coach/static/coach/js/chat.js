@@ -103,48 +103,39 @@
         const showFullFeedback = response.input_status === 'valid' || response.input_status === 'mixed_language';
 
         // 1. Grammar Corrections
-        if(showFullFeedback){
-            if (response.grammar_corrections && response.grammar_corrections.length > 0) {
-                let grammarHtml = '';
-                response.grammar_corrections.forEach(gc => {
-                    grammarHtml += `
-                        <div class="grammar-item">
-                            <div class="grammar-original">${escapeHtml(gc.original)}</div>
-                            <div class="grammar-corrected">${escapeHtml(gc.corrected)}</div>
-                            <div class="grammar-explanation">${escapeHtml(gc.explanation)}</div>
-                        </div>
-                    `;
-                });
-                card.appendChild(createFeedbackSection('🔍', 'Grammar Corrections', grammarHtml));
-            } else {
-                card.appendChild(createFeedbackSection(
-                    '🔍', 'Grammar Corrections',
-                    '<div style="color: var(--accent-success); font-size: 0.875rem;">✓ No grammar issues found. Great job!</div>'
-                ));
-            }
+        // Only render this section when the AI actually found grammar errors.
+        // When there are none, hide the section entirely (no "Great job!" message).
+        if (showFullFeedback && response.grammar_corrections && response.grammar_corrections.length > 0) {
+            let grammarHtml = '';
+            response.grammar_corrections.forEach(gc => {
+                grammarHtml += `
+                    <div class="grammar-item">
+                        <div class="grammar-original">${escapeHtml(gc.original)}</div>
+                        <div class="grammar-corrected">${escapeHtml(gc.corrected)}</div>
+                        <div class="grammar-explanation">${escapeHtml(gc.explanation)}</div>
+                    </div>
+                `;
+            });
+            card.appendChild(createFeedbackSection('🔍', 'Grammar Corrections', grammarHtml));
         }
 
         // 1.2 Mechanics Corrections (spelling, capitalization, punctuation)
-        if (showFullFeedback) {
-            if (response.mechanics_corrections && response.mechanics_corrections.length > 0) {
-                let mechanicsHtml = '';
-                response.mechanics_corrections.forEach(mc => {
-                    mechanicsHtml += `
-                        <div class="grammar-item">
-                            <div class="grammar-original">${escapeHtml(mc.original)}</div>
-                            <div class="grammar-corrected">${escapeHtml(mc.corrected)}</div>
-                            <div class="grammar-explanation">${escapeHtml(mc.tip || mc.explanation || '')}</div>
-                        </div>
-                    `;
-                });
-                card.appendChild(createFeedbackSection('✏️', 'Mechanics Corrections', mechanicsHtml));
-            } else {
-                card.appendChild(createFeedbackSection(
-                    '✏️', 'Mechanics Corrections',
-                    '<div style="color: var(--accent-success); font-size: 0.875rem;">✓ No spelling, capitalization, or punctuation issues. Great job!</div>'
-                ));
-            }
+        // Only render this section when the AI actually found mechanics errors.
+        // When there are none, hide the section entirely (no "Great job!" message).
+        if (showFullFeedback && response.mechanics_corrections && response.mechanics_corrections.length > 0) {
+            let mechanicsHtml = '';
+            response.mechanics_corrections.forEach(mc => {
+                mechanicsHtml += `
+                    <div class="grammar-item">
+                        <div class="grammar-original">${escapeHtml(mc.original)}</div>
+                        <div class="grammar-corrected">${escapeHtml(mc.corrected)}</div>
+                        <div class="grammar-explanation">${escapeHtml(mc.tip || mc.explanation || '')}</div>
+                    </div>
+                `;
+            });
+            card.appendChild(createFeedbackSection('✏️', 'Mechanics Corrections', mechanicsHtml));
         }
+
 
         // 1.5 Sentence Improvements
 
@@ -584,12 +575,20 @@
             await createConversation();
         }
 
+        // Turn off any active speaker/audio playback the moment a message is sent.
+        stopSpeaker();
+
         state.isSending = true;
         state.generationCancelled = false;
         state.abortController = new AbortController();
         const abortSignal = state.abortController.signal;
         DOM.chatInput.value = '';
+        // The message is now sent — clear any saved draft for this conversation.
+        if (state.currentConversation) {
+            delete state.chatDrafts[state.currentConversation.id];
+        }
         resizeChatInput();
+
         setGeneratingUI(true);   // Turn the Send button into a Stop button
         clearEmptyChatState();
 

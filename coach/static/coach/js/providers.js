@@ -127,7 +127,7 @@ EVERYTHING ELSE MUST REMAIN IN ENGLISH. Do NOT translate corrections, suggestion
 
 Example (Bengali explanation):
 original: "I am go to school." → corrected: "I go to school."
-explanation: "এখানে \"am\" ব্যবহার করা যাবে না, কারণ \"go\" মূল ক্রিয়া হিসেবে ব্যবহৃত হয়েছে।"`;
+explanation: "এখানে \"am\" ব্যবহার করা যাবে না, কারণ \"go\" মূল verb হিসেবে কাজ করছে।"`;
 
 
 // Build the system prompt, optionally injecting the explanation-language override.
@@ -137,6 +137,35 @@ function buildSystemPrompt(explanationLanguage = 'en') {
     }
     return SYSTEM_PROMPT;
 }
+
+
+// Rebuild a previous assistant turn for the conversation history.
+//
+// The system prompt requires the model to respond ONLY with valid JSON. If we
+// replay the assistant's earlier turns as plain-text `conversational_reply`,
+// the history contradicts that contract: the model "sees" itself answering in
+// prose, not JSON. Over 2–3 turns this inconsistency compounds and the model's
+// output discipline breaks down — and the first thing to fail is fragile,
+// low-resource Bengali (বাংলা) text, which degrades into unreadable gibberish.
+//
+// Replaying the stored response as the SAME JSON contract keeps the context
+// consistent so Bengali Unicode stays correct across every generation. The
+// stored object is already valid Unicode (Django JSONField round-trips it
+// losslessly), so JSON.stringify preserves every Bengali character exactly.
+function buildAssistantHistoryContent(aiResponse) {
+    if (aiResponse && typeof aiResponse === 'object') {
+        try {
+            return JSON.stringify(aiResponse);
+        } catch (e) {
+            // Fall back to the plain reply if the object can't be serialized.
+            if (aiResponse.conversational_reply) {
+                return aiResponse.conversational_reply;
+            }
+        }
+    }
+    return '';
+}
+
 
 
 function formatApiError(status, message, providerName) {
@@ -176,19 +205,24 @@ class GeminiProvider {
         // Build contents array with conversation history
         const contents = [];
 
-        // Add conversation history
+        // Add conversation history — replay the model's prior turn as the SAME
+        // JSON contract it must produce. Feeding back plain prose instead breaks
+        // the model's output discipline after a few turns and corrupts fragile
+        // Bengali (বাংলা) text. See buildAssistantHistoryContent().
         for (const msg of recentHistory) {
             contents.push({
                 role: 'user',
                 parts: [{ text: msg.user_text }]
             });
-            if (msg.ai_response && msg.ai_response.conversational_reply) {
+            const modelContent = buildAssistantHistoryContent(msg.ai_response);
+            if (modelContent) {
                 contents.push({
                     role: 'model',
-                    parts: [{ text: msg.ai_response.conversational_reply }]
+                    parts: [{ text: modelContent }]
                 });
             }
         }
+
 
         // Add current message
         contents.push({
@@ -272,13 +306,17 @@ class GroqProvider {
             { role: 'system', content: buildSystemPrompt(this.explanationLanguage) }
         ];
 
-        // Add history
+        // Add history — replay the assistant's prior turn as the SAME JSON
+        // contract the model must produce. Feeding back plain prose instead
+        // breaks the model's output discipline after a few turns and corrupts
+        // fragile Bengali (বাংলা) text. See buildAssistantHistoryContent().
         for (const msg of recentHistory) {
             messages.push({ role: 'user', content: msg.user_text });
-            if (msg.ai_response && msg.ai_response.conversational_reply) {
+            const assistantContent = buildAssistantHistoryContent(msg.ai_response);
+            if (assistantContent) {
                 messages.push({
                     role: 'assistant',
-                    content: msg.ai_response.conversational_reply
+                    content: assistantContent
                 });
             }
         }
@@ -293,6 +331,7 @@ class GroqProvider {
             max_tokens: 4096,
             response_format: { type: 'json_object' }
         };
+
 
         const response = await fetch(url, {
             method: 'POST',
@@ -350,11 +389,15 @@ class OpenRouterProvider {
         const MAX_HISTORY_TURNS = 8;
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
 
+        // Replay each prior assistant turn as the SAME JSON contract the model
+        // must produce — see buildAssistantHistoryContent() for why this keeps
+        // Bengali (বাংলা) text from corrupting after a few turns.
         const messages = [{ role: 'system', content: buildSystemPrompt(this.explanationLanguage) }];
         for (const msg of recentHistory) {
             messages.push({ role: 'user', content: msg.user_text });
-            if (msg.ai_response && msg.ai_response.conversational_reply) {
-                messages.push({ role: 'assistant', content: msg.ai_response.conversational_reply });
+            const assistantContent = buildAssistantHistoryContent(msg.ai_response);
+            if (assistantContent) {
+                messages.push({ role: 'assistant', content: assistantContent });
             }
         }
         messages.push({ role: 'user', content: userMessage });
@@ -374,6 +417,7 @@ class OpenRouterProvider {
                 'HTTP-Referer': window.location.href, // Recommended for OpenRouter
                 'X-Title': 'Uccharon Coach' // Recommended for OpenRouter
             },
+
             body: JSON.stringify(body),
             signal: options.signal
         });
@@ -418,14 +462,18 @@ class OpenAIProvider {
 
     async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = 'https://api.openai.com/v1/chat/completions';
-        const MAX_HISTORY_TURNS = 8;
+        const MAX_HISTORY_TURNS = 5;
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
 
+        // Replay each prior assistant turn as the SAME JSON contract the model
+        // must produce — see buildAssistantHistoryContent() for why this keeps
+        // Bengali (বাংলা) text from corrupting after a few turns.
         const messages = [{ role: 'system', content: buildSystemPrompt(this.explanationLanguage) }];
         for (const msg of recentHistory) {
             messages.push({ role: 'user', content: msg.user_text });
-            if (msg.ai_response && msg.ai_response.conversational_reply) {
-                messages.push({ role: 'assistant', content: msg.ai_response.conversational_reply });
+            const assistantContent = buildAssistantHistoryContent(msg.ai_response);
+            if (assistantContent) {
+                messages.push({ role: 'assistant', content: assistantContent });
             }
         }
         messages.push({ role: 'user', content: userMessage });
@@ -451,6 +499,7 @@ class OpenAIProvider {
             const err = await response.json().catch(() => ({}));
             throw new Error(formatApiError(response.status, err.error?.message, 'OpenAI'));
         }
+
 
         const data = await response.json();
         if (!data.choices || !data.choices[0]?.message?.content) {

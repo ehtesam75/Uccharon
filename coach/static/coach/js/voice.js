@@ -302,8 +302,13 @@
                             DOM.chatInput.value = prefix + transcript.trim();
                             resizeChatInput();
                             DOM.chatInput.focus();
+                        } else {
+                            // Empty/silent recording (or a discarded hallucinated
+                            // filler phrase) — don't inject meaningless text.
+                            showToast('No speech detected. Please try again.', 'error');
                         }
                     } catch (err) {
+
                         showToast('Transcription failed: ' + err.message, 'error');
                     } finally {
                         DOM.micStatus.style.display = 'none';
@@ -407,6 +412,33 @@
 
     // ─── Groq Whisper transcription ──────────────────
 
+    // Whisper-family models (including Groq Whisper) hallucinate short filler
+    // phrases such as "you" or "thank you" when the
+    // recording is silent or contains no real speech. When the ENTIRE transcript
+    // is nothing but one of these filler phrases, treat it as an empty recording
+    // so we don't inject meaningless text into the chat input.
+    const WHISPER_HALLUCINATION_PHRASES = new Set([
+        'you',
+        'you.',
+        'You.',
+        'thank you',
+        'thank you.',
+        'Thank you.'
+    ]);
+
+    function _isLikelyEmptyTranscript(text) {
+        if (!text) return true;
+        // Normalize: lowercase, trim, strip surrounding punctuation/whitespace.
+        const normalized = text
+            .trim()
+            .toLowerCase()
+            .replace(/[\s]+/g, ' ')
+            .replace(/^[\s.,!?…-]+|[\s.,!?…-]+$/g, '')
+            .trim();
+        if (!normalized) return true;
+        return WHISPER_HALLUCINATION_PHRASES.has(normalized);
+    }
+
     async function _transcribeWithGroq(audioBlob, apiKey, model) {
         const formData = new FormData();
         const ext = audioBlob.type.includes('webm') ? 'webm' : 'mp4';
@@ -428,8 +460,15 @@
         }
 
         const data = await res.json();
-        return data.text || '';
+        const text = data.text || '';
+
+        // Silent/empty recording produced a hallucinated filler phrase — discard it.
+        if (_isLikelyEmptyTranscript(text)) {
+            return '';
+        }
+        return text;
     }
+
 
     // ─── Speech-to-Text fallback + last-success tracking ───
 

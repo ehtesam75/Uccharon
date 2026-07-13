@@ -88,11 +88,28 @@
 
         finishConversationRename(true);
 
+        // Switching chats: turn off any active speaker/audio playback.
+        stopSpeaker();
+
         if (state.currentConversation && state.currentConversation.id !== convo.id) {
+            // Preserve whatever the user had typed in the outgoing chat so it can
+            // be restored when they come back — but never carry it into the new chat.
+            const outgoingDraft = DOM.chatInput.value;
+            if (outgoingDraft && outgoingDraft.trim()) {
+                state.chatDrafts[state.currentConversation.id] = outgoingDraft;
+            } else {
+                delete state.chatDrafts[state.currentConversation.id];
+            }
+
             void queueEmptyConversationDeletion(state.currentConversation.id, state.currentMessages);
         }
 
         state.currentConversation = convo;
+
+        // Restore the incoming chat's saved draft (empty string if none).
+        DOM.chatInput.value = state.chatDrafts[convo.id] || '';
+        resizeChatInput();
+
         state.previousScores = null;
         setPersistedConversationId(convo.id);
         setPersistedView('chat');
