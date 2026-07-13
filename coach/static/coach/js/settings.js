@@ -47,8 +47,13 @@
         if (openrouterKey3El) openrouterKey3El.value = state.settings.openrouter_api_key_3 || '';
 
         DOM.openaiApiKey.value = state.settings.openai_api_key || '';
+        const openaiKey2El = document.getElementById('openai-api-key-2');
+        const openaiKey3El = document.getElementById('openai-api-key-3');
+        if (openaiKey2El) openaiKey2El.value = state.settings.openai_api_key_2 || '';
+        if (openaiKey3El) openaiKey3El.value = state.settings.openai_api_key_3 || '';
 
         // AI Provider radios
+
         const aiProvider = state.settings.ai_provider || 'gemini';
         const providerRadio = document.querySelector(`input[name="ai-provider"][value="${aiProvider}"]`);
         if (providerRadio) providerRadio.checked = true;
@@ -61,10 +66,12 @@
         }
 
         // Model selects
-        DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.0-flash';
+        DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.5-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
         DOM.openrouterModelSelect.value = state.settings.openrouter_model || 'openrouter/free';
+        if (DOM.openaiModelSelect) DOM.openaiModelSelect.value = state.settings.openai_model || 'gpt-4o';
         if (DOM.groqWhisperModelSelect) DOM.groqWhisperModelSelect.value = state.settings.groq_whisper_model || 'whisper-large-v3-turbo';
+
 
 
         // Voice Provider radios
@@ -74,9 +81,9 @@
         _updateVoiceProviderUI(vp);
     }
 
-    /** Show/hide the OpenAI key field and notice based on selected voice provider */
+    /** Show/hide the per-provider voice notices based on selected voice provider */
     function _updateVoiceProviderUI(provider) {
-        DOM.openaiKeyGroup.style.display = provider === 'openai' ? 'block' : 'none';
+        if (DOM.openaiSttNotice) DOM.openaiSttNotice.style.display = provider === 'openai' ? 'flex' : 'none';
         DOM.geminiSttNotice.style.display = provider === 'gemini-stt' ? 'flex' : 'none';
         DOM.voiceBrowserNotice.style.display = provider === 'browser' ? 'flex' : 'none';
         if (DOM.groqWhisperGroup) DOM.groqWhisperGroup.style.display = provider === 'groq-whisper' ? 'block' : 'none';
@@ -84,11 +91,12 @@
 
     /** Show/hide the AI Provider settings based on selected AI provider */
     function _updateAiProviderUI(provider) {
-        ['gemini', 'groq', 'openrouter'].forEach(p => {
+        ['openai', 'gemini', 'groq', 'openrouter'].forEach(p => {
             const container = document.getElementById(`${p}-settings-container`);
             if (container) container.style.display = provider === p ? 'block' : 'none';
         });
     }
+
 
     // ─── Settings API Key Validation ─────────────────────
 
@@ -190,10 +198,14 @@
         const openrouterKey3 = (document.getElementById('openrouter-api-key-3')?.value || '').trim();
 
         const openaiKey = DOM.openaiApiKey.value.trim();
+        const openaiKey2 = (document.getElementById('openai-api-key-2')?.value || '').trim();
+        const openaiKey3 = (document.getElementById('openai-api-key-3')?.value || '').trim();
         const geminiModel = DOM.geminiModelSelect.value;
         const groqModel = DOM.groqModelSelect.value;
         const openrouterModel = DOM.openrouterModelSelect.value;
+        const openaiModel = DOM.openaiModelSelect?.value || 'gpt-4o';
         const groqWhisperModel = DOM.groqWhisperModelSelect?.value || 'whisper-large-v3-turbo';
+
 
         const voiceProvider = document.querySelector('input[name="voice-provider"]:checked')?.value || 'browser';
         const dailyWordGoal = DOM.dailyWordGoalSelect.value;
@@ -224,9 +236,13 @@
         state.settings.openrouter_api_key_3 = openrouterKey3;
 
         state.settings.openai_api_key = openaiKey;
+        state.settings.openai_api_key_2 = openaiKey2;
+        state.settings.openai_api_key_3 = openaiKey3;
+        state.settings.openai_model = openaiModel;
         state.settings.gemini_model = geminiModel;
         state.settings.groq_model = groqModel;
         state.settings.openrouter_model = openrouterModel;
+
 
         state.settings.voice_provider = voiceProvider;
         state.settings.groq_whisper_model = groqWhisperModel;
@@ -256,9 +272,14 @@
                 openrouter_api_key: openrouterKey,
                 openrouter_api_key_2: openrouterKey2,
                 openrouter_api_key_3: openrouterKey3,
+                openai_api_key: openaiKey,
+                openai_api_key_2: openaiKey2,
+                openai_api_key_3: openaiKey3,
+                openai_model: openaiModel,
 
                 explanation_language: explanationLanguage,
                 daily_word_goal: dailyWordGoal
+
             });
             state.settings.daily_word_goal = parseInt(dailyWordGoal);
             showToast('Settings saved successfully!', 'success');

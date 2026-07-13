@@ -320,9 +320,10 @@
         // Model attribution label
         if (providerName || modelName) {
             const PROVIDER_DISPLAY = {
-                gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter'
+                openai: 'OpenAI', gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter'
             };
             const displayProvider = PROVIDER_DISPLAY[providerName] || providerName;
+
             const displayModel = MODEL_DISPLAY_NAMES[modelName] || modelName;
             const parts = [displayProvider, displayModel].filter(Boolean);
             if (parts.length) {
@@ -383,12 +384,20 @@
     // ─── Fallback System Constants ──────────────────────
 
     const PROVIDER_MODELS = {
+        openai: [
+            'gpt-4o',
+            'gpt-4o-mini',
+            'gpt-4.1',
+            'gpt-4.1-mini',
+            'gpt-4-turbo',
+            'gpt-3.5-turbo'
+        ],
         gemini: [
+            'gemini-2.5-flash',
+            'gemini-2.5-pro',
+            'gemini-2.5-flash-lite',
             'gemini-2.0-flash',
-            'gemini-2.0-pro-exp-02-05',
-            'gemini-1.5-pro',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-8b'
+            'gemini-2.0-flash-lite'
         ],
         groq: [
             'llama-3.3-70b-versatile',
@@ -410,7 +419,8 @@
         ]
     };
 
-    const PROVIDER_DISPLAY = { gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter' };
+    const PROVIDER_DISPLAY = { openai: 'OpenAI', gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter' };
+
 
     function _getLastSuccess() {
         try {
@@ -444,7 +454,8 @@
         const lastSuccess = _getLastSuccess();
         const startProvider = state.settings.ai_provider;
         const startModel = state.settings[`${startProvider}_model`];
-        const allProviders = ['gemini', 'groq', 'openrouter'];
+        const allProviders = ['openai', 'gemini', 'groq', 'openrouter'];
+
         const attemptList = []; // [{provider, model, key, keyIndex, label}]
         const seen = new Set(); // dedup: "provider|model|keyIndex"
 
@@ -552,7 +563,8 @@
             return;
         }
 
-        const activeProviders = ['gemini', 'groq', 'openrouter'].filter(p => _getProviderKeys(p).length > 0);
+        const activeProviders = ['openai', 'gemini', 'groq', 'openrouter'].filter(p => _getProviderKeys(p).length > 0);
+
         if (activeProviders.length === 0) {
             showToast(`Please set an AI provider API key in Settings.`, 'error');
             openSettings();

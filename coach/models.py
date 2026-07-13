@@ -8,10 +8,12 @@ from django.dispatch import receiver
 class UserProfile(models.Model):
     """Extended user profile for preferences and settings."""
     PROVIDER_CHOICES = [
+        ('openai', 'OpenAI'),
         ('gemini', 'Gemini'),
         ('groq', 'Groq'),
         ('openrouter', 'OpenRouter'),
     ]
+
     THEME_CHOICES = [
         ('dark', 'Dark'),
         ('light', 'Light'),
@@ -39,8 +41,14 @@ class UserProfile(models.Model):
     openrouter_api_key = models.CharField(max_length=255, blank=True, default='')
     openrouter_api_key_2 = models.CharField(max_length=255, blank=True, default='')
     openrouter_api_key_3 = models.CharField(max_length=255, blank=True, default='')
+    # OpenAI keys are shared by the OpenAI response provider AND the Whisper voice input.
+    openai_api_key = models.CharField(max_length=255, blank=True, default='')
+    openai_api_key_2 = models.CharField(max_length=255, blank=True, default='')
+    openai_api_key_3 = models.CharField(max_length=255, blank=True, default='')
+    openai_model = models.CharField(max_length=100, blank=True, default='gpt-4o')
 
     daily_word_goal = models.IntegerField(default=250)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

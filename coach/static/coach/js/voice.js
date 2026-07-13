@@ -151,10 +151,10 @@
             _setRecordingUI(true, 'Browser');
 
         } else if (provider === 'openai') {
-            const apiKey = state.settings.openai_api_key;
-            if (!apiKey) {
+            if (_getProviderKeys('openai').length === 0) {
                 showToast('Please set your OpenAI API key in Settings to use Whisper.', 'error');
                 openSettings();
+
                 return;
             }
             _startMediaRecorder('openai');
@@ -456,9 +456,10 @@
         const last = _getSttLastSuccess();
         const groqKeys = _getProviderKeys('groq');
         const geminiKeys = _getProviderKeys('gemini');
-        const openaiKey = state.settings.openai_api_key;
+        const openaiKeys = _getProviderKeys('openai');
         const groqModel = state.settings.groq_whisper_model || 'whisper-large-v3-turbo';
         const geminiModel = state.settings.gemini_model || 'gemini-2.0-flash';
+
 
         const builders = {
             'groq-whisper': () => {
@@ -478,9 +479,19 @@
                 return list;
             },
             'openai': () => {
-                if (!openaiKey) return [];
-                return [{ provider: 'openai', model: 'whisper-1', key: openaiKey, keyIndex: 0, label: 'Whisper' }];
+                const list = [];
+                const order = [];
+                if (last && last.provider === 'openai' &&
+                    typeof last.keyIndex === 'number' && last.keyIndex < openaiKeys.length) {
+                    order.push(last.keyIndex);
+                }
+                for (let i = 0; i < openaiKeys.length; i++) if (!order.includes(i)) order.push(i);
+                for (const i of order) {
+                    list.push({ provider: 'openai', model: 'whisper-1', key: openaiKeys[i], keyIndex: i, label: 'Whisper' });
+                }
+                return list;
             },
+
             'gemini-stt': () => {
                 const list = [];
                 const order = [];

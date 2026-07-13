@@ -408,6 +408,72 @@ class OpenRouterProvider {
 
 
 
+class OpenAIProvider {
+    constructor(apiKey, model = 'gpt-4o', explanationLanguage = 'en') {
+        this.apiKey = apiKey;
+        this.model = model;
+        this.name = 'OpenAI';
+        this.explanationLanguage = explanationLanguage;
+    }
+
+    async sendMessage(userMessage, conversationHistory = [], options = {}) {
+        const url = 'https://api.openai.com/v1/chat/completions';
+        const MAX_HISTORY_TURNS = 8;
+        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+
+        const messages = [{ role: 'system', content: buildSystemPrompt(this.explanationLanguage) }];
+        for (const msg of recentHistory) {
+            messages.push({ role: 'user', content: msg.user_text });
+            if (msg.ai_response && msg.ai_response.conversational_reply) {
+                messages.push({ role: 'assistant', content: msg.ai_response.conversational_reply });
+            }
+        }
+        messages.push({ role: 'user', content: userMessage });
+
+        const body = {
+            model: this.model,
+            messages: messages,
+            temperature: 0.8,
+            response_format: { type: 'json_object' }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify(body),
+            signal: options.signal
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(formatApiError(response.status, err.error?.message, 'OpenAI'));
+        }
+
+        const data = await response.json();
+        if (!data.choices || !data.choices[0]?.message?.content) {
+            throw new Error('Invalid response from OpenAI API');
+        }
+
+        return this._parseResponse(data.choices[0].message.content);
+    }
+
+    _parseResponse(text) {
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (match) return JSON.parse(match[1].trim());
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            throw new Error('Could not parse AI response as JSON');
+        }
+    }
+}
+
+
 class CohereProvider {
     constructor(apiKey, model = 'command-r-08-2024', explanationLanguage = 'en') {
         this.apiKey = apiKey;
@@ -485,8 +551,11 @@ class ProviderFactory {
                 return new GroqProvider(apiKey, model, explanationLanguage);
             case 'openrouter':
                 return new OpenRouterProvider(apiKey, model, explanationLanguage);
+            case 'openai':
+                return new OpenAIProvider(apiKey, model, explanationLanguage);
 
             case 'cohere':
+
                 return new CohereProvider(apiKey, model, explanationLanguage);
             default:
                 throw new Error(`Unknown provider: ${providerName}`);

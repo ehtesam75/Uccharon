@@ -30,14 +30,18 @@
             openrouter_api_key: '',
             openrouter_api_key_2: '',
             openrouter_api_key_3: '',
+            openai_api_key: '',            // shared by OpenAI response provider + Whisper STT
+            openai_api_key_2: '',
+            openai_api_key_3: '',
 
-            gemini_model: 'gemini-2.0-flash',
+            gemini_model: 'gemini-2.5-flash',
             groq_model: 'llama-3.3-70b-versatile',
             openrouter_model: 'meta-llama/llama-3.3-70b-instruct',
+            openai_model: 'gpt-4o',
 
             voice_provider: 'browser',    // 'browser' | 'openai' | 'gemini-stt' | 'groq-whisper'
-            openai_api_key: '',            // used for Whisper STT
             groq_whisper_model: 'whisper-large-v3-turbo'   // Groq Whisper STT model
+
 
         },
         conversations: [],
@@ -106,8 +110,15 @@
         'google/gemma-3-27b-it': 'Gemma 3 27B',
         'openai/gpt-3.5-turbo': 'GPT-3.5 Turbo',
         'nvidia/nemotron-3-super-120b-a12b': 'NVIDIA Nemotron 3 Super',
-        'openrouter/auto': 'Auto (OpenRouter Choice)'
+        'openrouter/auto': 'Auto (OpenRouter Choice)',
+        'gpt-4o': 'GPT-4o',
+        'gpt-4o-mini': 'GPT-4o mini',
+        'gpt-4.1': 'GPT-4.1',
+        'gpt-4.1-mini': 'GPT-4.1 mini',
+        'gpt-4-turbo': 'GPT-4 Turbo',
+        'gpt-3.5-turbo': 'GPT-3.5 Turbo'
     };
+
 
     // ═══════════════════════════════════════════════════════
     // DOM REFERENCES
@@ -195,13 +206,15 @@
         geminiModelSelect: $('#gemini-model-select'),
         groqModelSelect: $('#groq-model-select'),
         openrouterModelSelect: $('#openrouter-model-select'),
+        openaiModelSelect: $('#openai-model-select'),
 
         saveSettingsBtn: $('#save-settings-btn'),
-        openaiKeyGroup: $('#openai-key-group'),
         groqWhisperGroup: $('#groq-whisper-group'),
         groqWhisperModelSelect: $('#groq-whisper-model-select'),
         voiceBrowserNotice: $('#voice-browser-notice'),
         geminiSttNotice: $('#gemini-stt-notice'),
+        openaiSttNotice: $('#openai-stt-notice'),
+
 
 
         // Dashboard

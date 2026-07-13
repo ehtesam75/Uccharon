@@ -50,7 +50,9 @@ def signup_view(request):
     gemini_api_key = data.get('gemini_api_key', '').strip()
     groq_api_key = data.get('groq_api_key', '').strip()
     openrouter_api_key = data.get('openrouter_api_key', '').strip()
+    openai_api_key = data.get('openai_api_key', '').strip()
     cohere_api_key = data.get('cohere_api_key', '').strip()
+
 
     if not username or not email or not password:
         return JsonResponse({'error': 'All fields are required.'}, status=400)
@@ -74,6 +76,8 @@ def signup_view(request):
         return JsonResponse({'error': 'A Groq API key is required.'}, status=400)
     if ai_provider == 'openrouter' and not openrouter_api_key:
         return JsonResponse({'error': 'An OpenRouter API key is required.'}, status=400)
+    if ai_provider == 'openai' and not openai_api_key:
+        return JsonResponse({'error': 'An OpenAI API key is required.'}, status=400)
 
     if ai_provider == 'cohere' and not cohere_api_key:
         return JsonResponse({'error': 'A Cohere API key is required.'}, status=400)
@@ -83,8 +87,10 @@ def signup_view(request):
     user.profile.gemini_api_key = gemini_api_key if ai_provider == 'gemini' else ''
     user.profile.groq_api_key = groq_api_key if ai_provider == 'groq' else ''
     user.profile.openrouter_api_key = openrouter_api_key if ai_provider == 'openrouter' else ''
+    user.profile.openai_api_key = openai_api_key if ai_provider == 'openai' else ''
 
     user.profile.cohere_api_key = cohere_api_key if ai_provider == 'cohere' else ''
+
     
     # Set daily word goal if provided
     daily_word_goal = data.get('daily_word_goal')
@@ -173,11 +179,16 @@ def current_user_view(request):
                 'openrouter_api_key': profile.openrouter_api_key,
                 'openrouter_api_key_2': profile.openrouter_api_key_2,
                 'openrouter_api_key_3': profile.openrouter_api_key_3,
+                'openai_api_key': profile.openai_api_key,
+                'openai_api_key_2': profile.openai_api_key_2,
+                'openai_api_key_3': profile.openai_api_key_3,
+                'openai_model': profile.openai_model,
 
                 'daily_word_goal': profile.daily_word_goal,
             }
         })
     return JsonResponse({'authenticated': False})
+
 
 
 # ─── Settings Views ────────────────────────────────────────
@@ -236,8 +247,17 @@ def settings_view(request):
         profile.openrouter_api_key_2 = data['openrouter_api_key_2']
     if 'openrouter_api_key_3' in data:
         profile.openrouter_api_key_3 = data['openrouter_api_key_3']
+    if 'openai_api_key' in data:
+        profile.openai_api_key = data['openai_api_key']
+    if 'openai_api_key_2' in data:
+        profile.openai_api_key_2 = data['openai_api_key_2']
+    if 'openai_api_key_3' in data:
+        profile.openai_api_key_3 = data['openai_api_key_3']
+    if 'openai_model' in data:
+        profile.openai_model = data['openai_model']
 
     if 'daily_word_goal' in data:
+
         new_goal = int(data['daily_word_goal'])
         if profile.daily_word_goal != new_goal:
             # Lock in today's goal to the OLD goal so the new goal only takes effect tomorrow
