@@ -72,7 +72,7 @@
         // Model selects
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.5-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
-        DOM.openrouterModelSelect.value = state.settings.openrouter_model || 'openrouter/free';
+        DOM.openrouterModelSelect.value = state.settings.openrouter_model || 'meta-llama/llama-3.3-70b-instruct';
         if (DOM.openaiModelSelect) DOM.openaiModelSelect.value = state.settings.openai_model || 'gpt-4o';
         if (DOM.groqWhisperModelSelect) DOM.groqWhisperModelSelect.value = state.settings.groq_whisper_model || 'whisper-large-v3-turbo';
 
