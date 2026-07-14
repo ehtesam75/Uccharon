@@ -84,6 +84,16 @@
         }
     }
 
+    // Stop the microphone recording only when one is currently active, then
+    // release the microphone. Safe to call unconditionally (e.g. when sending a
+    // message or switching chats).
+    function stopRecordingIfActive() {
+        if (state.isRecording) {
+            stopRecording();
+        }
+    }
+
+
     // Returns the current mic permission state: 'granted' | 'denied' | 'prompt' | 'unknown'
     async function _getMicPermissionState() {
         if (navigator.permissions && navigator.permissions.query) {

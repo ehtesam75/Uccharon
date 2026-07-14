@@ -91,6 +91,9 @@
         // Switching chats: turn off any active speaker/audio playback.
         stopSpeaker();
 
+        // Switching chats: stop any active microphone recording and release the mic.
+        stopRecordingIfActive();
+
         if (state.currentConversation && state.currentConversation.id !== convo.id) {
             // Preserve whatever the user had typed in the outgoing chat so it can
             // be restored when they come back — but never carry it into the new chat.

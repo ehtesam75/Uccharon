@@ -386,9 +386,7 @@
         gemini: [
             'gemini-2.5-flash',
             'gemini-2.5-pro',
-            'gemini-2.5-flash-lite',
-            'gemini-2.0-flash',
-            'gemini-2.0-flash-lite'
+            'gemini-2.0-flash'
         ],
         groq: [
             'llama-3.3-70b-versatile',
@@ -577,6 +575,9 @@
 
         // Turn off any active speaker/audio playback the moment a message is sent.
         stopSpeaker();
+
+        // Stop any active microphone recording and release the mic on send.
+        stopRecordingIfActive();
 
         state.isSending = true;
         state.generationCancelled = false;
@@ -906,10 +907,16 @@
                 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
                 if (!isMobile) {
                     e.preventDefault();
-                    sendMessage();
+                    // Enter only sends a new message. While an AI response is
+                    // generating it must NOT act as Stop/Cancel — that action is
+                    // available only through the dedicated Stop button.
+                    if (!state.isSending) {
+                        sendMessage();
+                    }
                 }
             }
         });
+
 
         DOM.sendBtn.addEventListener('click', sendMessage);
     }
