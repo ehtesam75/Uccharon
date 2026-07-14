@@ -65,6 +65,10 @@
             DOM.explanationLanguageSelect.value = state.settings.explanation_language || 'en';
         }
 
+        // Bengali explanations are unreliable on Groq — reflect that in the UI.
+        _updateGroqBengaliState();
+
+
         // Model selects
         DOM.geminiModelSelect.value = state.settings.gemini_model || 'gemini-2.5-flash';
         DOM.groqModelSelect.value = state.settings.groq_model || 'llama-3.3-70b-versatile';
@@ -96,6 +100,37 @@
             if (container) container.style.display = provider === p ? 'block' : 'none';
         });
     }
+
+    /**
+     * Groq produces corrupted output for Bengali explanations, so it is disabled
+     * whenever বাংলা (Bengali) is selected as the Explanation Language.
+     * This greys out / disables the Groq provider card, shows an explanatory
+     * notice, and — if Groq was the active provider — falls back to Gemini.
+     */
+    function _updateGroqBengaliState() {
+        const isBengali = (DOM.explanationLanguageSelect?.value || 'en') === 'bn';
+        const groqCard = document.getElementById('provider-groq-card');
+        const groqRadio = document.querySelector('input[name="ai-provider"][value="groq"]');
+        const notice = document.getElementById('groq-bengali-notice');
+
+        if (notice) notice.style.display = isBengali ? 'flex' : 'none';
+
+        if (groqRadio) groqRadio.disabled = isBengali;
+        if (groqCard) {
+            groqCard.classList.toggle('disabled', isBengali);
+            groqCard.setAttribute('aria-disabled', isBengali ? 'true' : 'false');
+        }
+
+        // If Groq is currently selected while Bengali is active, fall back to Gemini.
+        if (isBengali && groqRadio && groqRadio.checked) {
+            const geminiRadio = document.querySelector('input[name="ai-provider"][value="gemini"]');
+            if (geminiRadio) {
+                geminiRadio.checked = true;
+                _updateAiProviderUI('gemini');
+            }
+        }
+    }
+
 
 
     // ─── Settings API Key Validation ─────────────────────
@@ -319,6 +354,14 @@
                 _updateAiProviderUI(radio.value);
             });
         });
+
+        // Groq is unavailable for Bengali explanations — update UI on language change
+        if (DOM.explanationLanguageSelect) {
+            DOM.explanationLanguageSelect.addEventListener('change', () => {
+                _updateGroqBengaliState();
+            });
+        }
+
 
         // Wire up per-key "Validate" buttons and Save-gating
         // (openSettings() re-seeds validation state each time the drawer opens)

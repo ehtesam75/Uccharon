@@ -114,7 +114,16 @@
                             </div>
                         </label>
                     </div>
+
+                    <!-- Groq unavailable for Bengali explanations notice -->
+                    <div id="groq-bengali-notice" class="voice-provider-notice" style="display:none; margin-top:16px; border-left:3px solid var(--accent-error);">
+                        <span class="notice-icon">⚠️</span>
+                        <span>Groq currently does not support <strong>বাংলা (Bengali)</strong> explanations reliably and
+                            may produce corrupted output. Groq is unavailable while Bengali is selected as your
+                            Explanation Language. Switch the Explanation Language back to English to use Groq.</span>
+                    </div>
                 </div>
+
 
                 <!-- Gemini Specific Settings -->
                 <div id="gemini-settings-container">
@@ -201,6 +210,8 @@
                 <div id="groq-settings-container" style="display:none;">
                     <div class="settings-section">
                         <h3>Groq API Keys</h3>
+
+
                         <p class="settings-desc">Add up to 3 API keys from different accounts to reduce interruptions when one key reaches its rate limit.</p>
                         <div class="form-group" id="groq-key-group">
                             <label class="multi-key-label">Key 1 (Primary)</label>
@@ -444,9 +455,8 @@
                             <option value="gpt-4o-mini">GPT-4o mini (Fast &amp; Affordable)</option>
                             <option value="gpt-4.1">GPT-4.1 (Premium)</option>
                             <option value="gpt-4.1-mini">GPT-4.1 mini (Fast)</option>
-                            <option value="gpt-4-turbo">GPT-4 Turbo (Older, Premium)</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Budget)</option>
                         </select>
+
                     </div>
                 </div>
 

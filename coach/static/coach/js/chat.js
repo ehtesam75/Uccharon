@@ -379,10 +379,9 @@
             'gpt-4o',
             'gpt-4o-mini',
             'gpt-4.1',
-            'gpt-4.1-mini',
-            'gpt-4-turbo',
-            'gpt-3.5-turbo'
+            'gpt-4.1-mini'
         ],
+
         gemini: [
             'gemini-2.5-flash',
             'gemini-2.5-pro',
@@ -422,7 +421,21 @@
         localStorage.setItem('uccharon_last_success', JSON.stringify({ provider, model, keyIndex }));
     }
 
+    /**
+     * The list of AI providers eligible for use/fallback. Groq is excluded when
+     * বাংলা (Bengali) is the selected Explanation Language because it produces
+     * corrupted Bengali output.
+     */
+    function _getAvailableProviders() {
+        const all = ['openai', 'gemini', 'groq', 'openrouter'];
+        if (state.settings.explanation_language === 'bn') {
+            return all.filter(p => p !== 'groq');
+        }
+        return all;
+    }
+
     function _getProviderKeys(providerName) {
+
         const keys = [];
         const k1 = state.settings[`${providerName}_api_key`];
         const k2 = state.settings[`${providerName}_api_key_2`];
@@ -441,9 +454,16 @@
      */
     function _buildAttemptList() {
         const lastSuccess = _getLastSuccess();
-        const startProvider = state.settings.ai_provider;
+        const availableProviders = _getAvailableProviders();
+        let startProvider = state.settings.ai_provider;
+        // If the current provider is unavailable (e.g. Groq while Bengali is
+        // selected), start from the first available provider instead.
+        if (!availableProviders.includes(startProvider)) {
+            startProvider = availableProviders[0];
+        }
         const startModel = state.settings[`${startProvider}_model`];
-        const allProviders = ['openai', 'gemini', 'groq', 'openrouter'];
+        const allProviders = availableProviders;
+
 
         const attemptList = []; // [{provider, model, key, keyIndex, label}]
         const seen = new Set(); // dedup: "provider|model|keyIndex"
@@ -552,7 +572,8 @@
             return;
         }
 
-        const activeProviders = ['openai', 'gemini', 'groq', 'openrouter'].filter(p => _getProviderKeys(p).length > 0);
+        const activeProviders = _getAvailableProviders().filter(p => _getProviderKeys(p).length > 0);
+
 
         if (activeProviders.length === 0) {
             showToast(`Please set an AI provider API key in Settings.`, 'error');

@@ -227,6 +227,15 @@
     line-height: 1.3;
 }
 
+/* Disabled provider card (e.g. Groq while Bengali is the explanation language) */
+.provider-card.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    filter: grayscale(1);
+    pointer-events: none;
+}
+
+
 /* ─── API Key input row ──────────────────────────────────── */
 .key-input-wrapper {
     position: relative;
