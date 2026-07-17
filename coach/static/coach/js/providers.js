@@ -194,7 +194,85 @@ function formatApiError(status, message, providerName) {
     return `${providerName} Error: ${message || `HTTP ${status}`}`;
 }
 
+
+// ─── Structured errors + request timeout (shared by chat + voice fallback) ──
+//
+// The fallback engines need to make decisions based on WHY a request failed,
+// not just a human-readable string. ProviderError carries the HTTP status, the
+// provider name, and a classified `type` so callers can branch precisely while
+// still surfacing a friendly `.message` to the user.
+
+class ProviderError extends Error {
+    constructor(message, { status = null, provider = null, type = 'unknown', cause = null } = {}) {
+        super(message);
+        this.name = 'ProviderError';
+        this.status = status;
+        this.provider = provider;
+        // 'auth' | 'rate_limit' | 'model_unavailable' | 'validation' |
+        // 'server' | 'network' | 'timeout' | 'parse' | 'unknown'
+        this.type = type;
+        if (cause) this.cause = cause;
+    }
+}
+
+// Map an HTTP status code to a fallback-relevant error type.
+function classifyStatus(status) {
+    if (status === 401 || status === 403) return 'auth';
+    if (status === 429) return 'rate_limit';
+    if (status === 404) return 'model_unavailable';
+    if (status === 400 || status === 422) return 'validation';
+    if (status >= 500) return 'server';
+    return 'unknown';
+}
+
+const DEFAULT_REQUEST_TIMEOUT_MS = 45000;
+
+// fetch() with an abort-based timeout that also honours an optional caller signal
+// (e.g. the user pressing Stop). Distinguishes the two abort sources:
+//   • caller aborted  → re-throws a plain AbortError (so callers cancel cleanly)
+//   • timeout fired   → throws ProviderError { type: 'timeout' }
+//   • network failure → throws ProviderError { type: 'network' }
+async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, providerName = '') {
+    const timeoutController = new AbortController();
+    const timer = setTimeout(() => timeoutController.abort(), timeoutMs);
+
+    const callerSignal = options.signal;
+    const onCallerAbort = () => timeoutController.abort();
+    if (callerSignal) {
+        if (callerSignal.aborted) timeoutController.abort();
+        else callerSignal.addEventListener('abort', onCallerAbort);
+    }
+
+    try {
+        return await fetch(url, { ...options, signal: timeoutController.signal });
+    } catch (err) {
+        // User-initiated cancel: propagate as AbortError so callers can tell it
+        // apart from a timeout and abandon the whole flow without fallback.
+        if (callerSignal && callerSignal.aborted) {
+            const abortErr = new Error('Aborted');
+            abortErr.name = 'AbortError';
+            throw abortErr;
+        }
+        // Our timeout fired.
+        if (err.name === 'AbortError') {
+            throw new ProviderError(
+                `${providerName || 'Request'} timed out. The service did not respond in time.`,
+                { provider: providerName, type: 'timeout' }
+            );
+        }
+        // Network-level failure (offline, DNS, blocked by extension, CORS, etc.)
+        throw new ProviderError(err.message || 'Network error', {
+            provider: providerName, type: 'network', cause: err
+        });
+    } finally {
+        clearTimeout(timer);
+        if (callerSignal) callerSignal.removeEventListener('abort', onCallerAbort);
+    }
+}
+
+
 class GeminiProvider {
+
     constructor(apiKey, model = 'gemini-2.0-flash', explanationLanguage = 'en') {
         this.apiKey = apiKey;
         this.model = model;
@@ -251,27 +329,31 @@ class GeminiProvider {
             }
         };
 
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
             signal: options.signal
-        });
+        }, options.timeoutMs, 'Gemini');
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(formatApiError(response.status, err.error?.message, 'Gemini'));
+            throw new ProviderError(
+                formatApiError(response.status, err.error?.message, 'Gemini'),
+                { status: response.status, provider: 'Gemini', type: classifyStatus(response.status) }
+            );
         }
 
         const data = await response.json();
 
         if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
-            throw new Error('Invalid response from Gemini API');
+            throw new ProviderError('Invalid response from Gemini API', { provider: 'Gemini', type: 'parse' });
         }
 
         const text = data.candidates[0].content.parts[0].text;
         return this._parseResponse(text);
     }
+
 
     _parseResponse(text) {
         // Try to parse JSON directly
@@ -341,7 +423,7 @@ class GroqProvider {
         };
 
 
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -349,22 +431,26 @@ class GroqProvider {
             },
             body: JSON.stringify(body),
             signal: options.signal
-        });
+        }, options.timeoutMs, 'Groq');
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(formatApiError(response.status, err.error?.message, 'Groq'));
+            throw new ProviderError(
+                formatApiError(response.status, err.error?.message, 'Groq'),
+                { status: response.status, provider: 'Groq', type: classifyStatus(response.status) }
+            );
         }
 
         const data = await response.json();
 
         if (!data.choices || !data.choices[0]?.message?.content) {
-            throw new Error('Invalid response from Groq API');
+            throw new ProviderError('Invalid response from Groq API', { provider: 'Groq', type: 'parse' });
         }
 
         const text = data.choices[0].message.content;
         return this._parseResponse(text);
     }
+
 
     _parseResponse(text) {
         try {
@@ -418,7 +504,7 @@ class OpenRouterProvider {
             response_format: { type: 'json_object' }
         };
 
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -429,20 +515,32 @@ class OpenRouterProvider {
 
             body: JSON.stringify(body),
             signal: options.signal
-        });
+        }, options.timeoutMs, 'OpenRouter');
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(formatApiError(response.status, err.error?.message, 'OpenRouter'));
+            const rawMessage = err.error?.message;
+            // OpenRouter routes to underlying providers. A 502 "provider returned
+            // error" means THIS model's upstream is down/rate-limited — the key is
+            // fine, so classify it as model_unavailable to skip just this model.
+            let type = classifyStatus(response.status);
+            if (response.status === 502 && rawMessage && rawMessage.toLowerCase().includes('provider returned error')) {
+                type = 'model_unavailable';
+            }
+            throw new ProviderError(
+                formatApiError(response.status, rawMessage, 'OpenRouter'),
+                { status: response.status, provider: 'OpenRouter', type }
+            );
         }
 
         const data = await response.json();
         if (!data.choices || !data.choices[0]?.message?.content) {
-            throw new Error('Invalid response from OpenRouter API');
+            throw new ProviderError('Invalid response from OpenRouter API', { provider: 'OpenRouter', type: 'parse' });
         }
 
         return this._parseResponse(data.choices[0].message.content);
     }
+
 
     _parseResponse(text) {
         try {
@@ -494,7 +592,7 @@ class OpenAIProvider {
             response_format: { type: 'json_object' }
         };
 
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -502,21 +600,25 @@ class OpenAIProvider {
             },
             body: JSON.stringify(body),
             signal: options.signal
-        });
+        }, options.timeoutMs, 'OpenAI');
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(formatApiError(response.status, err.error?.message, 'OpenAI'));
+            throw new ProviderError(
+                formatApiError(response.status, err.error?.message, 'OpenAI'),
+                { status: response.status, provider: 'OpenAI', type: classifyStatus(response.status) }
+            );
         }
 
 
         const data = await response.json();
         if (!data.choices || !data.choices[0]?.message?.content) {
-            throw new Error('Invalid response from OpenAI API');
+            throw new ProviderError('Invalid response from OpenAI API', { provider: 'OpenAI', type: 'parse' });
         }
 
         return this._parseResponse(data.choices[0].message.content);
     }
+
 
     _parseResponse(text) {
         try {

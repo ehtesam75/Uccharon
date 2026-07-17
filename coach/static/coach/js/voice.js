@@ -61,19 +61,51 @@
             resizeChatInput();
         };
 
+        // 'no-speech' and 'aborted' are transient/expected during continuous
+        // recognition — don't tear the session down or nag the user for them.
+        // For genuine failures, stop and show an accurate, actionable message.
         state.recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
+
+            if (event.error === 'no-speech' || event.error === 'aborted') {
+                return; // onend will restart the session if still recording
+            }
+
             stopRecording();
-            if (event.error === 'not-allowed') {
-                showToast('Microphone access denied. Please allow access in browser settings.', 'error');
+
+            switch (event.error) {
+                case 'not-allowed':
+                case 'service-not-allowed':
+                    showToast('Microphone access denied. Please allow access in browser settings.', 'error');
+                    break;
+                case 'audio-capture':
+                    showToast('No microphone was found. Please connect a microphone and try again.', 'error');
+                    break;
+                case 'network':
+                    // Browser STT relies on an online recognition service. Point the
+                    // user to the API-based providers, which have their own fallback.
+                    showToast('Browser speech recognition lost its connection. Try Whisper, Groq, or Gemini voice in Settings for more reliable transcription.', 'error');
+                    break;
+                default:
+                    showToast('Speech recognition error. Please try again or switch voice provider in Settings.', 'error');
             }
         };
 
+        // Auto-restart keeps continuous recognition alive across the browser's
+        // periodic session cutoffs. If restart throws (e.g. the service is
+        // unavailable), stop cleanly rather than leaving the UI stuck recording.
         state.recognition.onend = () => {
             if (state.isRecording && state.settings.voice_provider === 'browser') {
-                try { state.recognition.start(); } catch (e) { stopRecording(); }
+                try {
+                    state.recognition.start();
+                } catch (e) {
+                    console.error('Browser speech recognition failed to restart:', e);
+                    stopRecording();
+                    showToast('Browser voice input stopped unexpectedly. You can switch to Whisper, Groq, or Gemini voice in Settings.', 'error');
+                }
             }
         };
+
     }
 
     function toggleRecording() {
@@ -354,20 +386,24 @@
         formData.append('model', 'whisper-1');
         formData.append('language', 'en');
 
-        const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        const res = await fetchWithTimeout('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${apiKey}` },
             body: formData
-        });
+        }, STT_TIMEOUT_MS, 'Whisper');
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Whisper API error: ${res.status}`);
+            throw new ProviderError(
+                err.error?.message || `Whisper API error: ${res.status}`,
+                { status: res.status, provider: 'Whisper', type: classifyStatus(res.status) }
+            );
         }
 
         const data = await res.json();
         return data.text || '';
     }
+
 
     // ─── Gemini audio understanding transcription ─────────
 
@@ -405,20 +441,31 @@
             }
         };
 
-        const res = await fetch(url, {
+        const res = await fetchWithTimeout(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
-        });
+        }, STT_TIMEOUT_MS, 'Gemini');
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Gemini STT error: ${res.status}`);
+            throw new ProviderError(
+                err.error?.message || `Gemini STT error: ${res.status}`,
+                { status: res.status, provider: 'Gemini', type: classifyStatus(res.status) }
+            );
         }
 
         const data = await res.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+        // Gemini STT can also hallucinate short filler phrases on silent audio.
+        // Apply the same guard used for Whisper/Groq so we never inject junk.
+        if (_isLikelyEmptyTranscript(text)) {
+            return '';
+        }
+        return text;
     }
+
 
     // ─── Groq Whisper transcription ──────────────────
 
@@ -458,16 +505,20 @@
         formData.append('response_format', 'json');
         formData.append('temperature', '0');
 
-        const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        const res = await fetchWithTimeout('https://api.groq.com/openai/v1/audio/transcriptions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${apiKey}` },
             body: formData
-        });
+        }, STT_TIMEOUT_MS, 'Groq');
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Groq Whisper error: ${res.status}`);
+            throw new ProviderError(
+                err.error?.message || `Groq Whisper error: ${res.status}`,
+                { status: res.status, provider: 'Groq', type: classifyStatus(res.status) }
+            );
         }
+
 
         const data = await res.json();
         const text = data.text || '';
@@ -482,7 +533,12 @@
 
     // ─── Speech-to-Text fallback + last-success tracking ───
 
+    // Transcription can take a while for longer clips, so allow more time than a
+    // plain chat request before we give up and fall back to the next attempt.
+    const STT_TIMEOUT_MS = 60000;
+
     function _getSttLastSuccess() {
+
         try {
             const raw = localStorage.getItem('uccharon_stt_last_success');
             return raw ? JSON.parse(raw) : null;
@@ -579,35 +635,99 @@
      * Transcribe with automatic fallback across keys and providers.
      * Remembers the last successful provider/model/key for future prioritization.
      */
+    // Accurate STT status message based on WHY the previous attempt failed and
+    // whether we're switching to a different STT provider next.
+    function _sttReasonMessage(prevErrorType, providerChanged, nextLabel) {
+        switch (prevErrorType) {
+            case 'auth':
+                return providerChanged
+                    ? `API key unauthorized. Switching to ${nextLabel}...`
+                    : 'API key unauthorized. Trying another key...';
+            case 'rate_limit':
+                return providerChanged
+                    ? `Rate limit reached. Switching to ${nextLabel}...`
+                    : 'Rate limit reached. Trying another key...';
+            case 'model_unavailable':
+                return providerChanged
+                    ? `Model unavailable. Switching to ${nextLabel}...`
+                    : 'Model unavailable. Trying another model...';
+            case 'timeout':
+                return providerChanged
+                    ? `Timed out. Switching to ${nextLabel}...`
+                    : 'Timed out. Trying another key...';
+            default:
+                return providerChanged
+                    ? `Switching to ${nextLabel}...`
+                    : 'Trying another key...';
+        }
+    }
+
     async function _transcribeWithSttFallback(blob, primaryProvider, statusSpan) {
         const attempts = _buildSttAttemptList(primaryProvider);
         if (attempts.length === 0) {
             throw new Error('No available speech-to-text provider is configured.');
         }
 
+        // Per-request cooldown — same idea as the chat fallback. Skip attempts we
+        // already know can't succeed right now instead of blindly retrying them.
+        const deadKeys = new Set();          // "provider|keyIndex" (401/403)
+        const rateLimitedKeys = new Set();   // "provider|keyIndex" (429)
+        const deadModels = new Set();        // "provider|model" (404 / unavailable)
+
         let lastError = null;
         let prevLabel = null;
+        let prevErrorType = null;
+        let started = false;
+
         for (let i = 0; i < attempts.length; i++) {
             const attempt = attempts[i];
+            const keySig = `${attempt.provider}|${attempt.keyIndex}`;
+            const modelSig = `${attempt.provider}|${attempt.model}`;
+
+            if (deadKeys.has(keySig)) continue;
+            if (rateLimitedKeys.has(keySig)) continue;
+            if (deadModels.has(modelSig)) continue;
+
             if (statusSpan) {
-                if (i === 0) {
+                if (!started) {
                     statusSpan.textContent = 'Transcribing...';
-                } else if (attempt.label !== prevLabel) {
-                    statusSpan.textContent = `Switching to ${attempt.label}...`;
                 } else {
-                    statusSpan.textContent = 'Trying another key...';
+                    statusSpan.textContent = _sttReasonMessage(prevErrorType, attempt.label !== prevLabel, attempt.label);
                 }
             }
+            started = true;
+
             try {
                 const transcript = await _transcribeAttempt(attempt, blob);
                 _saveSttLastSuccess(attempt.provider, attempt.model, attempt.keyIndex);
                 return transcript;
             } catch (err) {
                 lastError = err;
-                console.error(`[STT Fallback] ${attempt.label} (${attempt.model}, key ${attempt.keyIndex + 1}) failed:`, err.message);
+                prevErrorType = (err && err.type) ? err.type : 'unknown';
+                console.error(`[STT Fallback] ${attempt.label} (${attempt.model}, key ${attempt.keyIndex + 1}) failed [${prevErrorType}]:`, err.message);
                 prevLabel = attempt.label;
+
+                // Smart classification — record cooldowns to skip doomed retries.
+                switch (prevErrorType) {
+                    case 'auth':
+                        deadKeys.add(keySig);            // bad key everywhere
+                        break;
+                    case 'rate_limit':
+                        rateLimitedKeys.add(keySig);     // throttled key
+                        break;
+                    case 'model_unavailable':
+                        deadModels.add(modelSig);        // model gone for all keys
+                        break;
+                    case 'validation':
+                        // Request itself rejected — retrying won't help. Stop.
+                        throw err;
+                    default:
+                        // server / network / timeout / parse — allow normal fallback.
+                        break;
+                }
             }
         }
         throw lastError || new Error('All speech-to-text providers failed.');
     }
+
 

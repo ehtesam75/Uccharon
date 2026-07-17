@@ -422,6 +422,49 @@
     }
 
     /**
+     * Build an accurate "why we're falling back" status message based on the
+     * classified type of the PREVIOUS failure and what is changing on the next
+     * attempt (a different provider, a different model, or just another key).
+     */
+    function _fallbackReasonMessage(prevErrorType, { providerChanged, modelChanged }) {
+        switch (prevErrorType) {
+            case 'auth':
+                return providerChanged
+                    ? 'API key unauthorized. Switching provider...'
+                    : 'API key unauthorized. Trying another API key...';
+            case 'rate_limit':
+                if (providerChanged) return 'Rate limit reached. Switching provider...';
+                return modelChanged
+                    ? 'Rate limit reached. Trying another model...'
+                    : 'Rate limit reached. Trying another API key...';
+            case 'model_unavailable':
+                return providerChanged
+                    ? 'Model unavailable. Switching provider...'
+                    : 'Model unavailable. Trying another model...';
+            case 'timeout':
+                if (providerChanged) return 'Request timed out. Switching provider...';
+                return modelChanged
+                    ? 'Request timed out. Trying another model...'
+                    : 'Request timed out. Trying another API key...';
+            case 'server':
+                if (providerChanged) return 'Provider unavailable. Switching provider...';
+                return modelChanged
+                    ? 'Server error. Trying another model...'
+                    : 'Server error. Trying another API key...';
+            case 'network':
+                return providerChanged
+                    ? 'Network issue. Switching provider...'
+                    : 'Network issue. Retrying...';
+            default:
+                if (providerChanged) return 'Provider unavailable. Switching provider...';
+                return modelChanged
+                    ? 'Trying another model...'
+                    : 'Trying another API key...';
+        }
+    }
+
+
+    /**
      * The list of AI providers eligible for use/fallback. Groq is excluded when
      * বাংলা (Bengali) is the selected Explanation Language because it produces
      * corrupted Bengali output.
@@ -650,41 +693,58 @@
 
         let prevProvider = null;
         let prevModel = null;
-        let allKeysFailedForCurrentModel = false;
+        let lastErrorType = null;
+        let firstAttemptStarted = false;
+        let validationStop = false;
+
+        // ── Per-request cooldown / blacklist ────────────────────
+        // These sets live only for the duration of THIS send. They stop us from
+        // re-trying combinations that we already know can't succeed right now:
+        //   • deadKeys  — key returned 401/403 (bad for EVERY model & provider path)
+        //   • rateLimitedKeys — key hit 429 (don't burn it on other models of the
+        //     same provider; another key or provider is more likely to work)
+        //   • deadModels — model returned 404 / unavailable (bad for every key)
+        const deadKeys = new Set();          // "provider|keyIndex"
+        const rateLimitedKeys = new Set();   // "provider|keyIndex"
+        const deadModels = new Set();        // "provider|model"
 
         for (let i = 0; i < attemptList.length; i++) {
             const { provider, model, key, keyIndex } = attemptList[i];
             const displayProvider = PROVIDER_DISPLAY[provider] || provider;
             const displayModel = MODEL_DISPLAY_NAMES[model] || model;
 
-            // Determine what changed to show appropriate status message
+            const keySig = `${provider}|${keyIndex}`;
+            const modelSig = `${provider}|${model}`;
+
+            // Skip attempts we already know are dead for this request.
+            if (deadKeys.has(keySig)) continue;      // key unauthorized
+            if (deadModels.has(modelSig)) continue;  // model unavailable
+            // A rate-limited key should not be retried on OTHER models of the same
+            // provider — but it's still fine to try it under a different provider
+            // path (which uses that provider's own keys, so this never collides).
+            if (rateLimitedKeys.has(keySig)) continue;
+
+            // Determine what changed to show an accurate status message.
             const providerChanged = prevProvider !== null && provider !== prevProvider;
             const modelChanged = prevModel !== null && model !== prevModel && !providerChanged;
-            const keyChanged = i > 0 && !providerChanged && !modelChanged;
 
             try {
-                if (i === 0) {
+                if (!firstAttemptStarted) {
+                    firstAttemptStarted = true;
                     thinkingTextEl.textContent = `Analyzing your English...`;
                     // Brief pause then show model info
                     await new Promise(r => setTimeout(r, 300));
                     thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
-                } else if (providerChanged) {
-                    thinkingTextEl.textContent = `Provider unavailable. Switching to another provider...`;
-                    await new Promise(r => setTimeout(r, 1000));
-                    thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
-                } else if (modelChanged) {
-                    thinkingTextEl.textContent = `All API keys failed. Trying another model...`;
-                    await new Promise(r => setTimeout(r, 800));
-                    thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
-                } else if (keyChanged) {
-                    thinkingTextEl.textContent = `API key limit reached. Trying another API key...`;
-                    await new Promise(r => setTimeout(r, 800));
+                } else {
+                    // Accurate reason based on WHY the previous attempt failed.
+                    thinkingTextEl.textContent = _fallbackReasonMessage(lastErrorType, { providerChanged, modelChanged });
+                    await new Promise(r => setTimeout(r, providerChanged ? 1000 : 800));
                     thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
                 }
 
                 const aiProvider = ProviderFactory.create(provider, key, model, state.settings.explanation_language);
                 aiResponse = await aiProvider.sendMessage(text, state.currentMessages, { signal: abortSignal });
-                
+
                 finalProvider = provider;
                 finalModel = model;
                 finalKeyIndex = keyIndex;
@@ -696,11 +756,47 @@
                     break;
                 }
                 lastError = err;
-                console.error(`[Fallback] ${displayProvider} • ${displayModel} (key ${keyIndex + 1}) failed:`, err.message);
+                lastErrorType = (err && err.type) ? err.type : 'unknown';
+                console.error(`[Fallback] ${displayProvider} • ${displayModel} (key ${keyIndex + 1}) failed [${lastErrorType}]:`, err.message);
+
+                // Smart classification: record cooldowns so we skip doomed retries.
+                switch (lastErrorType) {
+                    case 'auth':
+                        // Bad key — useless for every model/provider path. Blacklist it.
+                        deadKeys.add(keySig);
+                        break;
+                    case 'rate_limit':
+                        // Key is throttled — stop hammering it across this provider's
+                        // other models; move to another key or provider.
+                        rateLimitedKeys.add(keySig);
+                        break;
+                    case 'model_unavailable':
+                        // Deprecated/invalid model (or OpenRouter upstream down).
+                        // Skip this model for all keys.
+                        deadModels.add(modelSig);
+                        break;
+                    case 'validation':
+                        // 400/422 — the request itself is rejected. Retrying with a
+                        // different key/model won't help; stop the whole fallback.
+                        validationStop = true;
+                        break;
+                    case 'server':
+                    case 'network':
+                    case 'timeout':
+                    case 'parse':
+                    default:
+                        // Transient / model-specific — allow normal fallback to the
+                        // next key → model → provider.
+                        break;
+                }
+
+                if (validationStop) break;
+
                 prevProvider = provider;
                 prevModel = model;
             }
         }
+
 
         // If the user cancelled, discard everything: no partial response, no save,
         // no feedback, no stats/history. Clean the UI back to a normal state.
