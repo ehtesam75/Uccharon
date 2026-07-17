@@ -1,0 +1,233 @@
+/* ═══════════════════════════════════════════════════════════
+   PRIVACY POLICY PAGE
+   Layered on top of home.css — reuses the same tokens, navbar,
+   footer, buttons and reveal animations for a consistent look.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Hero ────────────────────────────────────────────────── */
+.privacy-hero {
+    text-align: center;
+    padding-top: 130px;
+    padding-bottom: 24px;
+}
+
+.privacy-title {
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    margin: 18px 0 0;
+}
+
+.privacy-lead {
+    max-width: 640px;
+    margin: 18px auto 0;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.privacy-updated {
+    display: inline-block;
+    margin-top: 22px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+    background: var(--bg-glass);
+    color: var(--text-tertiary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Content layout ──────────────────────────────────────── */
+.privacy-section {
+    padding-top: 8px;
+}
+
+.privacy-wrap {
+    max-width: 820px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ─── Content blocks (cards) ──────────────────────────────── */
+.privacy-block {
+    position: relative;
+    padding: 28px 30px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.privacy-block:hover {
+    border-color: var(--border-color-hover);
+}
+
+.privacy-block h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 14px;
+    color: var(--text-primary);
+}
+
+.privacy-block p {
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.68;
+    margin-bottom: 12px;
+}
+
+.privacy-block p:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-block strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Highlighted / important blocks (API keys, account deletion) */
+.privacy-block-highlight {
+    background:
+        linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+        var(--gradient-accent) border-box;
+    border: 1px solid transparent;
+    box-shadow: 0 10px 40px rgba(var(--accent-primary-rgb), 0.08);
+}
+
+.privacy-tag {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    background: rgba(var(--accent-primary-rgb), 0.12);
+    color: var(--accent-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ─── Lists ───────────────────────────────────────────────── */
+.privacy-list {
+    list-style: none;
+    margin: 4px 0 16px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.privacy-list:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-list li {
+    position: relative;
+    padding-left: 26px;
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.55;
+}
+
+.privacy-list li strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.privacy-list li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0.62em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gradient-accent);
+}
+
+/* ─── Blockquote (confirmation message) ───────────────────── */
+.privacy-quote {
+    margin: 16px 0 0;
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent-primary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    background: rgba(var(--accent-primary-rgb), 0.06);
+    color: var(--text-primary);
+    font-size: 0.96rem;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+/* ─── GitHub repo link ────────────────────────────────────── */
+.privacy-repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 6px;
+    padding: 11px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    transition: border-color var(--transition-fast), background var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.privacy-repo-link:hover {
+    border-color: rgba(var(--accent-primary-rgb), 0.55);
+    background: rgba(var(--accent-primary-rgb), 0.1);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+/* ─── Active nav state (desktop + mobile) ─────────────────── */
+.nav-links a.is-active {
+    color: var(--accent-primary);
+}
+
+.mobile-link.is-active {
+    color: var(--accent-primary);
+}
+
+.mobile-link.is-active .mi-icon {
+    color: var(--accent-primary);
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+@media (max-width: 780px) {
+    .privacy-hero {
+        padding-top: 108px;
+    }
+
+    .privacy-block {
+        padding: 22px 20px;
+    }
+
+    .privacy-block h2 {
+        font-size: 1.2rem;
+    }
+
+    .privacy-lead {
+        font-size: 0.98rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .privacy-block {
+        padding: 20px 16px;
+    }
+
+    .privacy-repo-link {
+        font-size: 0.8rem;
+        padding: 10px 14px;
+        word-break: break-all;
+    }
+}

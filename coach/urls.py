@@ -7,6 +7,10 @@ urlpatterns = [
     # Public marketing homepage / landing page
     path('', views.home_view, name='home'),
 
+    # Public Privacy Policy page
+    path('privacy/', views.privacy_view, name='privacy'),
+
+
     # Main app (login, signup, and the logged-in SPA)
     path('app/', views.index_view, name='index'),
 

@@ -773,6 +773,17 @@ def home_view(request):
     return render(request, 'coach/home.html')
 
 
+def privacy_view(request):
+    """Serve the public Privacy Policy page.
+
+    A standalone marketing-style page (same shell as the homepage) that is
+    always accessible, whether or not the visitor is signed in.
+    """
+    from django.shortcuts import render
+    return render(request, 'coach/privacy.html')
+
+
+
 
 @ensure_csrf_cookie
 def index_view(request):

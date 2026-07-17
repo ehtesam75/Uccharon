@@ -1,0 +1,467 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="home-root">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy – Uccharon</title>
+    <meta name="description"
+        content="How Uccharon handles your data. We never store your API keys on our servers — they stay on your device. Learn what we store, why, and how to delete your account.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="manifest" href="{% static 'coach/manifest.json' %}">
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" type="image/x-icon" href="{% static 'coach/icon/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'coach/icon/apple-touch-icon.png' %}">
+
+    <link rel="stylesheet" href="{% static 'coach/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'coach/css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'coach/css/privacy.css' %}">
+
+
+    <!-- Apply persisted theme immediately to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('uccharon_theme');
+                if (t !== 'light' && t !== 'dark') t = 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="home-orbs" aria-hidden="true">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="orb orb-c"></div>
+    </div>
+
+    <div class="home">
+
+        <!-- ═══════════════ NAVBAR ═══════════════ -->
+        <header class="home-nav">
+            <div class="container home-nav-inner">
+                <a href="/" class="nav-brand">
+                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                    <span>Uccharon</span>
+                </a>
+
+                <nav aria-label="Primary">
+                    <ul class="nav-links">
+                        <li><a href="/#features">Features</a></li>
+                        <li><a href="/#about">About</a></li>
+                        <li><a href="/#guide">Guide</a></li>
+                        <li><a href="/privacy/" class="is-active">Privacy</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-actions">
+                    <button class="nav-theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme"
+                        title="Toggle theme">
+                        <svg class="theme-icon-dark" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg class="theme-icon-light" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="display:none">
+                            <circle cx="12" cy="12" r="5" />
+                            <path
+                                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                        </svg>
+                    </button>
+                    <a href="/app/" class="nav-signin">Sign in</a>
+                    <a href="/app/?auth=signup" class="nav-getstarted">Get started
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                    <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu"
+                        aria-expanded="false">
+                        <svg class="burger-open" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                        <svg class="burger-close" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile menu -->
+        <div class="mobile-backdrop" id="mobile-backdrop" aria-hidden="true"></div>
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-menu-inner">
+
+                <p class="mobile-menu-label">Menu</p>
+                <nav class="mobile-menu-nav" aria-label="Mobile">
+                    <a href="/#features" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.5L5.7 21l2.3-7-6-4.6h7.6z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Features</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/#about" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 16v-4M12 8h.01" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">About</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/#guide" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Guide</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/privacy/" class="mobile-link is-active">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Privacy</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                </nav>
+                <div class="mobile-menu-divider"></div>
+                <div class="mobile-menu-actions">
+                    <a href="/app/" class="btn btn-ghost">Sign In</a>
+                    <a href="/app/?auth=signup" class="btn btn-primary">Get Started
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <main>
+
+            <!-- ═══════════════ PRIVACY HERO ═══════════════ -->
+            <section class="section privacy-hero">
+                <div class="container">
+                    <span class="hero-badge reveal"><span class="dot"></span> Transparency first</span>
+                    <h1 class="privacy-title reveal">Privacy <span class="grad">Policy</span></h1>
+                    <p class="privacy-lead reveal">
+                        We built Uccharon around a simple idea: your keys, your data, your control. This page explains —
+                        in plain language — what we store, what we don't, and the choices you have.
+                    </p>
+                    <p class="privacy-updated reveal">Last updated: July 2026</p>
+                </div>
+            </section>
+
+            <!-- ═══════════════ PRIVACY CONTENT ═══════════════ -->
+            <section class="section section-tight privacy-section">
+                <div class="container privacy-wrap">
+
+                    <!-- Introduction -->
+                    <article class="privacy-block reveal" id="introduction">
+                        <h2>Introduction</h2>
+                        <p>
+                            Uccharon is an AI-powered English learning and speaking practice platform. It helps you build
+                            real fluency by giving structured feedback on everything you write or say. With Uccharon you can:
+                        </p>
+                        <ul class="privacy-list">
+                            <li>Practice English conversations at your own pace.</li>
+                            <li>Receive clear grammar corrections with explanations.</li>
+                            <li>Improve your vocabulary and sentence structure.</li>
+                            <li>Get pronunciation guidance.</li>
+                            <li>Track your learning progress over time.</li>
+                        </ul>
+                        <p>
+                            What makes Uccharon different is that it runs on your own AI. You connect your preferred AI
+                            provider using your own API keys and choose the models you want to learn with.
+                        </p>
+                    </article>
+
+                    <!-- API Key Handling -->
+                    <article class="privacy-block privacy-block-highlight reveal" id="api-keys">
+                        <span class="privacy-tag">Most important</span>
+                        <h2>How We Handle Your API Keys</h2>
+                        <p>Your API keys are yours, and they stay with you. Specifically:</p>
+                        <ul class="privacy-list">
+                            <li>Uccharon does <strong>not</strong> store your API keys on its servers.</li>
+                            <li>API keys are stored only on your own device, in your browser's local storage.</li>
+                            <li>AI requests are sent directly from your browser/device to the AI provider you selected.</li>
+                            <li>Uccharon's backend never receives, stores, or accesses your API keys.</li>
+                        </ul>
+                        <p>Your API keys are never included in any of the following:</p>
+                        <ul class="privacy-list">
+                            <li>Conversation history</li>
+                            <li>Learning analytics</li>
+                            <li>Statistics</li>
+                            <li>User data stored on Uccharon servers</li>
+                        </ul>
+                        <p>
+                            Because keys live on your device, you are responsible for managing your own AI provider API
+                            keys — keeping them safe, rotating them, and removing them when you no longer need them. No
+                            system can promise perfect security, so we won't claim your keys are "100% secure" or
+                            "impossible to access." We simply keep them off our servers so there is far less to expose.
+                        </p>
+                    </article>
+
+                    <!-- AI Provider Usage -->
+                    <article class="privacy-block reveal" id="ai-providers">
+                        <h2>AI Provider Usage</h2>
+                        <p>Uccharon supports multiple AI providers and models, including:</p>
+                        <ul class="privacy-list">
+                            <li>Google Gemini</li>
+                            <li>Groq</li>
+                            <li>OpenRouter</li>
+                            <li>OpenAI</li>
+                            <li>Other providers that may be added in the future</li>
+                        </ul>
+                        <p>
+                            When you use your own API key, your requests are processed according to that provider's own
+                            privacy policy. Uccharon does not control how third-party AI providers store or process your
+                            data. We recommend reviewing the privacy policy of any AI provider you choose to use.
+                        </p>
+                    </article>
+
+                    <!-- Conversation Data -->
+                    <article class="privacy-block reveal" id="conversation-data">
+                        <h2>Conversation Data</h2>
+                        <p>
+                            To power your learning features, Uccharon stores the data your practice sessions produce. This
+                            may include:
+                        </p>
+                        <ul class="privacy-list">
+                            <li>Your messages</li>
+                            <li>AI conversational responses</li>
+                            <li>Grammar corrections</li>
+                            <li>Vocabulary suggestions</li>
+                            <li>Sentence improvements</li>
+                            <li>Pronunciation guidance</li>
+                            <li>Learning feedback</li>
+                            <li>Performance ratings</li>
+                        </ul>
+                        <p>We store this so we can give you:</p>
+                        <ul class="privacy-list">
+                            <li>Conversation history you can revisit</li>
+                            <li>A Learning History page</li>
+                            <li>Progress tracking</li>
+                            <li>Performance analytics</li>
+                            <li>A personalized learning experience</li>
+                        </ul>
+                    </article>
+
+                    <!-- Account Information -->
+                    <article class="privacy-block reveal" id="account-info">
+                        <h2>Account Information</h2>
+                        <p>To make your account work, Uccharon stores basic information such as:</p>
+                        <ul class="privacy-list">
+                            <li>Username and email</li>
+                            <li>Account information</li>
+                            <li>Learning preferences</li>
+                            <li>Daily goals</li>
+                            <li>Application settings</li>
+                        </ul>
+                    </article>
+
+                    <!-- Analytics and Tracking -->
+                    <article class="privacy-block reveal" id="analytics">
+                        <h2>Analytics and Tracking</h2>
+                        <p>
+                            Uccharon does not use third-party advertising trackers or analytics services that collect your
+                            personal learning data. Your practice stays focused on you — not on ad networks.
+                        </p>
+                    </article>
+
+                    <!-- Account Deletion and User Control -->
+                    <article class="privacy-block privacy-block-highlight reveal" id="account-deletion">
+                        <span class="privacy-tag">Your control</span>
+                        <h2>Account Deletion and User Control</h2>
+                        <p>
+                            You can permanently delete your account at any time from <strong>Settings</strong>. When you
+                            delete your account, the following data is permanently removed:
+                        </p>
+                        <ul class="privacy-list">
+                            <li>Account information</li>
+                            <li>Conversations</li>
+                            <li>Learning History</li>
+                            <li>Grammar corrections</li>
+                            <li>Vocabulary suggestions</li>
+                            <li>Sentence improvements</li>
+                            <li>Pronunciation guidance</li>
+                            <li>Performance statistics</li>
+                            <li>Progress data</li>
+                            <li>User preferences and settings</li>
+                        </ul>
+                        <p>
+                            Your locally stored API keys are also removed from your device during account deletion. After
+                            deletion, your account and its associated data cannot be recovered.
+                        </p>
+                        <p>Before deleting, we show you this confirmation so there are no surprises:</p>
+                        <blockquote class="privacy-quote">
+                            "All your conversations, learning history, settings, and account data will be permanently
+                            deleted. Your locally stored API keys will also be removed from this device."
+                        </blockquote>
+                    </article>
+
+                    <!-- Data Security -->
+                    <article class="privacy-block reveal" id="data-security">
+                        <h2>Data Security</h2>
+                        <p>We take practical steps to protect your data:</p>
+                        <ul class="privacy-list">
+                            <li>HTTPS communication is used to protect data in transit.</li>
+                            <li>API keys are not stored on Uccharon servers.</li>
+                            <li>Authentication protections are in place for accounts.</li>
+                            <li>User data is isolated between accounts.</li>
+                        </ul>
+                        <p>
+                            No online service can guarantee absolute security, so we don't make that claim. Instead, we
+                            reduce risk by storing as little sensitive data as possible and keeping your keys off our
+                            servers entirely.
+                        </p>
+                    </article>
+
+                    <!-- Third-Party Services -->
+                    <article class="privacy-block reveal" id="third-party">
+                        <h2>Third-Party Services</h2>
+                        <p>Uccharon relies on external AI providers to generate feedback, such as:</p>
+                        <ul class="privacy-list">
+                            <li>Google Gemini</li>
+                            <li>Groq</li>
+                            <li>OpenRouter</li>
+                            <li>OpenAI</li>
+                        </ul>
+                        <p>
+                            When you send requests to these providers, your data is processed under their control and their
+                            privacy policies. Please review each provider's privacy policy to understand how they handle
+                            your data.
+                        </p>
+                    </article>
+
+                    <!-- Open Source Transparency -->
+                    <article class="privacy-block reveal" id="open-source">
+                        <h2>Open Source Transparency</h2>
+                        <p>
+                            Uccharon is an open-source project. The source code is publicly available so anyone can review
+                            how the application works, including its privacy-related implementations.
+                        </p>
+                        <a class="privacy-repo-link" href="https://github.com/ehtesam75/Uccharon" target="_blank"
+                            rel="noopener noreferrer">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M12 .5C5.73.5.9 5.33.9 11.6c0 4.9 3.18 9.06 7.6 10.53.56.1.76-.24.76-.53v-1.9c-3.09.67-3.74-1.32-3.74-1.32-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.67.08-.67 1.11.08 1.7 1.14 1.7 1.14.99 1.7 2.6 1.2 3.23.92.1-.72.39-1.2.7-1.48-2.47-.28-5.06-1.24-5.06-5.5 0-1.22.43-2.21 1.14-2.99-.11-.28-.49-1.42.11-2.95 0 0 .93-.3 3.05 1.14a10.6 10.6 0 0 1 5.56 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.53.22 2.67.11 2.95.71.78 1.14 1.77 1.14 2.99 0 4.27-2.6 5.21-5.08 5.49.4.35.76 1.03.76 2.08v3.08c0 .3.2.64.77.53a11.11 11.11 0 0 0 7.59-10.53C23.1 5.33 18.27.5 12 .5z" />
+                            </svg>
+                            github.com/ehtesam75/Uccharon
+                        </a>
+                    </article>
+
+                    <!-- User Rights -->
+                    <article class="privacy-block reveal" id="user-rights">
+                        <h2>Your Rights</h2>
+                        <p>You stay in control of your experience. At any time you can:</p>
+                        <ul class="privacy-list">
+                            <li>Update your account settings.</li>
+                            <li>Change AI providers.</li>
+                            <li>Manage your learning preferences.</li>
+                            <li>Delete your account permanently.</li>
+                            <li>Remove locally stored API keys.</li>
+                        </ul>
+                    </article>
+
+                    <!-- Contact -->
+                    <article class="privacy-block reveal" id="contact">
+                        <h2>Contact</h2>
+                        <p>
+                            For questions about privacy or data handling, please contact the Uccharon team. You can also
+                            open an issue on our public GitHub repository.
+                        </p>
+                    </article>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ═══════════════ FOOTER ═══════════════ -->
+        <footer class="home-footer">
+            <div class="container">
+                <div class="footer-inner">
+                    <div class="footer-brand">
+                        <div class="nav-brand">
+                            <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                            <span>Uccharon</span>
+                        </div>
+                        <p>The AI English speaking coach that runs on your own API key. Your AI, your cost, your
+                            journey.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="footer-col">
+                            <h5>Product</h5>
+                            <a href="/#features">Features</a>
+                            <a href="/#how">How It Works</a>
+                            <a href="/#providers">Providers</a>
+                        </div>
+                        <div class="footer-col">
+                            <h5>Company</h5>
+                            <a href="/#about">About</a>
+                            <a href="/#guide">Guide</a>
+                            <a href="/privacy/">Privacy</a>
+                        </div>
+                        <div class="footer-col footer-col-cta">
+                            <h5>Get Started</h5>
+                            <a href="/app/">Sign In</a>
+                            <a href="/app/?auth=signup">Create Account</a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <span class="footer-copy-desktop">&copy; <span id="year"></span> Uccharon. Your API Key. Your
+                        AI. Your Learning.</span>
+                    <span class="footer-copy-mobile">&copy; 2026 Uccharon. All rights reserved.</span>
+                </div>
+
+            </div>
+        </footer>
+    </div>
+
+    <script src="{% static 'coach/js/home.js' %}?v=2"></script>
+
+</body>
+
+</html>
