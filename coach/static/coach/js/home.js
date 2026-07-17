@@ -53,20 +53,41 @@
     function initMobileMenu() {
         var burger = document.getElementById('nav-burger');
         var menu = document.getElementById('mobile-menu');
+        var backdrop = document.getElementById('mobile-backdrop');
         if (!burger || !menu) return;
 
-        burger.addEventListener('click', function () {
-            var open = menu.classList.toggle('open');
+        function setMenu(open) {
+            menu.classList.toggle('open', open);
+            if (backdrop) backdrop.classList.toggle('open', open);
             burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+            // Lock body scroll while the drawer is open.
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+
+        burger.addEventListener('click', function () {
+            setMenu(!menu.classList.contains('open'));
         });
 
+        if (backdrop) {
+            backdrop.addEventListener('click', function () { setMenu(false); });
+        }
+
         menu.querySelectorAll('a').forEach(function (link) {
-            link.addEventListener('click', function () {
-                menu.classList.remove('open');
-                burger.setAttribute('aria-expanded', 'false');
-            });
+            link.addEventListener('click', function () { setMenu(false); });
+        });
+
+        // Close on Escape for keyboard users.
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && menu.classList.contains('open')) setMenu(false);
+        });
+
+        // Auto-close if the viewport grows past the mobile breakpoint.
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 780 && menu.classList.contains('open')) setMenu(false);
         });
     }
+
 
     // ─── Scroll reveal ───────────────────────────────────────
     function initReveal() {
