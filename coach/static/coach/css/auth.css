@@ -441,28 +441,31 @@
 }
 
 @media (max-width: 720px) {
-    /* Push the auth screen down so the topbar (Home link + theme
-       toggle) never overlaps the auth/sign-up card. */
+    /* On mobile, let the whole auth screen scroll as one piece instead
+       of squeezing the card content into cramped inner scroll boxes.
+       This keeps every field (incl. Confirm Password) and the submit
+       button reachable, and pushes content below the fixed topbar. */
     .auth-screen {
         align-items: flex-start;
+        height: 100dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .auth-container {
         padding-top: 84px;
+        padding-bottom: 32px;
     }
 
     .signup-card {
-        max-height: calc(100dvh - 108px);
+        max-height: none;
         padding: 24px;
     }
-
 
     .signup-progress {
         top: 0;
         margin-bottom: 20px;
     }
-
-
 
     .signup-grid-2col,
     .signup-grid-step2 {
@@ -473,16 +476,17 @@
         grid-template-columns: 1fr;
     }
 
-    .signup-step-scroll {
-        max-height: none;
-        padding-right: 0;
-    }
-
+    /* Disable the inner scroll containers on mobile; the whole screen
+       scrolls instead, so nothing gets clipped. */
+    .signup-step-scroll,
     .signup-step-scroll-step1,
     .signup-step-scroll-step2 {
-        max-height: calc(100dvh - 420px);
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
     }
 }
+
 
 .auth-error {
     display: none;

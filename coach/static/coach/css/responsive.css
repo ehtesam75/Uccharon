@@ -475,8 +475,11 @@
     }
 
     .auth-container {
-        padding: 16px;
+        /* Keep room for the fixed topbar (Home + theme toggle) and some
+           bottom breathing space; only tighten the side padding. */
+        padding: 84px 16px 32px;
     }
+
 
     .auth-card {
         padding: 24px;
