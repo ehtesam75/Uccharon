@@ -25,7 +25,19 @@
     <link rel="stylesheet" href="{% static 'coach/css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'coach/css/learning-history.css' %}">
     <link rel="stylesheet" href="{% static 'coach/css/responsive.css' %}">
+    <!-- Apply persisted theme immediately (shared with the homepage) to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('uccharon_theme');
+                if (t === 'light' || t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', t);
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
     <style>
+
         body {
             background-color: #0a0a1a;
             margin: 0;

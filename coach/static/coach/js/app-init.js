@@ -64,6 +64,9 @@
         document.documentElement.setAttribute('data-theme', theme);
         state.settings.theme = theme;
 
+        // Persist so the public homepage and the auth screen stay in sync.
+        try { localStorage.setItem('uccharon_theme', theme); } catch (e) { /* ignore */ }
+
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
             metaThemeColor.setAttribute('content', theme === 'dark' ? '#12122A' : '#d9b97aff');
@@ -71,14 +74,54 @@
 
         const darkIcon = $('.theme-icon-dark');
         const lightIcon = $('.theme-icon-light');
+        if (darkIcon && lightIcon) {
+            if (theme === 'dark') {
+                darkIcon.style.display = 'block';
+                lightIcon.style.display = 'none';
+            } else {
+                darkIcon.style.display = 'none';
+                lightIcon.style.display = 'block';
+            }
+        }
+
+        syncAuthThemeIcons(theme);
+    }
+
+    // Reflect the current theme on the auth-screen toggle icons.
+    function syncAuthThemeIcons(theme) {
+        if (!DOM.authThemeIconDark || !DOM.authThemeIconLight) return;
         if (theme === 'dark') {
-            darkIcon.style.display = 'block';
-            lightIcon.style.display = 'none';
+            DOM.authThemeIconDark.style.display = 'block';
+            DOM.authThemeIconLight.style.display = 'none';
         } else {
-            darkIcon.style.display = 'none';
-            lightIcon.style.display = 'block';
+            DOM.authThemeIconDark.style.display = 'none';
+            DOM.authThemeIconLight.style.display = 'block';
         }
     }
+
+    // Read the shared theme (localStorage) and apply it before login so the
+    // auth screen matches the homepage. Also wires the auth theme toggle.
+    function initAuthTheme() {
+        let theme = 'dark';
+        try {
+            const stored = localStorage.getItem('uccharon_theme');
+            if (stored === 'light' || stored === 'dark') theme = stored;
+        } catch (e) { /* ignore */ }
+
+        applyTheme(theme);
+
+        if (DOM.authThemeToggle) {
+            DOM.authThemeToggle.addEventListener('click', () => {
+                const newTheme = (document.documentElement.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+                applyTheme(newTheme);
+                // Persist to the server too, if the user is already authenticated.
+                if (state.user) {
+                    api('/api/settings/', 'PUT', { theme: newTheme }).catch(() => { });
+                }
+            });
+        }
+    }
+
 
     function toggleTheme() {
         const newTheme = state.settings.theme === 'dark' ? 'light' : 'dark';

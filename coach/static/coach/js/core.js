@@ -169,6 +169,10 @@
         signupBtn: $('#signup-btn'),
         showSignup: $('#show-signup'),
         showLogin: $('#show-login'),
+        authThemeToggle: $('#auth-theme-toggle'),
+        authThemeIconDark: $('.auth-theme-icon-dark'),
+        authThemeIconLight: $('.auth-theme-icon-light'),
+
 
         // Sidebar
         sidebar: $('#sidebar'),

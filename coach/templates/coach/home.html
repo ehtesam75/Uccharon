@@ -1,0 +1,492 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="home-root">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uccharon – Your API Key. Your AI. Your English Speaking Journey.</title>
+    <meta name="description"
+        content="Uccharon is an AI English speaking coach where you bring your own API key. Choose your AI provider, avoid expensive subscriptions, and stay in full control of your costs and learning.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="manifest" href="{% static 'coach/manifest.json' %}">
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" type="image/x-icon" href="{% static 'coach/icon/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'coach/icon/apple-touch-icon.png' %}">
+
+    <link rel="stylesheet" href="{% static 'coach/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'coach/css/home.css' %}">
+
+    <!-- Apply persisted theme immediately to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('uccharon_theme');
+                if (t !== 'light' && t !== 'dark') t = 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="home-orbs" aria-hidden="true">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="orb orb-c"></div>
+    </div>
+
+    <div class="home">
+
+        <!-- ═══════════════ NAVBAR ═══════════════ -->
+        <header class="home-nav">
+            <div class="container home-nav-inner">
+                <a href="/" class="nav-brand">
+                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                    <span>Uccharon</span>
+                </a>
+
+                <nav aria-label="Primary">
+                    <ul class="nav-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how">How It Works</a></li>
+                        <li><a href="#providers">Providers</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#guide">Guide</a></li>
+                        <li><a href="#privacy">Privacy</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-actions">
+                    <button class="nav-theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme"
+                        title="Toggle theme">
+                        <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="display:none">
+                            <circle cx="12" cy="12" r="5" />
+                            <path
+                                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                        </svg>
+                    </button>
+                    <a href="/app/" class="btn btn-ghost nav-signin">Sign In</a>
+                    <a href="/app/?auth=signup" class="btn btn-primary">Get Started</a>
+                    <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu"
+                        aria-expanded="false">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile menu -->
+            <div class="mobile-menu" id="mobile-menu">
+                <a href="#features">Features</a>
+                <a href="#how">How It Works</a>
+                <a href="#providers">Providers</a>
+                <a href="#about">About</a>
+                <a href="#guide">Guide</a>
+                <a href="#privacy">Privacy</a>
+                <a href="/app/" class="btn btn-ghost">Sign In</a>
+                <a href="/app/?auth=signup" class="btn btn-primary">Get Started</a>
+            </div>
+        </header>
+
+        <main>
+            <!-- ═══════════════ HERO ═══════════════ -->
+            <section class="section hero">
+                <div class="container">
+                    <span class="hero-badge reveal"><span class="dot"></span> Bring your own AI — no forced
+                        subscriptions</span>
+                    <h1 class="hero-title reveal">
+                        Learn English with the<br><span class="grad">AI you trust</span>
+                    </h1>
+                    <p class="hero-sub reveal">
+                        Uccharon is an AI English speaking coach that runs on <strong>your own API key</strong>. Pick
+                        your provider, choose your model, use free or paid tiers, and stay in full control of your costs
+                        and your learning.
+                    </p>
+                    <div class="hero-cta reveal">
+                        <a href="/app/?auth=signup" class="btn btn-primary btn-lg">Start Practicing Free</a>
+                        <a href="#how" class="btn btn-ghost btn-lg">See How It Works</a>
+                    </div>
+                    <p class="hero-note reveal">Many free API tiers already provide more than enough usage for daily
+                        English practice.</p>
+                </div>
+            </section>
+
+            <!-- ═══════════════ WHY DIFFERENT / PHILOSOPHY ═══════════════ -->
+            <section class="section philosophy" id="about">
+                <div class="container">
+                    <div class="philosophy-card reveal">
+                        <p class="eyebrow">Why Uccharon is Different</p>
+                        <div class="philosophy-lines">
+                            <span class="grad">Your API Key.</span>
+                            <span class="grad">Your AI.</span>
+                            <span>Your English Speaking Journey.</span>
+                        </div>
+                        <p class="philosophy-desc">
+                            Most English-learning AI apps hide their costs behind subscriptions and lock you into
+                            expensive plans. Uccharon flips the model: you connect your own AI provider and pay only for
+                            what you actually use — often nothing at all.
+                        </p>
+
+                        <div class="compare-grid">
+                            <div class="compare-col bad">
+                                <h4>
+                                    <svg class="mark" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M15 9l-6 6M9 9l6 6" />
+                                    </svg>
+                                    Other platforms
+                                </h4>
+                                <ul>
+                                    <li><span class="mark">✕</span> Hide AI costs behind subscriptions</li>
+                                    <li><span class="mark">✕</span> Force you into expensive monthly plans</li>
+                                    <li><span class="mark">✕</span> Don't let you use your own API keys</li>
+                                    <li><span class="mark">✕</span> Lock you to a single AI model</li>
+                                </ul>
+                            </div>
+                            <div class="compare-col good">
+                                <h4>
+                                    <svg class="mark" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <path d="M22 4L12 14.01l-3-3" />
+                                    </svg>
+                                    Uccharon
+                                </h4>
+                                <ul>
+                                    <li><span class="mark">✓</span> Use your own API keys</li>
+                                    <li><span class="mark">✓</span> Choose your provider and model</li>
+                                    <li><span class="mark">✓</span> Free or paid APIs — your call</li>
+                                    <li><span class="mark">✓</span> Full control over cost and quality</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ FEATURES ═══════════════ -->
+            <section class="section" id="features">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Everything you need</p>
+                        <h2 class="section-title">Powerful feedback on every sentence</h2>
+                        <p class="section-sub">Detailed, structured analysis that helps you actually improve — not just
+                            chat.</p>
+                    </div>
+
+                    <div class="features-grid">
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                            </div>
+                            <h3>Grammar Corrections</h3>
+                            <p>Clear, in-context fixes with explanations so you understand the why behind each change.
+                            </p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+                                </svg>
+                            </div>
+                            <h3>Writing Mechanics</h3>
+                            <p>Punctuation and spelling refinements that polish your writing to a professional standard.
+                            </p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                            </div>
+                            <h3>Natural Sentence Improvements</h3>
+                            <p>Rewrites that make your English sound smoother and more natural to native ears.</p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                            </div>
+                            <h3>Native Speaker Version</h3>
+                            <p>See how a fluent native speaker would express the same idea.</p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                </svg>
+                            </div>
+                            <h3>Vocabulary Suggestions</h3>
+                            <p>Richer word choices and synonyms tailored to the context of your message.</p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                                </svg>
+                            </div>
+                            <h3>Pronunciation Guidance</h3>
+                            <p>Phonetic tips and hearable examples to sharpen how you sound.</p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 3v18h18" />
+                                    <path d="M18 17V9M13 17V5M8 17v-3" />
+                                </svg>
+                            </div>
+                            <h3>Performance Analytics</h3>
+                            <p>Track grammar, vocabulary, naturalness, and more over time with clear charts.</p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 6v6l4 2" />
+                                </svg>
+                            </div>
+                            <h3>Learning History</h3>
+                            <p>Every correction and suggestion saved, searchable, and easy to revisit.</p>
+                        </div>
+                        <div class="feature-card reveal">
+                            <div class="feature-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
+                                </svg>
+                            </div>
+                            <h3>Voice Input Support</h3>
+                            <p>Speak naturally and get feedback — practice speaking, not just typing.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+            <section class="section" id="how">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Simple by design</p>
+                        <h2 class="section-title">How it works</h2>
+                        <p class="section-sub">From your API key to real improvement in five clear steps.</p>
+                    </div>
+
+                    <div class="steps">
+                        <div class="step reveal">
+                            <div class="step-num">1</div>
+                            <h4>Choose AI Provider</h4>
+                            <p>Pick the provider you trust and prefer.</p>
+                        </div>
+                        <div class="step reveal">
+                            <div class="step-num">2</div>
+                            <h4>Add Your API Key</h4>
+                            <p>Securely connect your own key — free or paid.</p>
+                        </div>
+                        <div class="step reveal">
+                            <div class="step-num">3</div>
+                            <h4>Practice English</h4>
+                            <p>Chat or speak naturally, any time.</p>
+                        </div>
+                        <div class="step reveal">
+                            <div class="step-num">4</div>
+                            <h4>Receive Feedback</h4>
+                            <p>Get detailed, structured corrections.</p>
+                        </div>
+                        <div class="step reveal">
+                            <div class="step-num">5</div>
+                            <h4>Track Improvement</h4>
+                            <p>Watch your scores climb over time.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ PROVIDERS ═══════════════ -->
+            <section class="section" id="providers">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">No vendor lock-in</p>
+                        <h2 class="section-title">Works with the AI providers you already know</h2>
+                        <p class="section-sub">Mix and match chat and voice providers to fit your needs and budget.</p>
+                    </div>
+
+                    <div class="providers-block">
+                        <p class="providers-label">AI Chat Providers</p>
+                        <div class="providers-grid">
+                            <div class="provider-chip reveal"><span class="provider-logo">AI</span> OpenAI</div>
+                            <div class="provider-chip reveal"><span class="provider-logo">G</span> Gemini</div>
+                            <div class="provider-chip reveal"><span class="provider-logo">Gr</span> Groq</div>
+                            <div class="provider-chip reveal"><span class="provider-logo">OR</span> OpenRouter</div>
+                        </div>
+                    </div>
+
+                    <div class="providers-block">
+                        <p class="providers-label">Voice Providers</p>
+                        <div class="providers-grid">
+                            <div class="provider-chip reveal"><span class="provider-logo">W</span> OpenAI Whisper</div>
+                            <div class="provider-chip reveal"><span class="provider-logo">Gr</span> Groq Whisper</div>
+                            <div class="provider-chip reveal"><span class="provider-logo">G</span> Gemini Audio</div>
+                            <div class="provider-chip reveal"><span class="provider-logo">🎙</span> Browser Speech</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ BENEFITS ═══════════════ -->
+            <section class="section" id="guide">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Stay in control</p>
+                        <h2 class="section-title">Built around your freedom</h2>
+                        <p class="section-sub">The benefits of owning your AI experience end to end.</p>
+                    </div>
+
+                    <div class="benefits-grid">
+                        <div class="benefit reveal">
+                            <div class="benefit-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                            </div>
+                            <h4>Full Cost Control</h4>
+                            <p>You decide exactly what you spend.</p>
+                        </div>
+                        <div class="benefit reveal">
+                            <div class="benefit-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                            </div>
+                            <h4>Free Tiers Welcome</h4>
+                            <p>Practice daily with generous free APIs.</p>
+                        </div>
+                        <div class="benefit reveal">
+                            <div class="benefit-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                                </svg>
+                            </div>
+                            <h4>No Vendor Lock-in</h4>
+                            <p>Switch providers whenever you want.</p>
+                        </div>
+                        <div class="benefit reveal">
+                            <div class="benefit-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h16v4H4z" />
+                                </svg>
+                            </div>
+                            <h4>Multiple Models</h4>
+                            <p>Choose the model that fits each task.</p>
+                        </div>
+                        <div class="benefit reveal">
+                            <div class="benefit-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.5L5.7 21l2.3-7-6-4.6h7.6z" />
+                                </svg>
+                            </div>
+                            <h4>Personalized</h4>
+                            <p>A learning experience shaped by you.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ FINAL CTA ═══════════════ -->
+            <section class="section section-tight">
+                <div class="container">
+                    <div class="cta-band reveal">
+                        <h2>Your API Key. Your AI.<br>Your English Speaking Journey.</h2>
+                        <p>Start practicing today with the provider you trust — no mandatory subscriptions, no
+                            lock-in.</p>
+                        <div class="hero-cta">
+                            <a href="/app/?auth=signup" class="btn btn-primary btn-lg">Create Your Account</a>
+                            <a href="/app/" class="btn btn-ghost btn-lg">Sign In</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ═══════════════ FOOTER ═══════════════ -->
+        <footer class="home-footer" id="privacy">
+            <div class="container">
+                <div class="footer-inner">
+                    <div class="footer-brand">
+                        <div class="nav-brand">
+                            <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                            <span>Uccharon</span>
+                        </div>
+                        <p>The AI English speaking coach that runs on your own API key. Your AI, your cost, your
+                            journey.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="footer-col">
+                            <h5>Product</h5>
+                            <a href="#features">Features</a>
+                            <a href="#how">How It Works</a>
+                            <a href="#providers">Providers</a>
+                        </div>
+                        <div class="footer-col">
+                            <h5>Company</h5>
+                            <a href="#">About</a>
+                            <a href="#">Guide</a>
+                            <a href="#">Privacy</a>
+                        </div>
+                        <div class="footer-col">
+                            <h5>Get Started</h5>
+                            <a href="/app/">Sign In</a>
+                            <a href="/app/?auth=signup">Create Account</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    &copy; <span id="year"></span> Uccharon. Your API Key. Your AI. Your Learning.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{% static 'coach/js/home.js' %}?v=1"></script>
+</body>
+
+</html>

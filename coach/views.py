@@ -771,7 +771,15 @@ def learning_history_view(request):
 
 # ─── Page View ───────────────────────────────────────────────
 
+def home_view(request):
+    """Serve the public marketing homepage / landing page."""
+    from django.shortcuts import render
+    return render(request, 'coach/home.html')
+
+
 def index_view(request):
-    """Serve the main SPA page."""
+    """Serve the main SPA page (login, signup, and the logged-in app)."""
     from django.shortcuts import render
     return render(request, 'coach/index.html')
+
+

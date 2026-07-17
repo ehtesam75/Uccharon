@@ -88,15 +88,42 @@
             }
         });
 
-        // Theme toggle
+        // Theme toggle (in-app)
         DOM.themeToggleBtn.addEventListener('click', toggleTheme);
+
+        // Auth-screen theme toggle + shared theme sync with the homepage
+        initAuthTheme();
 
         // Logout
         DOM.logoutBtn.addEventListener('click', handleLogout);
 
+        // If arriving from the homepage's "Get Started" link (/app/?auth=signup),
+        // open the signup form once the auth screen is shown.
+        handleAuthIntent();
+
         // Check existing auth
         checkAuth();
     }
+
+    // Open the signup flow directly when ?auth=signup is present in the URL.
+    function handleAuthIntent() {
+        let intent = null;
+        try {
+            intent = new URLSearchParams(window.location.search).get('auth');
+        } catch (e) { /* ignore */ }
+        if (intent !== 'signup') return;
+
+        // Defer until after checkAuth decides whether to show the auth screen.
+        // Only open signup for logged-out visitors.
+        setTimeout(() => {
+            if (state.user) return;
+            if (DOM.authScreen && DOM.showSignup) {
+                DOM.authScreen.style.display = 'flex';
+                DOM.showSignup.click();
+            }
+        }, 400);
+    }
+
 
     // Start the app
     document.addEventListener('DOMContentLoaded', init);

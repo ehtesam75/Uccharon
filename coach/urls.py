@@ -4,8 +4,12 @@ from . import views
 app_name = 'coach'
 
 urlpatterns = [
-    # Main page
-    path('', views.index_view, name='index'),
+    # Public marketing homepage / landing page
+    path('', views.home_view, name='home'),
+
+    # Main app (login, signup, and the logged-in SPA)
+    path('app/', views.index_view, name='index'),
+
 
     # Auth API
     path('api/auth/signup/', views.signup_view, name='api-signup'),
