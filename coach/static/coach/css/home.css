@@ -98,6 +98,14 @@ html.home-root body {
     transition: background var(--transition-normal), border-color var(--transition-normal);
 }
 
+/* Light mode: warm translucent tint that blends with the cream hero
+   gradient instead of a flat white bar */
+[data-theme="light"] .home-nav {
+    background: color-mix(in srgb, #ede6d8 78%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+}
+
+
 /* Offset page content for the fixed navbar */
 .home {
     padding-top: 68px;
@@ -140,7 +148,10 @@ html.home-root body {
     align-items: center;
     gap: 30px;
     list-style: none;
+    /* Task 3: nudge the primary nav links slightly to the right */
+    margin-left: 48px;
 }
+
 
 .nav-links a {
     position: relative;
@@ -282,6 +293,16 @@ html.home-root body {
     transform: translateY(-2px);
 }
 
+/* Task 4: keep primary CTA button text white in light mode. The generic
+   `.home a { color: inherit }` rule out-specifies `.btn-primary`, so scope
+   these to the homepage to force white text on the gradient buttons
+   (e.g. "Start Practicing Free" and "Create Your Account"). */
+.home a.btn-primary,
+.home a.btn-primary:hover {
+    color: #fff;
+}
+
+
 .btn-ghost {
     background: var(--bg-glass);
     color: var(--text-primary);
@@ -386,12 +407,46 @@ html.home-root body {
 }
 
 .hero-badge .dot {
+    position: relative;
     width: 7px;
     height: 7px;
     border-radius: 50%;
     background: var(--accent-success);
-    box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.18);
+    box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.18);
 }
+
+/* Live "pulse" indicator: an expanding ring that ripples outward from the
+   dot, plus a subtle brightness beat on the dot itself. */
+.hero-badge .dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent-success);
+    animation: livePulse 1.8s ease-out infinite;
+}
+
+@keyframes livePulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    70% {
+        transform: scale(3.2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(3.2);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-badge .dot::after {
+        animation: none;
+    }
+}
+
 
 .hero-title {
     font-size: clamp(2.3rem, 6vw, 4rem);
@@ -825,6 +880,12 @@ html.home-root body {
     font-size: 0.85rem;
 }
 
+/* Task 1: show the full tagline copyright on desktop, the short
+   "All rights reserved." variant only on mobile */
+.footer-copy-desktop { display: inline; }
+.footer-copy-mobile { display: none; }
+
+
 /* ─── Reveal on scroll ───────────────────────────────────── */
 .reveal {
     opacity: 0;
@@ -955,17 +1016,21 @@ html.home-root body {
     .feature-card p { font-size: 0.82rem; line-height: 1.5; }
 
 
-    /* Task 2: keep AI chat + voice providers at 2 per row on mobile */
+    /* Task 2: keep AI chat + voice providers at 2 per row on mobile,
+       icon and name aligned horizontally (consistent with desktop) */
     .providers-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .provider-chip {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
         gap: 10px;
-        padding: 14px;
-        font-size: 0.88rem;
+        padding: 12px 10px;
+        font-size: 0.82rem;
+        white-space: normal;
+        line-height: 1.25;
     }
-    .provider-logo { width: 34px; height: 34px; }
-    .provider-logo svg { width: 20px; height: 20px; }
+    .provider-logo { width: 32px; height: 32px; }
+    .provider-logo svg { width: 19px; height: 19px; }
+
 
     /* Task 3: "Built around your freedom" — hide Full Cost Control and
        show remaining benefits 2 per row */
@@ -973,13 +1038,24 @@ html.home-root body {
     .benefits-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .benefit { padding: 22px 14px; }
 
+    /* Task: reduce side padding on the "Why Uccharon is Different" card
+       and the Final CTA band so they use more of the mobile width */
+    .philosophy-card { padding: 32px 14px; }
+    .cta-band { padding: 44px 16px; }
+
     .hero { padding: 56px 0 52px; }
     .hero-cta { flex-direction: column; }
     .hero-cta .btn { width: 100%; }
     .footer-links { gap: 32px; }
 
+
     /* Task 4: hide the footer Get Started (Sign In / Create Account) column */
     .footer-col-cta { display: none; }
+
+    /* Task 1: on mobile swap the long tagline for the short copyright line */
+    .footer-copy-desktop { display: none; }
+    .footer-copy-mobile { display: inline; }
+
 
     /* ─── Task 5: Compact mobile "How it works" timeline ───── */
     .steps {
