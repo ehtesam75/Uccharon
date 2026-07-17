@@ -320,11 +320,76 @@
         }
     }
 
+    // ─── Account Deletion ────────────────────────────────
+
+    function openDeleteAccountModal() {
+        if (!DOM.deleteAccountOverlay) return;
+        DOM.deleteAccountOverlay.style.display = 'flex';
+    }
+
+    function closeDeleteAccountModal() {
+        if (!DOM.deleteAccountOverlay) return;
+        DOM.deleteAccountOverlay.style.display = 'none';
+    }
+
+    async function handleDeleteAccount() {
+        const btn = DOM.confirmDeleteAccountBtn;
+        const userId = state.user?.id;
+
+        if (btn) {
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+        }
+        if (DOM.cancelDeleteAccountBtn) DOM.cancelDeleteAccountBtn.disabled = true;
+
+        try {
+            await api('/api/auth/delete-account/', 'POST');
+
+            // Wipe ALL locally-stored data for this device (device-only API keys,
+            // theme, model/provider memory, collapsed sections, cached settings).
+            clearAllUccharonLocalData(userId);
+            clearAllPersistedConversationIds();
+            clearAllPersistedViews();
+            resetChatState();
+            state.user = null;
+
+            showToast('Your account has been deleted.', 'success');
+
+            // Send the user back to the public homepage.
+            window.location.href = '/';
+        } catch (err) {
+            if (btn) {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+            if (DOM.cancelDeleteAccountBtn) DOM.cancelDeleteAccountBtn.disabled = false;
+            showToast(err.message || 'Failed to delete account', 'error');
+        }
+    }
+
     function initSettings() {
         DOM.settingsBtn.addEventListener('click', openSettings);
         DOM.closeSettings.addEventListener('click', closeSettings);
         DOM.settingsOverlay.addEventListener('click', closeSettings);
         DOM.saveSettingsBtn.addEventListener('click', saveSettings);
+
+        // Account deletion: open confirmation modal, then delete on confirm.
+        if (DOM.deleteAccountBtn) {
+            DOM.deleteAccountBtn.addEventListener('click', openDeleteAccountModal);
+        }
+        if (DOM.cancelDeleteAccountBtn) {
+            DOM.cancelDeleteAccountBtn.addEventListener('click', closeDeleteAccountModal);
+        }
+        if (DOM.deleteAccountOverlay) {
+            // Clicking the dimmed backdrop (outside the dialog) cancels.
+            DOM.deleteAccountOverlay.addEventListener('click', (e) => {
+                if (e.target === DOM.deleteAccountOverlay) closeDeleteAccountModal();
+            });
+        }
+        if (DOM.confirmDeleteAccountBtn) {
+            DOM.confirmDeleteAccountBtn.addEventListener('click', handleDeleteAccount);
+        }
+
 
         // Toggle API key visibility (handles all .toggle-key-vis buttons incl. OpenAI)
         document.querySelectorAll('.toggle-key-vis').forEach(btn => {

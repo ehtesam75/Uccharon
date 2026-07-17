@@ -17,6 +17,8 @@ urlpatterns = [
     path('api/auth/login/', views.login_view, name='api-login'),
     path('api/auth/logout/', views.logout_view, name='api-logout'),
     path('api/auth/user/', views.current_user_view, name='api-user'),
+    path('api/auth/delete-account/', views.delete_account_view, name='api-delete-account'),
+
 
     # Settings API
     path('api/settings/', views.settings_view, name='api-settings'),

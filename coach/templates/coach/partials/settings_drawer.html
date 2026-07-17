@@ -606,7 +606,23 @@
                         <span>No API key needed. Uses your browser's built-in speech recognition.</span>
                     </div>
                 </div>
+
+                <!-- Danger Zone: Account Deletion -->
+                <div class="settings-section danger-zone">
+                    <h3>Delete Account</h3>
+                    <p class="settings-desc">Permanently delete your account and all associated data. This action
+                        <strong>cannot be undone</strong>.</p>
+                    <div class="voice-provider-notice danger-notice" style="margin-bottom:16px;">
+                        <span class="notice-icon">⚠️</span>
+                        <span>All your conversations, learning history, settings, and account data will be permanently
+                            deleted. Your locally stored API keys will also be removed from this device.</span>
+                    </div>
+                    <button id="delete-account-btn" type="button" class="auth-btn danger-btn">
+                        <span>Delete Account</span>
+                    </button>
+                </div>
             </div>
+
 
             <div class="drawer-footer">
                 <button id="save-settings-btn" class="auth-btn primary-btn">

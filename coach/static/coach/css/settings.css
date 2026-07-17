@@ -507,3 +507,145 @@
     letter-spacing: 0.3px;
     white-space: nowrap;
 }
+
+/* ─── Danger Zone (Account Deletion) ─────────────────────── */
+.settings-section.danger-zone {
+    border-color: rgba(225, 112, 85, 0.4);
+    background: rgba(225, 112, 85, 0.05);
+}
+
+.settings-section.danger-zone:hover {
+    border-color: rgba(225, 112, 85, 0.6);
+}
+
+.settings-section.danger-zone h3 {
+    color: var(--accent-error);
+}
+
+.voice-provider-notice.danger-notice {
+    background: rgba(225, 112, 85, 0.08);
+    border-color: rgba(225, 112, 85, 0.22);
+}
+
+/* Destructive action button (shared by the section + confirm modal) */
+.auth-btn.danger-btn {
+    background: var(--accent-error);
+    color: #fff;
+    border: 1px solid var(--accent-error);
+    transition: background var(--transition-fast), transform var(--transition-fast),
+        box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+.auth-btn.danger-btn:hover:not(:disabled) {
+    background: #d15f43;
+    box-shadow: 0 4px 14px rgba(225, 112, 85, 0.32);
+    transform: translateY(-1px);
+}
+
+.auth-btn.danger-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.auth-btn.danger-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Neutral / cancel button */
+.auth-btn.secondary-btn {
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.auth-btn.secondary-btn:hover:not(:disabled) {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-color-hover);
+}
+
+.auth-btn.secondary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ─── Generic Modal (overlay + content) ──────────────────── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 200;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 28px 26px;
+    animation: modalPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: scale(0.94) translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ─── Delete Account Confirmation Modal ──────────────────── */
+.delete-account-modal-content {
+    text-align: center;
+}
+
+.delete-account-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(225, 112, 85, 0.12);
+    color: var(--accent-error);
+}
+
+.delete-account-modal-content h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.delete-account-modal-content .modal-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin-bottom: 24px;
+}
+
+.delete-account-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.delete-account-actions .auth-btn {
+    flex: 1;
+    margin-top: 0;
+}
+
+

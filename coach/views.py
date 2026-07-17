@@ -1,15 +1,17 @@
 import json
 import re
 from datetime import timedelta
+from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 from .models import UserProfile, Conversation, Message, DailyProgress
+
 
 
 def json_body(request):
@@ -131,6 +133,48 @@ def logout_view(request):
     """Logout current user."""
     logout(request)
     return JsonResponse({'success': True})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_account_view(request):
+    """Permanently delete the authenticated user's account and ALL related data.
+
+    Security:
+      • @login_required ensures only an authenticated user can reach this view.
+      • This view is intentionally NOT @csrf_exempt — Django's CsrfViewMiddleware
+        validates the X-CSRFToken header against the session, so cross-site or
+        forged requests are rejected. The SPA page sets the CSRF cookie via
+        @ensure_csrf_cookie on index_view.
+      • A user can only ever delete their OWN account: the target is always
+        request.user, never an id supplied by the client. There is no way to
+        target another user's account.
+
+    All data linked to the user is removed. Every model below has a ForeignKey /
+    OneToOne to User with on_delete=CASCADE, so deleting the User row cascades to
+    the rest. We still delete explicitly inside a transaction and then delete the
+    User so no orphan records can remain even if new related models are added.
+    """
+    user = request.user
+
+    with transaction.atomic():
+        # Learning data: messages live under the user's conversations.
+        Message.objects.filter(conversation__user=user).delete()
+        Conversation.objects.filter(user=user).delete()
+        # Statistics / progress data.
+        DailyProgress.objects.filter(user=user).delete()
+        # Profile (preferences, settings). OneToOne — also covered by cascade.
+        UserProfile.objects.filter(user=user).delete()
+        # Finally the account itself (username, email, password, session link).
+        # Log the user out first so the session is flushed, then delete the row.
+        logout(request)
+        user.delete()
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Your account and all associated data have been permanently deleted.',
+    })
+
 
 
 @require_http_methods(["GET"])
@@ -730,9 +774,16 @@ def home_view(request):
 
 
 
+@ensure_csrf_cookie
 def index_view(request):
-    """Serve the main SPA page (login, signup, and the logged-in app)."""
+    """Serve the main SPA page (login, signup, and the logged-in app).
+
+    @ensure_csrf_cookie guarantees the browser receives the ``csrftoken`` cookie
+    so CSRF-protected endpoints (e.g. account deletion) can validate the
+    X-CSRFToken header sent by the SPA.
+    """
     from django.shortcuts import render
     return render(request, 'coach/index.html')
+
 
 

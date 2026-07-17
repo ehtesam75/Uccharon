@@ -222,6 +222,13 @@
         geminiSttNotice: $('#gemini-stt-notice'),
         openaiSttNotice: $('#openai-stt-notice'),
 
+        // Delete Account
+        deleteAccountBtn: $('#delete-account-btn'),
+        deleteAccountOverlay: $('#delete-account-overlay'),
+        cancelDeleteAccountBtn: $('#cancel-delete-account-btn'),
+        confirmDeleteAccountBtn: $('#confirm-delete-account-btn'),
+
+
 
 
         // Dashboard
@@ -513,8 +520,50 @@
 
 
 
+    // ═══════════════════════════════════════════════════════
+    // FULL LOCAL DATA WIPE (used on account deletion)
+    // ═══════════════════════════════════════════════════════
+    //
+    // Remove every Uccharon-related entry from localStorage and sessionStorage
+    // so the device behaves like a brand-new user after account deletion. This
+    // covers device-only API keys, theme preference, provider/model memory,
+    // voice provider memory, collapsed-section state, and any cached settings.
+    function clearAllUccharonLocalData(userId = state.user?.id) {
+        // Explicit, well-known keys (some are user-namespaced).
+        const explicitKeys = [
+            'uccharon_theme',
+            'uccharon_gemini_model',
+            'uccharon_groq_model',
+            'uccharon_openrouter_model',
+            'uccharon_voice_provider',
+            'uccharon_groq_whisper_model',
+            'uccharon_last_success',        // last successful AI provider/model/key
+            'uccharon_stt_last_success',    // last successful voice provider/model/key
+            getApiKeysStorageKey(userId),   // uccharon_api_keys_<userId>
+            getCollapsedSectionsKey(userId) // uccharon_collapsed_sections_<userId>
+        ];
+        explicitKeys.forEach(key => {
+            try { localStorage.removeItem(key); } catch (e) { /* ignore */ }
+        });
+
+        // Sweep any remaining uccharon_* keys (e.g. other-guest namespaced
+        // entries) from both storages so no cached user data lingers.
+        try {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('uccharon_')) localStorage.removeItem(key);
+            });
+        } catch (e) { /* ignore */ }
+        try {
+            Object.keys(sessionStorage).forEach(key => {
+                if (key.startsWith('uccharon_')) sessionStorage.removeItem(key);
+            });
+        } catch (e) { /* ignore */ }
+    }
+
+
     function showWelcomeScreen() {
         DOM.welcomeScreen.style.display = 'flex';
+
         DOM.chatArea.style.display = 'none';
         DOM.dashboardScreen.style.display = 'none';
         DOM.learningHistoryScreen.style.display = 'none';
