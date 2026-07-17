@@ -467,12 +467,11 @@
             clearAllPersistedViews();
             resetChatState();
             state.user = null;
-            DOM.app.style.display = 'none';
-            DOM.dashboardScreen.style.display = 'none';
-            DOM.learningHistoryScreen.style.display = 'none';
-            DOM.authScreen.style.display = 'flex';
+            // Redirect to the public homepage instead of the login screen.
+            window.location.href = '/';
         } catch (err) {
             showToast('Logout failed', 'error');
         }
+
     }
 

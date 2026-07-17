@@ -867,12 +867,81 @@ html.home-root body {
 
 @media (max-width: 560px) {
     .container { padding: 0 18px; }
-    .features-grid,
-    .steps,
-    .benefits-grid,
-    .providers-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+
+    /* Task 2: keep AI chat + voice providers at 2 per row on mobile */
+    .providers-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .provider-chip {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px;
+        font-size: 0.88rem;
+    }
+    .provider-logo { width: 34px; height: 34px; }
+    .provider-logo svg { width: 20px; height: 20px; }
+
+    /* Task 3: "Built around your freedom" — hide Full Cost Control and
+       show remaining benefits 2 per row */
+    .benefit-hide-mobile { display: none; }
+    .benefits-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .benefit { padding: 22px 14px; }
+
     .hero { padding: 56px 0 52px; }
     .hero-cta { flex-direction: column; }
     .hero-cta .btn { width: 100%; }
     .footer-links { gap: 32px; }
+
+    /* Task 4: hide the footer Get Started (Sign In / Create Account) column */
+    .footer-col-cta { display: none; }
+
+    /* ─── Task 5: Compact mobile "How it works" timeline ───── */
+    .steps {
+        grid-template-columns: 1fr;
+        gap: 0;
+        position: relative;
+        padding-left: 8px;
+    }
+    /* Vertical connecting line down the numbered markers */
+    .steps::before {
+        content: "";
+        position: absolute;
+        left: 29px;
+        top: 20px;
+        bottom: 20px;
+        width: 2px;
+        background: linear-gradient(var(--accent-primary), var(--accent-secondary));
+        opacity: 0.35;
+    }
+    .step {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        align-items: center;
+        column-gap: 14px;
+        text-align: left;
+        padding: 12px 14px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+    .step-num {
+        margin: 0;
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    .step h4 {
+        grid-column: 2;
+        margin-bottom: 2px;
+        font-size: 0.95rem;
+    }
+    .step p {
+        grid-column: 2;
+        font-size: 0.82rem;
+    }
+    .step::after { display: none; }
 }
+
+
