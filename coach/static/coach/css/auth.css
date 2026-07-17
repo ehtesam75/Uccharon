@@ -441,10 +441,21 @@
 }
 
 @media (max-width: 720px) {
+    /* Push the auth screen down so the topbar (Home link + theme
+       toggle) never overlaps the auth/sign-up card. */
+    .auth-screen {
+        align-items: flex-start;
+    }
+
+    .auth-container {
+        padding-top: 84px;
+    }
+
     .signup-card {
-        max-height: calc(100dvh - 24px);
+        max-height: calc(100dvh - 108px);
         padding: 24px;
     }
+
 
     .signup-progress {
         top: 0;

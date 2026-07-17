@@ -55,8 +55,6 @@
                 <nav aria-label="Primary">
                     <ul class="nav-links">
                         <li><a href="#features">Features</a></li>
-                        <li><a href="#how">How It Works</a></li>
-                        <li><a href="#providers">Providers</a></li>
                         <li><a href="#about">About</a></li>
                         <li><a href="#guide">Guide</a></li>
                         <li><a href="#privacy">Privacy</a></li>
@@ -66,11 +64,11 @@
                 <div class="nav-actions">
                     <button class="nav-theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme"
                         title="Toggle theme">
-                        <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        <svg class="theme-icon-dark" width="19" height="19" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                         </svg>
-                        <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        <svg class="theme-icon-light" width="19" height="19" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             style="display:none">
                             <circle cx="12" cy="12" r="5" />
@@ -79,12 +77,16 @@
                         </svg>
                     </button>
                     <a href="/app/" class="btn btn-ghost nav-signin">Sign In</a>
-                    <a href="/app/?auth=signup" class="btn btn-primary">Get Started</a>
+                    <a href="/app/?auth=signup" class="btn btn-primary nav-getstarted">Get Started</a>
                     <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu"
                         aria-expanded="false">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="burger-open" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                        <svg class="burger-close" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
@@ -92,16 +94,19 @@
 
             <!-- Mobile menu -->
             <div class="mobile-menu" id="mobile-menu">
-                <a href="#features">Features</a>
-                <a href="#how">How It Works</a>
-                <a href="#providers">Providers</a>
-                <a href="#about">About</a>
-                <a href="#guide">Guide</a>
-                <a href="#privacy">Privacy</a>
-                <a href="/app/" class="btn btn-ghost">Sign In</a>
-                <a href="/app/?auth=signup" class="btn btn-primary">Get Started</a>
+                <div class="mobile-menu-inner">
+                    <a href="#features">Features</a>
+                    <a href="#about">About</a>
+                    <a href="#guide">Guide</a>
+                    <a href="#privacy">Privacy</a>
+                    <div class="mobile-menu-actions">
+                        <a href="/app/" class="btn btn-ghost">Sign In</a>
+                        <a href="/app/?auth=signup" class="btn btn-primary">Get Started</a>
+                    </div>
+                </div>
             </div>
         </header>
+
 
         <main>
             <!-- ═══════════════ HERO ═══════════════ -->
@@ -346,22 +351,73 @@
                     <div class="providers-block">
                         <p class="providers-label">AI Chat Providers</p>
                         <div class="providers-grid">
-                            <div class="provider-chip reveal"><span class="provider-logo">AI</span> OpenAI</div>
-                            <div class="provider-chip reveal"><span class="provider-logo">G</span> Gemini</div>
-                            <div class="provider-chip reveal"><span class="provider-logo">Gr</span> Groq</div>
-                            <div class="provider-chip reveal"><span class="provider-logo">OR</span> OpenRouter</div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+                                        <path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9A6 6 0 0 0 4.98 4.18a5.98 5.98 0 0 0-3.99 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.52 2.9A6 6 0 0 0 19.02 19.8a5.98 5.98 0 0 0 3.99-2.9 6.05 6.05 0 0 0-.73-7.09zm-9.02 12.6a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.79-2.77a.78.78 0 0 0 .39-.68v-6.76l2.02 1.17c.02.01.04.03.04.06v5.6a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.3a4.47 4.47 0 0 1-.54-3.02l.14.09 4.79 2.77c.24.14.53.14.77 0l5.85-3.38v2.33a.08.08 0 0 1-.03.07l-4.85 2.8a4.5 4.5 0 0 1-6.13-1.66zM2.34 7.9a4.48 4.48 0 0 1 2.34-1.97v5.7c0 .28.15.54.39.68l5.83 3.36-2.02 1.17a.08.08 0 0 1-.08 0l-4.84-2.8A4.5 4.5 0 0 1 2.34 7.9zm16.63 3.86-5.85-3.38 2.02-1.16a.08.08 0 0 1 .08 0l4.84 2.8a4.5 4.5 0 0 1-.68 8.11v-5.7a.79.79 0 0 0-.4-.67zm2.01-3.03-.14-.09-4.79-2.77a.78.78 0 0 0-.78 0l-5.84 3.38V6.9a.08.08 0 0 1 .03-.07l4.85-2.8a4.5 4.5 0 0 1 6.67 4.66zM9.51 12.9l-2.02-1.17a.08.08 0 0 1-.04-.06V6.08a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.79 2.77a.78.78 0 0 0-.39.68l-.01 6.74zm1.1-2.36L13.22 9l2.6 1.5v3l-2.6 1.5-2.61-1.5z"/>
+                                    </svg>
+                                </span> OpenAI
+                            </div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                                        <path fill="#4285F4" d="M12 0c.34 6.34 5.66 11.66 12 12-6.34.34-11.66 5.66-12 12-.34-6.34-5.66-11.66-12-12C6.34 11.66 11.66 6.34 12 0z"/>
+                                    </svg>
+                                </span> Gemini
+                            </div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#F55036" aria-hidden="true">
+                                        <path d="M12 2a5.5 5.5 0 0 0-5.5 5.5A5.5 5.5 0 0 0 12 13h1.9a1.6 1.6 0 0 1 0 3.2H12a5.4 5.4 0 0 1-3.3-1.1l-1.9 2.4A8.4 8.4 0 0 0 12 19.4h1.9a4.8 4.8 0 0 0 0-9.6H12a2.5 2.5 0 0 1 0-5h1.9a2.4 2.4 0 0 1 1.5.5l1.9-2.4A5.4 5.4 0 0 0 13.9 2H12z"/>
+                                    </svg>
+                                </span> Groq
+                            </div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path d="M12 3c2.5 2.4 2.5 15.6 0 18M12 3c-2.5 2.4-2.5 15.6 0 18M3 12h18"/>
+                                    </svg>
+                                </span> OpenRouter
+                            </div>
                         </div>
                     </div>
 
                     <div class="providers-block">
                         <p class="providers-label">Voice Providers</p>
                         <div class="providers-grid">
-                            <div class="provider-chip reveal"><span class="provider-logo">W</span> OpenAI Whisper</div>
-                            <div class="provider-chip reveal"><span class="provider-logo">Gr</span> Groq Whisper</div>
-                            <div class="provider-chip reveal"><span class="provider-logo">G</span> Gemini Audio</div>
-                            <div class="provider-chip reveal"><span class="provider-logo">🎙</span> Browser Speech</div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+                                        <path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9A6 6 0 0 0 4.98 4.18a5.98 5.98 0 0 0-3.99 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.52 2.9A6 6 0 0 0 19.02 19.8a5.98 5.98 0 0 0 3.99-2.9 6.05 6.05 0 0 0-.73-7.09zm-9.02 12.6a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.79-2.77a.78.78 0 0 0 .39-.68v-6.76l2.02 1.17c.02.01.04.03.04.06v5.6a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.3a4.47 4.47 0 0 1-.54-3.02l.14.09 4.79 2.77c.24.14.53.14.77 0l5.85-3.38v2.33a.08.08 0 0 1-.03.07l-4.85 2.8a4.5 4.5 0 0 1-6.13-1.66zM2.34 7.9a4.48 4.48 0 0 1 2.34-1.97v5.7c0 .28.15.54.39.68l5.83 3.36-2.02 1.17a.08.08 0 0 1-.08 0l-4.84-2.8A4.5 4.5 0 0 1 2.34 7.9zm16.63 3.86-5.85-3.38 2.02-1.16a.08.08 0 0 1 .08 0l4.84 2.8a4.5 4.5 0 0 1-.68 8.11v-5.7a.79.79 0 0 0-.4-.67zm2.01-3.03-.14-.09-4.79-2.77a.78.78 0 0 0-.78 0l-5.84 3.38V6.9a.08.08 0 0 1 .03-.07l4.85-2.8a4.5 4.5 0 0 1 6.67 4.66zM9.51 12.9l-2.02-1.17a.08.08 0 0 1-.04-.06V6.08a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.79 2.77a.78.78 0 0 0-.39.68l-.01 6.74zm1.1-2.36L13.22 9l2.6 1.5v3l-2.6 1.5-2.61-1.5z"/>
+                                    </svg>
+                                </span> OpenAI Whisper
+                            </div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#F55036" aria-hidden="true">
+                                        <path d="M12 2a5.5 5.5 0 0 0-5.5 5.5A5.5 5.5 0 0 0 12 13h1.9a1.6 1.6 0 0 1 0 3.2H12a5.4 5.4 0 0 1-3.3-1.1l-1.9 2.4A8.4 8.4 0 0 0 12 19.4h1.9a4.8 4.8 0 0 0 0-9.6H12a2.5 2.5 0 0 1 0-5h1.9a2.4 2.4 0 0 1 1.5.5l1.9-2.4A5.4 5.4 0 0 0 13.9 2H12z"/>
+                                    </svg>
+                                </span> Groq Whisper
+                            </div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                                        <path fill="#4285F4" d="M12 0c.34 6.34 5.66 11.66 12 12-6.34.34-11.66 5.66-12 12-.34-6.34-5.66-11.66-12-12C6.34 11.66 11.66 6.34 12 0z"/>
+                                    </svg>
+                                </span> Gemini Audio
+                            </div>
+                            <div class="provider-chip reveal">
+                                <span class="provider-logo">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+                                    </svg>
+                                </span> Browser Speech
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </section>
 

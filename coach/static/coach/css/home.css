@@ -86,13 +86,22 @@ html.home-root body {
 
 /* ─── Navbar ─────────────────────────────────────────────── */
 .home-nav {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
     backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     background: color-mix(in srgb, var(--bg-primary) 72%, transparent);
     border-bottom: 1px solid var(--border-color);
 }
+
+/* Offset page content for the fixed navbar */
+.home {
+    padding-top: 68px;
+}
+
 
 .home-nav-inner {
     display: flex;
@@ -149,22 +158,31 @@ html.home-root body {
 }
 
 .nav-theme-toggle {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     display: grid;
     place-items: center;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    background: var(--bg-glass);
+    border-radius: 50%;
+    border: none;
+    background: transparent;
     color: var(--text-secondary);
-    transition: all var(--transition-fast);
+    cursor: pointer;
+    transition: color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.nav-theme-toggle svg {
+    transition: transform var(--transition-normal);
 }
 
 .nav-theme-toggle:hover {
     color: var(--text-primary);
-    border-color: var(--border-color-hover);
-    background: var(--bg-glass-hover);
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
 }
+
+.nav-theme-toggle:hover svg {
+    transform: rotate(-15deg) scale(1.08);
+}
+
 
 /* ─── Buttons ────────────────────────────────────────────── */
 .btn {
@@ -224,7 +242,19 @@ html.home-root body {
     border: 1px solid var(--border-color);
     background: var(--bg-glass);
     color: var(--text-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
 }
+
+.nav-burger:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-color-hover);
+}
+
+.nav-burger .burger-close { display: none; }
+.nav-burger[aria-expanded="true"] .burger-open { display: none; }
+.nav-burger[aria-expanded="true"] .burger-close { display: block; }
+
 
 /* ─── Sections base ──────────────────────────────────────── */
 .section {
@@ -576,17 +606,21 @@ html.home-root body {
 }
 
 .provider-logo {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
     display: grid;
     place-items: center;
-    border-radius: 9px;
+    border-radius: 10px;
     background: var(--bg-glass);
-    color: var(--accent-secondary);
-    font-weight: 800;
-    font-size: 0.95rem;
 }
+
+.provider-logo svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
 
 /* ─── Benefits ───────────────────────────────────────────── */
 .benefits-grid {
@@ -745,33 +779,71 @@ html.home-root body {
 
 /* ─── Mobile nav drawer ──────────────────────────────────── */
 .mobile-menu {
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    padding: 12px 24px 20px;
-    border-bottom: 1px solid var(--border-color);
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    border-bottom: 1px solid transparent;
     background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
     backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: max-height 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.32s ease,
+                border-color 0.42s ease;
 }
 
 .mobile-menu.open {
+    max-height: 460px;
+    opacity: 1;
+    border-bottom-color: var(--border-color);
+}
+
+.mobile-menu-inner {
     display: flex;
+    flex-direction: column;
+    padding: 8px 24px 20px;
 }
 
 .mobile-menu a {
-    padding: 12px 4px;
+    padding: 14px 6px;
     font-weight: 500;
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border-color);
+    transform: translateY(-8px);
+    opacity: 0;
+    transition: color var(--transition-fast), transform 0.4s ease, opacity 0.4s ease;
 }
 
-.mobile-menu a:last-child {
-    border-bottom: none;
+.mobile-menu a:hover {
+    color: var(--text-primary);
 }
 
-.mobile-menu .btn {
-    margin-top: 12px;
+.mobile-menu-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+    transform: translateY(-8px);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
+
+.mobile-menu-actions .btn {
+    width: 100%;
+}
+
+/* Stagger the reveal of menu items when opened */
+.mobile-menu.open .mobile-menu-inner > a,
+.mobile-menu.open .mobile-menu-actions {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.mobile-menu.open .mobile-menu-inner > a:nth-child(1) { transition-delay: 0.06s; }
+.mobile-menu.open .mobile-menu-inner > a:nth-child(2) { transition-delay: 0.1s; }
+.mobile-menu.open .mobile-menu-inner > a:nth-child(3) { transition-delay: 0.14s; }
+.mobile-menu.open .mobile-menu-inner > a:nth-child(4) { transition-delay: 0.18s; }
+.mobile-menu.open .mobile-menu-actions { transition-delay: 0.22s; }
+
 
 /* ─── Responsive ─────────────────────────────────────────── */
 @media (max-width: 960px) {
@@ -784,12 +856,14 @@ html.home-root body {
 
 @media (max-width: 780px) {
     .nav-links,
-    .nav-signin { display: none; }
+    .nav-signin,
+    .nav-getstarted { display: none; }
     .nav-burger { display: grid; }
     .section { padding: 68px 0; }
     .compare-grid { grid-template-columns: 1fr; }
     .philosophy-card { padding: 40px 24px; }
 }
+
 
 @media (max-width: 560px) {
     .container { padding: 0 18px; }
