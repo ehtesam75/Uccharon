@@ -141,30 +141,36 @@ function buildSystemPrompt(explanationLanguage = 'en') {
 
 // Rebuild a previous assistant turn for the conversation history.
 //
-// The system prompt requires the model to respond ONLY with valid JSON. If we
-// replay the assistant's earlier turns as plain-text `conversational_reply`,
-// the history contradicts that contract: the model "sees" itself answering in
-// prose, not JSON. Over 2–3 turns this inconsistency compounds and the model's
-// output discipline breaks down — and the first thing to fail is fragile,
-// low-resource Bengali (বাংলা) text, which degrades into unreadable gibberish.
+// To keep token usage low, we send ONLY the assistant's conversational_reply
+// back as history — never the evaluation sections (grammar_corrections,
+// sentence_improvements, mechanics_corrections, native_versions,
+// pronunciation_guidance, vocabulary_improvements, performance_rating,
+// follow_up_question, etc.). Past evaluation data is irrelevant to evaluating
+// the next message and only inflates the prompt.
 //
-// Replaying the stored response as the SAME JSON contract keeps the context
-// consistent so Bengali Unicode stays correct across every generation. The
-// stored object is already valid Unicode (Django JSONField round-trips it
-// losslessly), so JSON.stringify preserves every Bengali character exactly.
+// The system prompt still requires the model to respond ONLY with valid JSON.
+// To avoid contradicting that contract in the replayed history (which can
+// degrade output discipline and corrupt fragile Bengali (বাংলা) text), we
+// replay the prior turn as a minimal JSON object that contains only the
+// conversational_reply field. JSON.stringify preserves every Bengali character
+// exactly, so Unicode stays correct across generations.
 function buildAssistantHistoryContent(aiResponse) {
+    let reply = '';
     if (aiResponse && typeof aiResponse === 'object') {
-        try {
-            return JSON.stringify(aiResponse);
-        } catch (e) {
-            // Fall back to the plain reply if the object can't be serialized.
-            if (aiResponse.conversational_reply) {
-                return aiResponse.conversational_reply;
-            }
-        }
+        reply = aiResponse.conversational_reply || '';
+    } else if (typeof aiResponse === 'string') {
+        reply = aiResponse;
     }
-    return '';
+    if (!reply) {
+        return '';
+    }
+    try {
+        return JSON.stringify({ conversational_reply: reply });
+    } catch (e) {
+        return reply;
+    }
 }
+
 
 
 
@@ -199,10 +205,11 @@ class GeminiProvider {
     async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
 
-        const MAX_HISTORY_TURNS = 8; // match Groq's setting
+        const MAX_HISTORY_TURNS = 5; // last 5 exchanges
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
 
         // Build contents array with conversation history
+
         const contents = [];
 
         // Add conversation history — replay the model's prior turn as the SAME
@@ -298,10 +305,11 @@ class GroqProvider {
     async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = 'https://api.groq.com/openai/v1/chat/completions';
 
-        const MAX_HISTORY_TURNS = 8; // keep last 8 exchanges, tune as needed
+        const MAX_HISTORY_TURNS = 5; // last 5 exchanges
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
 
         // Build messages array
+
         const messages = [
             { role: 'system', content: buildSystemPrompt(this.explanationLanguage) }
         ];
@@ -386,8 +394,9 @@ class OpenRouterProvider {
 
     async sendMessage(userMessage, conversationHistory = [], options = {}) {
         const url = 'https://openrouter.ai/api/v1/chat/completions';
-        const MAX_HISTORY_TURNS = 8;
+        const MAX_HISTORY_TURNS = 5; // last 5 exchanges
         const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+
 
         // Replay each prior assistant turn as the SAME JSON contract the model
         // must produce — see buildAssistantHistoryContent() for why this keeps
