@@ -19,10 +19,22 @@
         DOM.app.style.display = 'flex';
         hideGlobalSplash();
         updateUserInfo();
-        applyTheme(state.settings.theme);
+
+        // Theme continuity: the shared localStorage value reflects the most
+        // recent choice made anywhere (public homepage, auth screen, or app).
+        // Prefer it over the server value so a theme picked on the homepage
+        // carries into the logged-in app. If it differs from the server, sync
+        // it back so the choice persists across sessions and devices.
+        const storedTheme = getStoredTheme();
+        const effectiveTheme = storedTheme || state.settings.theme;
+        if (storedTheme && state.user && storedTheme !== state.settings.theme) {
+            api('/api/settings/', 'PUT', { theme: storedTheme }).catch(() => { });
+        }
+        applyTheme(effectiveTheme);
         applySettingsToUI();
         updateScrollToBottomButton();
     }
+
 
     function hideGlobalSplash() {
         const splash = document.getElementById('global-splash');
@@ -60,7 +72,19 @@
     // THEME
     // ═══════════════════════════════════════════════════════
 
+    // Read the shared theme from localStorage (the single source of truth that
+    // the public homepage, auth screen, and app all write to). Returns 'light',
+    // 'dark', or null if nothing valid is stored.
+    function getStoredTheme() {
+        try {
+            const stored = localStorage.getItem('uccharon_theme');
+            if (stored === 'light' || stored === 'dark') return stored;
+        } catch (e) { /* ignore */ }
+        return null;
+    }
+
     function applyTheme(theme) {
+
         document.documentElement.setAttribute('data-theme', theme);
         state.settings.theme = theme;
 
