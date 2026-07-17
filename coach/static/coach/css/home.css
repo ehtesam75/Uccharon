@@ -91,10 +91,11 @@ html.home-root body {
     left: 0;
     right: 0;
     z-index: 50;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    background: color-mix(in srgb, var(--bg-primary) 72%, transparent);
-    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    background: color-mix(in srgb, var(--bg-primary) 62%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
+    transition: background var(--transition-normal), border-color var(--transition-normal);
 }
 
 /* Offset page content for the fixed navbar */
@@ -110,6 +111,7 @@ html.home-root body {
     height: 68px;
     gap: 16px;
 }
+
 
 .nav-brand {
     display: flex;
@@ -136,26 +138,96 @@ html.home-root body {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 30px;
     list-style: none;
 }
 
 .nav-links a {
+    position: relative;
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-secondary);
     transition: color var(--transition-fast);
 }
 
+/* Subtle animated underline on hover for primary nav links */
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 100%;
+    height: 1.5px;
+    background: var(--gradient-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-normal);
+}
+
 .nav-links a:hover {
     color: var(--text-primary);
+}
+
+.nav-links a:hover::after {
+    transform: scaleX(1);
 }
 
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
 }
+
+/* ─── Navbar auth actions (minimal, premium) ─────────────── */
+.nav-signin,
+.nav-getstarted {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: var(--radius-full);
+    transition: color var(--transition-fast), background var(--transition-fast),
+                border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Sign in: quiet text link */
+.nav-signin {
+    padding: 8px 14px;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+.nav-signin:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+/* Get started: subtle outlined pill with a gradient text/accent hover —
+   present but not visually dominant */
+.nav-getstarted {
+    padding: 8px 16px;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+}
+
+.nav-getstarted svg {
+    transition: transform var(--transition-normal);
+}
+
+.nav-getstarted:hover {
+    color: var(--text-primary);
+    border-color: rgba(var(--accent-primary-rgb), 0.55);
+    background: rgba(var(--accent-primary-rgb), 0.1);
+    transform: translateY(-1px);
+}
+
+.nav-getstarted:hover svg {
+    transform: translateX(3px);
+}
+
 
 .nav-theme-toggle {
     width: 38px;
@@ -228,11 +300,8 @@ html.home-root body {
     font-size: 1rem;
 }
 
-.nav-signin {
-    display: inline-flex;
-}
-
 /* Mobile menu toggle */
+
 .nav-burger {
     display: none;
     width: 40px;
