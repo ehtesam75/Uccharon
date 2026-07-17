@@ -32,20 +32,12 @@ class UserProfile(models.Model):
         max_length=5, choices=EXPLANATION_LANGUAGE_CHOICES, default='en'
     )
 
-    gemini_api_key = models.CharField(max_length=255, blank=True, default='')
-    gemini_api_key_2 = models.CharField(max_length=255, blank=True, default='')
-    gemini_api_key_3 = models.CharField(max_length=255, blank=True, default='')
-    groq_api_key = models.CharField(max_length=255, blank=True, default='')
-    groq_api_key_2 = models.CharField(max_length=255, blank=True, default='')
-    groq_api_key_3 = models.CharField(max_length=255, blank=True, default='')
-    openrouter_api_key = models.CharField(max_length=255, blank=True, default='')
-    openrouter_api_key_2 = models.CharField(max_length=255, blank=True, default='')
-    openrouter_api_key_3 = models.CharField(max_length=255, blank=True, default='')
-    # OpenAI keys are shared by the OpenAI response provider AND the Whisper voice input.
-    openai_api_key = models.CharField(max_length=255, blank=True, default='')
-    openai_api_key_2 = models.CharField(max_length=255, blank=True, default='')
-    openai_api_key_3 = models.CharField(max_length=255, blank=True, default='')
+    # NOTE: API keys are NEVER stored server-side. They live ONLY on the user's
+    # device (browser local storage) and are never received, stored, or returned
+    # by Uccharon's servers. The former *_api_key columns were removed in
+    # migration 0016.
     openai_model = models.CharField(max_length=100, blank=True, default='gpt-4o')
+
 
     daily_word_goal = models.IntegerField(default=250)
 

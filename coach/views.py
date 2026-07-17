@@ -47,11 +47,10 @@ def signup_view(request):
     email = data.get('email', '').strip()
     password = data.get('password', '')
     ai_provider = data.get('ai_provider', 'gemini')
-    gemini_api_key = data.get('gemini_api_key', '').strip()
-    groq_api_key = data.get('groq_api_key', '').strip()
-    openrouter_api_key = data.get('openrouter_api_key', '').strip()
-    openai_api_key = data.get('openai_api_key', '').strip()
 
+    # NOTE: API keys are NEVER received or stored by the server. They live only
+    # on the user's device (browser storage). Any api_key fields in the request
+    # body are intentionally ignored.
 
     if not username or not email or not password:
         return JsonResponse({'error': 'All fields are required.'}, status=400)
@@ -69,24 +68,11 @@ def signup_view(request):
     if ai_provider not in valid_providers:
         return JsonResponse({'error': 'Please select a valid AI provider.'}, status=400)
 
-    if ai_provider == 'gemini' and not gemini_api_key:
-        return JsonResponse({'error': 'A Gemini API key is required.'}, status=400)
-    if ai_provider == 'groq' and not groq_api_key:
-        return JsonResponse({'error': 'A Groq API key is required.'}, status=400)
-    if ai_provider == 'openrouter' and not openrouter_api_key:
-        return JsonResponse({'error': 'An OpenRouter API key is required.'}, status=400)
-    if ai_provider == 'openai' and not openai_api_key:
-        return JsonResponse({'error': 'An OpenAI API key is required.'}, status=400)
-
     user = User.objects.create_user(username=username, email=email, password=password)
     user.profile.ai_provider = ai_provider
-    user.profile.gemini_api_key = gemini_api_key if ai_provider == 'gemini' else ''
-    user.profile.groq_api_key = groq_api_key if ai_provider == 'groq' else ''
-    user.profile.openrouter_api_key = openrouter_api_key if ai_provider == 'openrouter' else ''
-    user.profile.openai_api_key = openai_api_key if ai_provider == 'openai' else ''
 
-    
     # Set daily word goal if provided
+
     daily_word_goal = data.get('daily_word_goal')
     if daily_word_goal is not None:
         try:
@@ -159,27 +145,16 @@ def current_user_view(request):
                 'username': request.user.username,
                 'email': request.user.email,
             },
+            # API keys are NEVER returned by the server. They live only on the
+            # user's device (browser local storage).
             'settings': {
                 'theme': profile.theme,
                 'ai_provider': profile.ai_provider,
                 'explanation_language': profile.explanation_language,
-                'gemini_api_key': profile.gemini_api_key,
-
-                'gemini_api_key_2': profile.gemini_api_key_2,
-                'gemini_api_key_3': profile.gemini_api_key_3,
-                'groq_api_key': profile.groq_api_key,
-                'groq_api_key_2': profile.groq_api_key_2,
-                'groq_api_key_3': profile.groq_api_key_3,
-                'openrouter_api_key': profile.openrouter_api_key,
-                'openrouter_api_key_2': profile.openrouter_api_key_2,
-                'openrouter_api_key_3': profile.openrouter_api_key_3,
-                'openai_api_key': profile.openai_api_key,
-                'openai_api_key_2': profile.openai_api_key_2,
-                'openai_api_key_3': profile.openai_api_key_3,
                 'openai_model': profile.openai_model,
-
                 'daily_word_goal': profile.daily_word_goal,
             }
+
         })
     return JsonResponse({'authenticated': False})
 
@@ -195,23 +170,16 @@ def settings_view(request):
     profile = request.user.profile
 
     if request.method == 'GET':
+        # API keys are NEVER stored or returned by the server. They live only on
+        # the user's device (browser local storage).
         return JsonResponse({
             'theme': profile.theme,
             'ai_provider': profile.ai_provider,
             'explanation_language': profile.explanation_language,
-            'gemini_api_key': profile.gemini_api_key,
-            'gemini_api_key_2': profile.gemini_api_key_2,
-
-            'gemini_api_key_3': profile.gemini_api_key_3,
-            'groq_api_key': profile.groq_api_key,
-            'groq_api_key_2': profile.groq_api_key_2,
-            'groq_api_key_3': profile.groq_api_key_3,
-            'openrouter_api_key': profile.openrouter_api_key,
-            'openrouter_api_key_2': profile.openrouter_api_key_2,
-            'openrouter_api_key_3': profile.openrouter_api_key_3,
-
+            'openai_model': profile.openai_model,
             'daily_word_goal': profile.daily_word_goal,
         })
+
 
     data = json_body(request)
     if 'theme' in data:
@@ -222,33 +190,11 @@ def settings_view(request):
         valid_langs = {choice[0] for choice in UserProfile.EXPLANATION_LANGUAGE_CHOICES}
         if data['explanation_language'] in valid_langs:
             profile.explanation_language = data['explanation_language']
-    if 'gemini_api_key' in data:
-
-        profile.gemini_api_key = data['gemini_api_key']
-    if 'gemini_api_key_2' in data:
-        profile.gemini_api_key_2 = data['gemini_api_key_2']
-    if 'gemini_api_key_3' in data:
-        profile.gemini_api_key_3 = data['gemini_api_key_3']
-    if 'groq_api_key' in data:
-        profile.groq_api_key = data['groq_api_key']
-    if 'groq_api_key_2' in data:
-        profile.groq_api_key_2 = data['groq_api_key_2']
-    if 'groq_api_key_3' in data:
-        profile.groq_api_key_3 = data['groq_api_key_3']
-    if 'openrouter_api_key' in data:
-        profile.openrouter_api_key = data['openrouter_api_key']
-    if 'openrouter_api_key_2' in data:
-        profile.openrouter_api_key_2 = data['openrouter_api_key_2']
-    if 'openrouter_api_key_3' in data:
-        profile.openrouter_api_key_3 = data['openrouter_api_key_3']
-    if 'openai_api_key' in data:
-        profile.openai_api_key = data['openai_api_key']
-    if 'openai_api_key_2' in data:
-        profile.openai_api_key_2 = data['openai_api_key_2']
-    if 'openai_api_key_3' in data:
-        profile.openai_api_key_3 = data['openai_api_key_3']
+    # API keys are NEVER stored server-side. Any api_key fields present in the
+    # request body are intentionally ignored — keys live only on the device.
     if 'openai_model' in data:
         profile.openai_model = data['openai_model']
+
 
     if 'daily_word_goal' in data:
 

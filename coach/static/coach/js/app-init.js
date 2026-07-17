@@ -48,14 +48,17 @@
         try {
             const settingsData = await api('/api/settings/');
             state.settings = { ...state.settings, ...settingsData };
+            // API keys live ONLY on the device — load them from local storage.
+            loadLocalApiKeys(state.user?.id);
+
             state.settings.gemini_model = localStorage.getItem('uccharon_gemini_model') || 'gemini-2.0-flash';
             state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
             state.settings.openrouter_model = localStorage.getItem('uccharon_openrouter_model') || 'meta-llama/llama-3.3-70b-instruct';
 
             state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'groq-whisper';
-            state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
             state.settings.groq_whisper_model = localStorage.getItem('uccharon_groq_whisper_model') || 'whisper-large-v3-turbo';
         } catch (e) { /* ignore */ }
+
         await loadConversations(skipAutoSelect);
 
     }

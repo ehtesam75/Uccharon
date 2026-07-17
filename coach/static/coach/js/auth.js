@@ -282,15 +282,13 @@
         DOM.signupBtn.disabled = true;
 
         try {
+            // API keys are NEVER sent to the server — only the chosen provider and
+            // non-sensitive preferences are. The key is stored on this device only.
             const data = await api('/api/auth/signup/', 'POST', {
                 username,
                 email,
                 password,
                 ai_provider,
-                gemini_api_key: ai_provider === 'gemini' ? apiKey : '',
-                groq_api_key: ai_provider === 'groq' ? apiKey : '',
-                openrouter_api_key: ai_provider === 'openrouter' ? apiKey : '',
-
                 daily_word_goal
             });
             clearAllPersistedConversationIds();
@@ -301,9 +299,15 @@
             // Explicitly force defaults for local settings on new signup
             // so they don't inherit a previous user's settings on the same machine
             localStorage.setItem('uccharon_voice_provider', 'groq-whisper');
-            localStorage.removeItem('uccharon_openai_api_key');
+
+            // Persist the signup API key to THIS DEVICE only, under the new user id.
+            API_KEY_FIELDS.forEach(f => { state.settings[f] = ''; });
+            state.settings[`${ai_provider}_api_key`] = apiKey;
+            saveLocalApiKeys(state.user.id);
+
 
             await loadUserData(true);
+
             showWelcomeScreen();
             DOM.authScreen.style.display = 'none';
             showApp();
@@ -426,13 +430,16 @@
             if (data.authenticated) {
                 state.user = data.user;
                 state.settings = { ...state.settings, ...data.settings };
+                // API keys live ONLY on the device — load them from local storage.
+                loadLocalApiKeys(state.user.id);
+
                 // Restore local-only settings from localStorage
                 state.settings.gemini_model = localStorage.getItem('uccharon_gemini_model') || 'gemini-2.0-flash';
                 state.settings.groq_model = localStorage.getItem('uccharon_groq_model') || 'llama-3.3-70b-versatile';
                 state.settings.voice_provider = localStorage.getItem('uccharon_voice_provider') || 'groq-whisper';
-                state.settings.openai_api_key = localStorage.getItem('uccharon_openai_api_key') || '';
                 state.settings.groq_whisper_model = localStorage.getItem('uccharon_groq_whisper_model') || 'whisper-large-v3-turbo';
                 resetChatState();
+
 
                 migrateLegacyConversationId(state.user.id);
                 loadCollapsedSections();

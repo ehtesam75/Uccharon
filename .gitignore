@@ -4,3 +4,4 @@ __pycache__/
 project_overview.txt
 .env
 _fix_voice_ui.py
+db.sqlite3.bak-pre-apikey-removal-20260717-231304.bak

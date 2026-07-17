@@ -1,4 +1,4 @@
-/**
+    /**
  * Uccharon - AI English Speaking Coach
  * Settings drawer, API-key validation, save settings
  *
@@ -283,39 +283,32 @@
         state.settings.groq_whisper_model = groqWhisperModel;
         state.settings.explanation_language = explanationLanguage;
 
+        // Persist all API keys to THIS DEVICE only — never sent to the server.
+        saveLocalApiKeys(state.user?.id);
+
         // Save model selections to localStorage
         localStorage.setItem('uccharon_gemini_model', geminiModel);
         localStorage.setItem('uccharon_groq_model', groqModel);
         localStorage.setItem('uccharon_openrouter_model', openrouterModel);
 
         localStorage.setItem('uccharon_voice_provider', state.settings.voice_provider);
-        localStorage.setItem('uccharon_openai_api_key', openaiKey);
         localStorage.setItem('uccharon_groq_whisper_model', groqWhisperModel);
 
         DOM.saveSettingsBtn.classList.add('btn-loading');
         DOM.saveSettingsBtn.disabled = true;
 
         try {
+            // Only non-sensitive preferences are synced to the server. API keys
+            // are intentionally excluded — they live on the device only.
             await api('/api/settings/', 'PUT', {
                 ai_provider: provider,
-                gemini_api_key: geminiKey,
-                gemini_api_key_2: geminiKey2,
-                gemini_api_key_3: geminiKey3,
-                groq_api_key: groqKey,
-                groq_api_key_2: groqKey2,
-                groq_api_key_3: groqKey3,
-                openrouter_api_key: openrouterKey,
-                openrouter_api_key_2: openrouterKey2,
-                openrouter_api_key_3: openrouterKey3,
-                openai_api_key: openaiKey,
-                openai_api_key_2: openaiKey2,
-                openai_api_key_3: openaiKey3,
                 openai_model: openaiModel,
 
                 explanation_language: explanationLanguage,
                 daily_word_goal: dailyWordGoal
 
             });
+
             state.settings.daily_word_goal = parseInt(dailyWordGoal);
             showToast('Settings saved successfully!', 'success');
             closeSettings();

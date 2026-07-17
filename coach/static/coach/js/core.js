@@ -458,6 +458,61 @@
         }
     }
 
+    // ═══════════════════════════════════════════════════════
+    // DEVICE-ONLY API KEY STORE
+    // ═══════════════════════════════════════════════════════
+    //
+    // API keys are stored ONLY on the user's device (browser local storage) and
+    // are never sent to, stored by, or returned from Uccharon's servers. Keys are
+    // namespaced per user id so multiple accounts on one device stay isolated.
+    //
+    // The four supported providers each allow up to 3 keys (primary + 2 fallback).
+    const API_KEY_PROVIDERS = ['gemini', 'groq', 'openrouter', 'openai'];
+    const API_KEY_FIELDS = API_KEY_PROVIDERS.reduce((fields, p) => {
+        fields.push(`${p}_api_key`, `${p}_api_key_2`, `${p}_api_key_3`);
+        return fields;
+    }, []);
+
+    function getApiKeysStorageKey(userId = state.user?.id) {
+        return `uccharon_api_keys_${userId ?? 'guest'}`;
+    }
+
+    // Populate state.settings API-key fields from device storage. Any key not
+    // present on the device resolves to an empty string.
+    function loadLocalApiKeys(userId = state.user?.id) {
+        let stored = {};
+        try {
+            const raw = localStorage.getItem(getApiKeysStorageKey(userId));
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') stored = parsed;
+            }
+        } catch (e) {
+            stored = {};
+        }
+        API_KEY_FIELDS.forEach(field => {
+            state.settings[field] = stored[field] || '';
+        });
+        return stored;
+    }
+
+    // Persist the current in-memory API keys (state.settings) to device storage.
+    // Only non-empty keys are written.
+    function saveLocalApiKeys(userId = state.user?.id) {
+        const payload = {};
+        API_KEY_FIELDS.forEach(field => {
+            const val = (state.settings[field] || '').trim();
+            if (val) payload[field] = val;
+        });
+        try {
+            localStorage.setItem(getApiKeysStorageKey(userId), JSON.stringify(payload));
+        } catch (e) {
+            // ignore storage errors
+        }
+    }
+
+
+
     function showWelcomeScreen() {
         DOM.welcomeScreen.style.display = 'flex';
         DOM.chatArea.style.display = 'none';
