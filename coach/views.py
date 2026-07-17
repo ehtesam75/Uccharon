@@ -772,9 +772,16 @@ def learning_history_view(request):
 # ─── Page View ───────────────────────────────────────────────
 
 def home_view(request):
-    """Serve the public marketing homepage / landing page."""
-    from django.shortcuts import render
+    """Serve the public marketing homepage / landing page.
+
+    If the visitor is already authenticated (e.g. returning after a previous
+    session), skip the marketing page and take them straight to the app.
+    """
+    from django.shortcuts import redirect, render
+    if request.user.is_authenticated:
+        return redirect('/app/')
     return render(request, 'coach/home.html')
+
 
 
 def index_view(request):

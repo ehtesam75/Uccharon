@@ -129,7 +129,7 @@
                         and your learning.
                     </p>
                     <div class="hero-cta reveal">
-                        <a href="/app/?auth=signup" class="btn btn-primary btn-lg">Start Practicing Free</a>
+                        <a href="/app/" class="btn btn-primary btn-lg">Start Practicing Free</a>
                         <a href="#how" class="btn btn-ghost btn-lg">See How It Works</a>
                     </div>
                     <p class="hero-note reveal">Many free API tiers already provide more than enough usage for daily
@@ -401,22 +401,32 @@
                             <div class="provider-chip reveal">
                                 <span class="provider-logo">
                                     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-                                        <path fill="#4285F4" d="M12 0c.34 6.34 5.66 11.66 12 12-6.34.34-11.66 5.66-12 12-.34-6.34-5.66-11.66-12-12C6.34 11.66 11.66 6.34 12 0z"/>
+                                        <defs>
+                                            <linearGradient id="gemGrad1" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                                <stop offset="0" stop-color="#4285F4"/>
+                                                <stop offset=".5" stop-color="#9168C0"/>
+                                                <stop offset="1" stop-color="#D96570"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path fill="url(#gemGrad1)" d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"/>
                                     </svg>
                                 </span> Gemini
                             </div>
                             <div class="provider-chip reveal">
                                 <span class="provider-logo">
-                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#F55036" aria-hidden="true">
-                                        <path d="M12 2a5.5 5.5 0 0 0-5.5 5.5A5.5 5.5 0 0 0 12 13h1.9a1.6 1.6 0 0 1 0 3.2H12a5.4 5.4 0 0 1-3.3-1.1l-1.9 2.4A8.4 8.4 0 0 0 12 19.4h1.9a4.8 4.8 0 0 0 0-9.6H12a2.5 2.5 0 0 1 0-5h1.9a2.4 2.4 0 0 1 1.5.5l1.9-2.4A5.4 5.4 0 0 0 13.9 2H12z"/>
+                                    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="11" fill="#F55036"/>
+                                        <text x="12" y="17.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#fff">q</text>
                                     </svg>
                                 </span> Groq
                             </div>
                             <div class="provider-chip reveal">
                                 <span class="provider-logo">
-                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <circle cx="12" cy="12" r="9"/>
-                                        <path d="M12 3c2.5 2.4 2.5 15.6 0 18M12 3c-2.5 2.4-2.5 15.6 0 18M3 12h18"/>
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="5" cy="12" r="2.1"/>
+                                        <circle cx="19" cy="5.5" r="2.1"/>
+                                        <circle cx="19" cy="18.5" r="2.1"/>
+                                        <path d="M7 11.4l10-4.6M7 12.6l10 4.6"/>
                                     </svg>
                                 </span> OpenRouter
                             </div>
@@ -435,15 +445,23 @@
                             </div>
                             <div class="provider-chip reveal">
                                 <span class="provider-logo">
-                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#F55036" aria-hidden="true">
-                                        <path d="M12 2a5.5 5.5 0 0 0-5.5 5.5A5.5 5.5 0 0 0 12 13h1.9a1.6 1.6 0 0 1 0 3.2H12a5.4 5.4 0 0 1-3.3-1.1l-1.9 2.4A8.4 8.4 0 0 0 12 19.4h1.9a4.8 4.8 0 0 0 0-9.6H12a2.5 2.5 0 0 1 0-5h1.9a2.4 2.4 0 0 1 1.5.5l1.9-2.4A5.4 5.4 0 0 0 13.9 2H12z"/>
+                                    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="11" fill="#F55036"/>
+                                        <text x="12" y="17.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#fff">q</text>
                                     </svg>
                                 </span> Groq Whisper
                             </div>
                             <div class="provider-chip reveal">
                                 <span class="provider-logo">
                                     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-                                        <path fill="#4285F4" d="M12 0c.34 6.34 5.66 11.66 12 12-6.34.34-11.66 5.66-12 12-.34-6.34-5.66-11.66-12-12C6.34 11.66 11.66 6.34 12 0z"/>
+                                        <defs>
+                                            <linearGradient id="gemGrad2" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                                <stop offset="0" stop-color="#4285F4"/>
+                                                <stop offset=".5" stop-color="#9168C0"/>
+                                                <stop offset="1" stop-color="#D96570"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path fill="url(#gemGrad2)" d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"/>
                                     </svg>
                                 </span> Gemini Audio
                             </div>

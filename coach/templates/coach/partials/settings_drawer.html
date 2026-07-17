@@ -83,7 +83,18 @@
                         <label class="provider-card" id="provider-gemini-card">
                             <input type="radio" name="ai-provider" value="gemini" checked>
                             <div class="provider-card-content">
-                                <div class="provider-icon">✦</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                                        <defs>
+                                            <linearGradient id="setGemGrad1" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                                <stop offset="0" stop-color="#4285F4"/>
+                                                <stop offset=".5" stop-color="#9168C0"/>
+                                                <stop offset="1" stop-color="#D96570"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path fill="url(#setGemGrad1)" d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"/>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">Gemini</div>
                                     <div class="provider-desc">Google AI</div>
@@ -94,7 +105,12 @@
                         <label class="provider-card" id="provider-groq-card">
                             <input type="radio" name="ai-provider" value="groq">
                             <div class="provider-card-content">
-                                <div class="provider-icon">⚡</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="11" fill="#F55036"/>
+                                        <text x="12" y="17.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#fff">q</text>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">Groq</div>
                                     <div class="provider-desc">Fast but less accurate</div>
@@ -105,7 +121,14 @@
                         <label class="provider-card" id="provider-openrouter-card">
                             <input type="radio" name="ai-provider" value="openrouter">
                             <div class="provider-card-content">
-                                <div class="provider-icon">🌐</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="5" cy="12" r="2.1"/>
+                                        <circle cx="19" cy="5.5" r="2.1"/>
+                                        <circle cx="19" cy="18.5" r="2.1"/>
+                                        <path d="M7 11.4l10-4.6M7 12.6l10 4.6"/>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">OpenRouter</div>
                                     <div class="provider-desc">Slow but more accurate</div>
@@ -468,7 +491,12 @@
                         <label class="provider-card" id="voice-provider-browser-card">
                             <input type="radio" name="voice-provider" value="browser">
                             <div class="provider-card-content">
-                                <div class="provider-icon">🌐</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">Browser Native</div>
                                     <div class="provider-desc">Web Speech API (Free &amp; built-in)</div>
@@ -494,7 +522,18 @@
                         <label class="provider-card" id="voice-provider-gemini-card">
                             <input type="radio" name="voice-provider" value="gemini-stt">
                             <div class="provider-card-content">
-                                <div class="provider-icon">✦</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                                        <defs>
+                                            <linearGradient id="setGemGrad2" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                                <stop offset="0" stop-color="#4285F4"/>
+                                                <stop offset=".5" stop-color="#9168C0"/>
+                                                <stop offset="1" stop-color="#D96570"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path fill="url(#setGemGrad2)" d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"/>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">Gemini Audio</div>
                                     <div class="provider-desc">Google's advanced audio understanding</div>
@@ -505,7 +544,12 @@
                         <label class="provider-card" id="voice-provider-groq-card">
                             <input type="radio" name="voice-provider" value="groq-whisper" checked>
                             <div class="provider-card-content">
-                                <div class="provider-icon">⚡</div>
+                                <div class="provider-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="11" fill="#F55036"/>
+                                        <text x="12" y="17.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#fff">q</text>
+                                    </svg>
+                                </div>
                                 <div class="provider-info">
                                     <div class="provider-name">Groq Whisper</div>
                                     <div class="provider-desc">Ultra-fast Whisper transcription</div>
