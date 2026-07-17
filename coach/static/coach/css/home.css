@@ -186,7 +186,7 @@ html.home-root body {
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 /* ─── Navbar auth actions (minimal, premium) ─────────────── */
@@ -194,7 +194,7 @@ html.home-root body {
 .nav-getstarted {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     font-size: 0.9rem;
     font-weight: 600;
     white-space: nowrap;
@@ -205,10 +205,11 @@ html.home-root body {
 
 /* Sign in: quiet text link */
 .nav-signin {
-    padding: 8px 14px;
+    padding: 7px 10px;
     color: var(--text-secondary);
-    margin-left: 4px;
+    margin-left: 0;
 }
+
 
 .nav-signin:hover {
     color: var(--text-primary);
@@ -218,7 +219,7 @@ html.home-root body {
 /* Get started: subtle outlined pill with a gradient text/accent hover —
    present but not visually dominant */
 .nav-getstarted {
-    padding: 8px 16px;
+    padding: 7px 13px;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     background: color-mix(in srgb, var(--bg-card) 60%, transparent);
@@ -227,6 +228,7 @@ html.home-root body {
 .nav-getstarted svg {
     transition: transform var(--transition-normal);
 }
+
 
 .nav-getstarted:hover {
     color: var(--text-primary);
@@ -241,8 +243,8 @@ html.home-root body {
 
 
 .nav-theme-toggle {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     display: grid;
     place-items: center;
     border-radius: 50%;
@@ -1044,7 +1046,18 @@ html.home-root body {
     .cta-band { padding: 44px 16px; }
 
     .hero { padding: 56px 0 52px; }
+
+    /* Smaller hero badge on mobile ("Bring your own AI…") */
+    .hero-badge {
+        gap: 6px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        margin-bottom: 22px;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; }
+
     .hero-cta { flex-direction: column; }
+
     .hero-cta .btn { width: 100%; }
     .footer-links { gap: 32px; }
 
