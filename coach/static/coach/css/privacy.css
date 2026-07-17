@@ -7,7 +7,7 @@
 /* ─── Hero ────────────────────────────────────────────────── */
 .privacy-hero {
     text-align: center;
-    padding-top: 130px;
+    padding-top: 96px;
     padding-bottom: 24px;
 }
 
@@ -204,7 +204,7 @@
 /* ─── Responsive ──────────────────────────────────────────── */
 @media (max-width: 780px) {
     .privacy-hero {
-        padding-top: 108px;
+        padding-top: 88px;
     }
 
     .privacy-block {
