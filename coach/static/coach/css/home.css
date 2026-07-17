@@ -986,17 +986,24 @@ html.home-root body {
         position: relative;
         padding-left: 8px;
     }
-    /* Vertical connecting line down the numbered markers */
+    /* Vertical connecting line running through the centre of the numbered
+       markers. It starts at the first number's centre and ends at the last
+       one's centre, so nothing shows below step 5.
+       Number centre X = steps padding-left (8) + step padding-left (14)
+       + half of the 42px marker (21) = 43px -> line (2px) left: 42px.
+       Number centre Y from each edge = step padding (12) + 21 = 33px. */
     .steps::before {
         content: "";
         position: absolute;
-        left: 29px;
-        top: 20px;
-        bottom: 20px;
+        left: 42px;
+        top: 33px;
+        bottom: 33px;
         width: 2px;
         background: linear-gradient(var(--accent-primary), var(--accent-secondary));
         opacity: 0.35;
+        z-index: 0;
     }
+
     .step {
         display: grid;
         grid-template-columns: 44px 1fr;
