@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -24,7 +24,6 @@ def json_body(request):
 
 # ─── Auth Views ─────────────────────────────────────────────
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def validate_signup_step1_view(request):
     """Validate username and email before proceeding to signup step 2."""
@@ -40,7 +39,6 @@ def validate_signup_step1_view(request):
 
     return JsonResponse({'valid': True})
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def signup_view(request):
     """Register a new user."""
@@ -95,7 +93,6 @@ def signup_view(request):
     })
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def login_view(request):
     """Login with username/email and password."""
@@ -127,7 +124,6 @@ def login_view(request):
         return JsonResponse({'error': 'Invalid credentials.'}, status=401)
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def logout_view(request):
     """Logout current user."""
@@ -206,7 +202,6 @@ def current_user_view(request):
 
 # ─── Settings Views ────────────────────────────────────────
 
-@csrf_exempt
 @login_required
 @require_http_methods(["GET", "PUT"])
 def settings_view(request):
@@ -259,7 +254,6 @@ def settings_view(request):
 
 # ─── Conversation Views ────────────────────────────────────
 
-@csrf_exempt
 @login_required
 @require_http_methods(["GET", "POST"])
 def conversations_view(request):
@@ -289,7 +283,6 @@ def conversations_view(request):
     })
 
 
-@csrf_exempt
 @login_required
 @require_http_methods(["DELETE", "PUT"])
 def conversation_delete_view(request, convo_id):
@@ -348,7 +341,6 @@ def _count_english_words(text):
 
 # ─── Message Views ──────────────────────────────────────────
 
-@csrf_exempt
 @login_required
 @require_http_methods(["GET", "POST"])
 def messages_view(request, convo_id):
