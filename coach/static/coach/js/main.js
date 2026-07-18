@@ -14,11 +14,30 @@
     // ESCAPE HTML
     // ═══════════════════════════════════════════════════════
 
+    // Escape a string for safe interpolation into BOTH HTML text nodes AND
+    // double/single-quoted HTML attribute values.
+    //
+    // The previous implementation used `div.textContent = text; return
+    // div.innerHTML;`. That escapes `&`, `<`, and `>` but NOT quotes — which is
+    // unsafe because the value is frequently interpolated into quoted attributes
+    // (e.g. `data-word="${escapeHtml(...)}"`). A payload containing a `"` could
+    // break out of the attribute and inject new attributes/handlers.
+    //
+    // This version explicitly escapes all five HTML-significant characters via a
+    // pure string replacement, so it is safe in every context (text + single- or
+    // double-quoted attributes) and does not depend on the DOM (making it
+    // unit-testable and immune to any DOM-based quirks).
+    const _HTML_ESCAPE_MAP = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    };
+
     function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        if (text === null || text === undefined || text === '') return '';
+        return String(text).replace(/[&<>"']/g, (ch) => _HTML_ESCAPE_MAP[ch]);
     }
 
     // ═══════════════════════════════════════════════════════
