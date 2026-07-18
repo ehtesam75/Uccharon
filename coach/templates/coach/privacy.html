@@ -26,8 +26,9 @@
 
 
     <!-- Apply persisted theme immediately to avoid a flash of the wrong theme -->
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         (function () {
+
             try {
                 var t = localStorage.getItem('uccharon_theme');
                 if (t !== 'light' && t !== 'dark') t = 'dark';

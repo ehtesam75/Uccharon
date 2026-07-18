@@ -454,4 +454,92 @@ class RateLimitTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
 
+@override_settings(
+    # Same static-storage fallback as CsrfProtectionTests: the SPA page uses
+    # {% static %} with WhiteNoise's hashed manifest, which needs collectstatic.
+    # Plain storage lets index_view render during tests.
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+)
+class ContentSecurityPolicyTests(TestCase):
+    """Verify the Content-Security-Policy header locks down script and connect
+    sources so injected scripts can't run or exfiltrate the on-device API keys.
+
+    django-csp emits the header on every response; these tests assert the policy
+    on a representative page (the SPA) and confirm the key protections are in
+    place: a strict script-src (nonce, no 'unsafe-inline'), an allowlisted
+    connect-src limited to our origin plus the AI providers, and hardening
+    directives like object-src 'none'.
+    """
+
+    HEADER = 'Content-Security-Policy'
+
+    def _policy(self):
+        resp = self.client.get(reverse('coach:index'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(self.HEADER, resp.headers)
+        return resp.headers[self.HEADER]
+
+    def test_header_present_on_responses(self):
+        self.assertTrue(self._policy())
+
+    def test_script_src_is_strict(self):
+        """script-src uses a nonce and does NOT allow 'unsafe-inline' — the core
+        defense that stops injected inline scripts from executing."""
+        policy = self._policy()
+        self.assertIn("script-src", policy)
+        self.assertIn("'nonce-", policy)
+        # Pull out just the script-src directive to assert on it precisely.
+        script_src = next(
+            part.strip() for part in policy.split(';') if part.strip().startswith('script-src')
+        )
+        self.assertNotIn("'unsafe-inline'", script_src)
+
+    def test_inline_script_carries_nonce(self):
+        """The page's own inline <script> blocks must carry the same nonce the
+        header advertises, otherwise the strict policy would block our own JS."""
+        resp = self.client.get(reverse('coach:index'))
+        policy = resp.headers[self.HEADER]
+        # Extract the nonce value from the header: ...'nonce-XXXX'...
+        token = policy.split("'nonce-", 1)[1].split("'", 1)[0]
+        self.assertIn(f'nonce="{token}"'.encode(), resp.content)
+
+    def test_connect_src_allows_only_self_and_ai_providers(self):
+        """connect-src must permit our origin and the four AI provider APIs the
+        browser calls directly — and nothing else — so a compromised page can't
+        POST stolen keys to an attacker endpoint."""
+        policy = self._policy()
+        connect_src = next(
+            part.strip() for part in policy.split(';') if part.strip().startswith('connect-src')
+        )
+        for origin in (
+            "https://generativelanguage.googleapis.com",
+            "https://api.groq.com",
+            "https://openrouter.ai",
+            "https://api.openai.com",
+        ):
+            self.assertIn(origin, connect_src)
+        self.assertIn("'self'", connect_src)
+
+    def test_hardening_directives_present(self):
+        """object-src, base-uri, and frame-ancestors are locked down to blunt
+        plugin, base-tag, and clickjacking vectors."""
+        policy = self._policy()
+        self.assertIn("object-src 'none'", policy)
+        self.assertIn("base-uri 'self'", policy)
+        self.assertIn("frame-ancestors 'none'", policy)
+
+    def test_nonce_differs_per_request(self):
+        """Each response gets a fresh nonce; a static, guessable nonce would let
+        an attacker mark injected scripts as trusted."""
+        p1 = self._policy()
+        p2 = self._policy()
+        n1 = p1.split("'nonce-", 1)[1].split("'", 1)[0]
+        n2 = p2.split("'nonce-", 1)[1].split("'", 1)[0]
+        self.assertNotEqual(n1, n2)
+
+
+
 

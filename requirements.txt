@@ -15,7 +15,9 @@ deep-translator==1.11.4
 dj-database-url==3.0.1
 Django==5.2.8
 django-cloudinary-storage==0.3.0
+django-csp==4.0
 dotenv==0.9.9
+
 frozenlist==1.8.0
 git-filter-repo==2.47.0
 gunicorn==23.0.0

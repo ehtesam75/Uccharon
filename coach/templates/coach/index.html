@@ -26,10 +26,11 @@
     <link rel="stylesheet" href="{% static 'coach/css/learning-history.css' %}">
     <link rel="stylesheet" href="{% static 'coach/css/responsive.css' %}">
     <!-- Apply persisted theme immediately (shared with the homepage) to avoid a flash of the wrong theme -->
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         (function () {
             try {
                 var t = localStorage.getItem('uccharon_theme');
+
                 if (t === 'light' || t === 'dark') {
                     document.documentElement.setAttribute('data-theme', t);
                 }
@@ -109,7 +110,8 @@
     <script src="{% static 'coach/js/auth.js' %}?v=7"></script>
     <script src="{% static 'coach/js/app-init.js' %}?v=7"></script>
 
-    <script src="{% static 'coach/js/conversations.js' %}?v=6"></script>
+    <script src="{% static 'coach/js/conversations.js' %}?v=7"></script>
+
     <script src="{% static 'coach/js/chat.js' %}?v=6"></script>
     <script src="{% static 'coach/js/voice.js' %}?v=6"></script>
     <script src="{% static 'coach/js/settings.js' %}?v=6"></script>
@@ -118,8 +120,9 @@
     <script src="{% static 'coach/js/sidebar.js' %}?v=6"></script>
     <script src="{% static 'coach/js/main.js' %}?v=6"></script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         if ('serviceWorker' in navigator) {
+
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register("{% static 'coach/sw.js' %}").then(function (registration) {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);

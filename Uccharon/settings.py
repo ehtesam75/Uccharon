@@ -14,8 +14,10 @@ from pathlib import Path
 import os
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+from csp.constants import NONE, SELF, NONCE
 from dotenv import load_dotenv
 import dj_database_url
+
 
 load_dotenv()
 
@@ -83,7 +85,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Emits the Content-Security-Policy header on every response (django-csp).
+    "csp.middleware.CSPMiddleware",
 ]
+
 
 ROOT_URLCONF = 'Uccharon.urls'
 
@@ -213,3 +218,49 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # 1 week, raise once confirmed working
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+
+# ─── Content Security Policy (django-csp) ────────────────────────────────
+# A strict CSP is the key second line of defense against XSS. Because all AI
+# provider API keys live in the browser's localStorage, a successful script
+# injection would let an attacker exfiltrate those keys — so we lock down where
+# scripts may come from and where the page may connect.
+#
+# Design:
+#   • script-src: only our own origin + a per-request nonce + the Chart.js CDN.
+#     No 'unsafe-inline', so injected <script> tags and inline handlers can't
+#     execute. Our own inline <script> blocks carry the request nonce.
+#   • connect-src: our origin + the four AI provider API domains the browser
+#     talks to directly (Gemini, Groq, OpenRouter, OpenAI). Anything else (e.g.
+#     an attacker's exfiltration endpoint) is blocked.
+#   • style-src: allows 'unsafe-inline' because the UI uses many inline style=""
+#     attributes and JS-generated inline styles. Style injection cannot read or
+#     exfiltrate localStorage, so this is a deliberate, low-risk trade-off.
+#   • object-src/base-uri/frame-ancestors locked down to blunt other vectors.
+#   • img-src includes data: for inline SVG/PNG data URIs; worker-src/manifest-src
+#     keep the PWA service worker and manifest working.
+AI_PROVIDER_ORIGINS = [
+    "https://generativelanguage.googleapis.com",  # Gemini
+    "https://api.groq.com",                        # Groq
+    "https://openrouter.ai",                       # OpenRouter
+    "https://api.openai.com",                      # OpenAI (Whisper + chat)
+]
+
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [SELF],
+        "script-src": [SELF, NONCE, "https://cdn.jsdelivr.net"],
+        "style-src": [SELF, "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "font-src": [SELF, "https://fonts.gstatic.com"],
+        "img-src": [SELF, "data:"],
+        "connect-src": [SELF] + AI_PROVIDER_ORIGINS,
+        "worker-src": [SELF],
+        "manifest-src": [SELF],
+        "object-src": [NONE],
+        "base-uri": [SELF],
+        "frame-ancestors": [NONE],
+        "form-action": [SELF],
+    },
+}
+
+

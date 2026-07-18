@@ -73,14 +73,27 @@
             // No chat selected, let's create a new one
             await createConversation();
         }
-        
+
         // Populate the input
         DOM.chatInput.value = promptText;
         resizeChatInput();
-        
+
         // Auto-send
         sendMessage();
     };
+
+    // Delegated handler for the welcome-screen suggestion cards. The prompt text
+    // lives in each card's data-prompt attribute (see main_content.html) instead
+    // of an inline onclick, so it works under a strict Content-Security-Policy
+    // that forbids inline event handlers. A single document-level listener also
+    // covers cards regardless of when the welcome screen is shown.
+    document.addEventListener('click', (e) => {
+        const card = e.target.closest('.suggestion-card[data-prompt]');
+        if (!card) return;
+        e.preventDefault();
+        window.startConversationWithPrompt(card.dataset.prompt);
+    });
+
 
     async function selectConversation(convo, options = {}) {
         const loadMessages = options.loadMessages !== false;

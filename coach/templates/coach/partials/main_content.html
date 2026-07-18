@@ -13,33 +13,37 @@
                     <p class="welcome-desc">Start speaking to improve your fluency. I'll provide real-time corrections,
                         better vocabulary, and native-sounding alternatives.</p>
 
+                    <!-- Prompts are carried in data-prompt attributes and handled by a
+                         delegated click listener (see conversations.js). This avoids
+                         inline onclick handlers, which a strict Content-Security-Policy
+                         (no 'unsafe-inline' for scripts) would block. -->
                     <div class="welcome-suggestions">
-                        <button class="suggestion-card"
-                            onclick="window.startConversationWithPrompt('Let\'s practice a realistic job interview for a software engineer role where you act as the interviewer and ask me technical and behavioral questions.')">
+                        <button class="suggestion-card" type="button"
+                            data-prompt="Let's practice a realistic job interview for a software engineer role where you act as the interviewer and ask me technical and behavioral questions.">
                             <span class="suggestion-icon">💼</span>
                             <div class="suggestion-text">
                                 <h4>Job Interview</h4>
                                 <p>Practice common questions</p>
                             </div>
                         </button>
-                        <button class="suggestion-card"
-                            onclick="window.startConversationWithPrompt('I want to talk about my daily routine. Help me practice describing my schedule, habits, responsibilities, and activities using natural English expressions.')">
+                        <button class="suggestion-card" type="button"
+                            data-prompt="I want to talk about my daily routine. Help me practice describing my schedule, habits, responsibilities, and activities using natural English expressions.">
                             <span class="suggestion-icon">🌅</span>
                             <div class="suggestion-text">
                                 <h4>Daily Routine</h4>
                                 <p>Talk about your day</p>
                             </div>
                         </button>
-                        <button class="suggestion-card"
-                            onclick="window.startConversationWithPrompt('Can we do a roleplay where I am ordering food at a restaurant? Act as the waiter and help me practice a realistic conversation from start to finish.')">
+                        <button class="suggestion-card" type="button"
+                            data-prompt="Can we do a roleplay where I am ordering food at a restaurant? Act as the waiter and help me practice a realistic conversation from start to finish.">
                             <span class="suggestion-icon">🍽️</span>
                             <div class="suggestion-text">
                                 <h4>Restaurant</h4>
                                 <p>Order food in English</p>
                             </div>
                         </button>
-                        <button class="suggestion-card"
-                            onclick="window.startConversationWithPrompt('Let\'s discuss a movie I watched recently. Ask me about the story, characters, opinions, and my thoughts while helping me express my ideas naturally.')">
+                        <button class="suggestion-card" type="button"
+                            data-prompt="Let's discuss a movie I watched recently. Ask me about the story, characters, opinions, and my thoughts while helping me express my ideas naturally.">
                             <span class="suggestion-icon">🎬</span>
                             <div class="suggestion-text">
                                 <h4>Movie Review</h4>
@@ -47,6 +51,7 @@
                             </div>
                         </button>
                     </div>
+
 
                     <button id="welcome-new-chat" class="welcome-start-btn" style="margin-top: 10px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
