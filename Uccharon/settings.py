@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 import dj_database_url
 
@@ -23,16 +25,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Falls back to a dev-only key so local development still works without a .env file.
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "django-insecure-*w%7n+y0ym&&o+daz#sy&7t#wejn46#g9$z=c6u++ct%d+1*d1",
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
 # Reads from environment so DEBUG is True locally but False on Railway.
 DEBUG = os.getenv("DEBUG", "False") == "True"
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# The key MUST come from the environment. There is intentionally NO hardcoded
+# fallback: a committed key is public and would let an attacker forge session
+# cookies and signed tokens (account takeover).
+#   • Production (DEBUG=False): fail fast if SECRET_KEY is missing/blank.
+#   • Development (DEBUG=True): generate a random ephemeral key so local runs
+#     work without a .env. It changes each start (sessions won't persist across
+#     restarts), which is fine for development and never used in production.
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = get_random_secret_key()
+    else:
+        raise ImproperlyConfigured(
+            "The SECRET_KEY environment variable is required when DEBUG is False. "
+            "Set a strong, unique SECRET_KEY in the production environment."
+        )
+
 
 ALLOWED_HOSTS = [
     "uccharon.up.railway.app",
