@@ -693,6 +693,160 @@ class InputValidationTests(TestCase):
         self.assertEqual(self.convo.title, 'Chat 1')
 
 
+class SettingsValidationTests(TestCase):
+    """Verify server-side validation on the settings PUT endpoint.
+
+    The client is untrusted, so every settings field is validated in the view
+    before anything is persisted. These tests confirm valid payloads are
+    accepted and saved, and that malformed or out-of-range values are rejected
+    with a 400 (never a 500) and leave the stored profile unchanged.
+
+    The default test client is used (CSRF is bypassed); settings validation is
+    orthogonal to CSRF, which is covered by CsrfProtectionTests.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='alice', email='alice@example.com', password='pw-123456'
+        )
+        self.client.force_login(self.user)
+        self.url = reverse('coach:api-settings')
+
+    def _put(self, payload):
+        return self.client.put(
+            self.url, data=json.dumps(payload), content_type='application/json'
+        )
+
+    # ── daily_word_goal ──────────────────────────────────────────────────
+
+    def test_valid_goal_accepted_and_saved(self):
+        resp = self._put({'daily_word_goal': 500})
+        self.assertEqual(resp.status_code, 200)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, 500)
+
+    def test_numeric_string_goal_accepted(self):
+        """The SPA sends the goal as a string from a <select>; that still works."""
+        resp = self._put({'daily_word_goal': '1000'})
+        self.assertEqual(resp.status_code, 200)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, 1000)
+
+    def test_non_numeric_goal_rejected_not_500(self):
+        """A non-numeric goal returns 400 (previously an unguarded int() → 500)."""
+        original = self.user.profile.daily_word_goal
+        resp = self._put({'daily_word_goal': 'abc'})
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('number', resp.json().get('error', '').lower())
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, original)
+
+    def test_null_goal_rejected(self):
+        original = self.user.profile.daily_word_goal
+        resp = self._put({'daily_word_goal': None})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, original)
+
+    def test_boolean_goal_rejected(self):
+        """bool is an int subclass; it must not slip through as 1/0."""
+        original = self.user.profile.daily_word_goal
+        resp = self._put({'daily_word_goal': True})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, original)
+
+    def test_negative_goal_rejected(self):
+        original = self.user.profile.daily_word_goal
+        resp = self._put({'daily_word_goal': -5})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, original)
+
+    def test_zero_goal_rejected(self):
+        original = self.user.profile.daily_word_goal
+        resp = self._put({'daily_word_goal': 0})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, original)
+
+    def test_absurdly_large_goal_rejected(self):
+        original = self.user.profile.daily_word_goal
+        resp = self._put({'daily_word_goal': 10 ** 9})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, original)
+
+    def test_goal_at_max_boundary_accepted(self):
+        resp = self._put({'daily_word_goal': views.MAX_DAILY_WORD_GOAL})
+        self.assertEqual(resp.status_code, 200)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.daily_word_goal, views.MAX_DAILY_WORD_GOAL)
+
+    # ── ai_provider ──────────────────────────────────────────────────────
+
+    def test_valid_ai_provider_accepted(self):
+        resp = self._put({'ai_provider': 'openai'})
+        self.assertEqual(resp.status_code, 200)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.ai_provider, 'openai')
+
+    def test_invalid_ai_provider_rejected(self):
+        """An arbitrary provider string is rejected and the value is unchanged."""
+        original = self.user.profile.ai_provider
+        resp = self._put({'ai_provider': 'evilcorp'})
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('provider', resp.json().get('error', '').lower())
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.ai_provider, original)
+
+    # ── openai_model ─────────────────────────────────────────────────────
+
+    def test_valid_openai_model_accepted(self):
+        resp = self._put({'openai_model': 'gpt-4o-mini'})
+        self.assertEqual(resp.status_code, 200)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.openai_model, 'gpt-4o-mini')
+
+    def test_invalid_openai_model_rejected(self):
+        original = self.user.profile.openai_model
+        resp = self._put({'openai_model': 'gpt-9-ultra-hacker'})
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('model', resp.json().get('error', '').lower())
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.openai_model, original)
+
+    # ── explanation_language & theme ─────────────────────────────────────
+
+    def test_invalid_explanation_language_rejected(self):
+        original = self.user.profile.explanation_language
+        resp = self._put({'explanation_language': 'zz'})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.explanation_language, original)
+
+    def test_invalid_theme_rejected(self):
+        original = self.user.profile.theme
+        resp = self._put({'theme': 'rainbow'})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.theme, original)
+
+    # ── Partial-write safety ─────────────────────────────────────────────
+
+    def test_invalid_field_does_not_persist_valid_sibling(self):
+        """When one field in a multi-field payload is invalid, the whole request
+        is rejected and NO field is persisted (validate-before-mutate)."""
+        original_provider = self.user.profile.ai_provider
+        original_goal = self.user.profile.daily_word_goal
+        resp = self._put({'ai_provider': 'openai', 'daily_word_goal': 'not-a-number'})
+        self.assertEqual(resp.status_code, 400)
+        self.user.profile.refresh_from_db()
+        # The valid ai_provider must NOT have been saved because the goal was bad.
+        self.assertEqual(self.user.profile.ai_provider, original_provider)
+        self.assertEqual(self.user.profile.daily_word_goal, original_goal)
+
+
 class PasswordPolicyTests(TestCase):
     """Verify the signup password-length policy (minimum 8 characters).
 

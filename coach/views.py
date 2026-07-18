@@ -29,6 +29,25 @@ MAX_MODEL_NAME_LENGTH = 100          # matches Message.ai_model_name max_length
 # for the user text and metadata, bounded so a single request can't be huge.
 MAX_MESSAGE_REQUEST_BYTES = 200_000
 
+# ─── Settings validation bounds ─────────────────────────────
+# The daily word goal drives streak/goal logic, so bound it to a sane range.
+# The UI offers 100/250/500/1000; these limits are wider so any reasonable
+# custom value is accepted while negative, zero, or absurd values are rejected.
+MIN_DAILY_WORD_GOAL = 1
+MAX_DAILY_WORD_GOAL = 100_000
+
+# Only the OpenAI model is stored server-side (the other providers' models live
+# on the device only). Restrict it to the models the UI actually offers so a
+# forged request can't persist an arbitrary string. Keep in sync with the
+# <select id="openai-model-select"> options in settings_drawer.html.
+VALID_OPENAI_MODELS = {
+    'gpt-4o',
+    'gpt-4o-mini',
+    'gpt-4.1',
+    'gpt-4.1-mini',
+}
+
+
 
 def json_body(request):
     """Parse JSON body from request."""
@@ -262,32 +281,70 @@ def settings_view(request):
 
 
     data = json_body(request)
+
+    # ── Validate every field before mutating the profile ────────────────
+    # The client is untrusted: reject invalid/malformed values with a 400 up
+    # front so nothing partial is written and no unhandled exception (e.g. a
+    # non-numeric goal) can turn into a 500.
     if 'theme' in data:
+        valid_themes = {choice[0] for choice in UserProfile.THEME_CHOICES}
+        if data['theme'] not in valid_themes:
+            return JsonResponse({'error': 'Invalid theme.'}, status=400)
         profile.theme = data['theme']
+
     if 'ai_provider' in data:
+        valid_providers = {choice[0] for choice in UserProfile.PROVIDER_CHOICES}
+        if data['ai_provider'] not in valid_providers:
+            return JsonResponse({'error': 'Invalid AI provider.'}, status=400)
         profile.ai_provider = data['ai_provider']
+
     if 'explanation_language' in data:
         valid_langs = {choice[0] for choice in UserProfile.EXPLANATION_LANGUAGE_CHOICES}
-        if data['explanation_language'] in valid_langs:
-            profile.explanation_language = data['explanation_language']
+        if data['explanation_language'] not in valid_langs:
+            return JsonResponse({'error': 'Invalid explanation language.'}, status=400)
+        profile.explanation_language = data['explanation_language']
+
     # API keys are NEVER stored server-side. Any api_key fields present in the
     # request body are intentionally ignored — keys live only on the device.
     if 'openai_model' in data:
+        if data['openai_model'] not in VALID_OPENAI_MODELS:
+            return JsonResponse({'error': 'Invalid OpenAI model.'}, status=400)
         profile.openai_model = data['openai_model']
 
-
+    # Parse/validate the daily goal WITHOUT mutating the profile yet, so a bad
+    # value can't leave the profile half-updated. Reject non-numeric values
+    # (previously an unguarded int() → 500) and out-of-range values.
+    new_goal = None
     if 'daily_word_goal' in data:
-
-        new_goal = int(data['daily_word_goal'])
-        if profile.daily_word_goal != new_goal:
-            # Lock in today's goal to the OLD goal so the new goal only takes effect tomorrow
-            now_local = timezone.localtime(timezone.now())
-            DailyProgress.objects.get_or_create(
-                user=request.user,
-                date=now_local.date(),
-                defaults={'goal_target': profile.daily_word_goal}
+        try:
+            # bool is an int subclass; reject it explicitly so True/False can't
+            # slip through as 1/0.
+            if isinstance(data['daily_word_goal'], bool):
+                raise ValueError
+            new_goal = int(data['daily_word_goal'])
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {'error': 'Daily word goal must be a number.'}, status=400
             )
-            profile.daily_word_goal = new_goal
+        if not (MIN_DAILY_WORD_GOAL <= new_goal <= MAX_DAILY_WORD_GOAL):
+            return JsonResponse(
+                {'error': (
+                    f'Daily word goal must be between {MIN_DAILY_WORD_GOAL} '
+                    f'and {MAX_DAILY_WORD_GOAL}.'
+                )},
+                status=400,
+            )
+
+    if new_goal is not None and profile.daily_word_goal != new_goal:
+        # Lock in today's goal to the OLD goal so the new goal only takes effect tomorrow
+        now_local = timezone.localtime(timezone.now())
+        DailyProgress.objects.get_or_create(
+            user=request.user,
+            date=now_local.date(),
+            defaults={'goal_target': profile.daily_word_goal}
+        )
+        profile.daily_word_goal = new_goal
+
     profile.save()
 
     return JsonResponse({'success': True})
