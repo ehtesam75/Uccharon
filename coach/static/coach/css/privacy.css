@@ -150,19 +150,6 @@
     background: var(--gradient-accent);
 }
 
-/* ─── Blockquote (confirmation message) ───────────────────── */
-.privacy-quote {
-    margin: 16px 0 0;
-    padding: 16px 20px;
-    border-left: 3px solid var(--accent-primary);
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    background: rgba(var(--accent-primary-rgb), 0.06);
-    color: var(--text-primary);
-    font-size: 0.96rem;
-    font-style: italic;
-    line-height: 1.6;
-}
-
 /* ─── GitHub repo link ────────────────────────────────────── */
 .privacy-repo-link {
     display: inline-flex;
