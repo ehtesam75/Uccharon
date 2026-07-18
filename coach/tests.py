@@ -693,6 +693,66 @@ class InputValidationTests(TestCase):
         self.assertEqual(self.convo.title, 'Chat 1')
 
 
+class PasswordPolicyTests(TestCase):
+    """Verify the signup password-length policy (minimum 8 characters).
+
+    The backend is the source of truth (the frontend enforces the same rule for
+    UX). These tests confirm short passwords are rejected with a clear message
+    and no user is created, a password at exactly the 8-char boundary is
+    accepted, and that login still works for an account created under the policy.
+    """
+
+    def setUp(self):
+        self.signup_url = reverse('coach:api-signup')
+        self.login_url = reverse('coach:api-login')
+
+    def _signup(self, username, password):
+        return self.client.post(
+            self.signup_url,
+            data=json.dumps({
+                'username': username,
+                'email': f'{username}@example.com',
+                'password': password,
+                'ai_provider': 'gemini',
+            }),
+            content_type='application/json',
+        )
+
+    def test_password_shorter_than_8_rejected(self):
+        """A 7-character password is rejected and no account is created."""
+        resp = self._signup('shorty', '1234567')  # 7 chars
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json().get('error'), 'Password must be at least 8 characters.')
+        self.assertFalse(User.objects.filter(username='shorty').exists())
+
+    def test_password_exactly_8_accepted(self):
+        """A password of exactly 8 characters is accepted (boundary case)."""
+        resp = self._signup('eight', '12345678')  # 8 chars
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get('success'))
+        self.assertTrue(User.objects.filter(username='eight').exists())
+
+    def test_password_longer_than_8_accepted(self):
+        resp = self._signup('longpw', 'a-very-long-password')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(User.objects.filter(username='longpw').exists())
+
+    def test_login_works_for_policy_compliant_account(self):
+        """Authentication still works end-to-end for an account created under
+        the 8-char policy."""
+        self._signup('validuser', 'goodpass1')
+        # Log out the session established by signup, then log back in.
+        self.client.post(reverse('coach:api-logout'))
+        resp = self.client.post(
+            self.login_url,
+            data=json.dumps({'username': 'validuser', 'password': 'goodpass1'}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get('success'))
+
+
+
 
 
 

@@ -157,10 +157,12 @@
             showAuthError('signup1', 'Please enter a valid email address.');
             return;
         }
-        if (password.length < 6) {
-            showAuthError('signup1', 'Password must be at least 6 characters.');
+        if (password.length < 8) {
+            showAuthError('signup1', 'Password must be at least 8 characters.');
+
             return;
         }
+
         if (password !== confirmPassword) {
             showAuthError('signup1', 'Passwords do not match.');
             return;
@@ -384,7 +386,8 @@
         const email = DOM.signupEmail.value.trim();
         const password = DOM.signupPassword.value;
         const confirmPassword = DOM.signupConfirmPassword.value;
-        const isValid = Boolean(username && email && DOM.signupEmail.checkValidity() && password.length >= 6 && confirmPassword && password === confirmPassword);
+        const isValid = Boolean(username && email && DOM.signupEmail.checkValidity() && password.length >= 8 && confirmPassword && password === confirmPassword);
+
         DOM.signupNextBtn.disabled = !isValid;
     }
 

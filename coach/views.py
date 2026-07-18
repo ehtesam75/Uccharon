@@ -93,8 +93,9 @@ def signup_view(request):
     if User.objects.filter(email=email).exists():
         return JsonResponse({'error': 'Email already registered.'}, status=400)
 
-    if len(password) < 6:
-        return JsonResponse({'error': 'Password must be at least 6 characters.'}, status=400)
+    if len(password) < 8:
+        return JsonResponse({'error': 'Password must be at least 8 characters.'}, status=400)
+
 
     valid_providers = {choice[0] for choice in UserProfile.PROVIDER_CHOICES}
     if ai_provider not in valid_providers:
