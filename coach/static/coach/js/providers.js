@@ -234,7 +234,18 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_REQUEST_T
     const onCallerAbort = () => timeoutController.abort();
     if (callerSignal) {
         if (callerSignal.aborted) timeoutController.abort();
-        else callerSignal.addEventListener('abort', onCallerAbort);
+        // IMPORTANT: keep this listener attached for the FULL lifetime of the
+        // request — including the body download that the caller performs later
+        // via response.json(). fetch() resolves as soon as the response HEADERS
+        // arrive, but the JSON body of an AI response streams for another 1-3s.
+        // If we removed this listener the moment headers arrived (e.g. in a
+        // finally block), pressing Stop during body download would NOT abort the
+        // stream, and a full response would still be parsed, saved, and rendered.
+        // { once: true } lets it fire at most once and auto-detach, so there is
+        // no leak. Aborting an already-settled controller later is a harmless
+        // no-op. The response body is tied to timeoutController.signal, so this
+        // abort also cancels an in-flight response.json() in the provider.
+        else callerSignal.addEventListener('abort', onCallerAbort, { once: true });
     }
 
     try {
@@ -259,10 +270,13 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_REQUEST_T
             provider: providerName, type: 'network', cause: err
         });
     } finally {
+        // Only clear the connection timeout here. The caller-abort listener is
+        // intentionally left attached (see above) so Stop still works while the
+        // response body is being downloaded/parsed by the provider.
         clearTimeout(timer);
-        if (callerSignal) callerSignal.removeEventListener('abort', onCallerAbort);
     }
 }
+
 
 
 class GeminiProvider {

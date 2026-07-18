@@ -316,11 +316,14 @@
     opacity: 0.75;
 }
 
+/* Validation result is shown as simple inline text directly below the input —
+   no box, background, border, or padding. Only the text color changes. */
 .key-validate-status {
     display: none;
-    margin-top: 8px;
-    padding: 6px 10px;
-    border-radius: var(--radius-sm);
+    margin-top: 6px;
+    padding: 0;
+    background: none;
+    border: none;
     font-size: 0.78rem;
     font-weight: 500;
     line-height: 1.35;
@@ -332,21 +335,16 @@
 
 .key-validate-status.status-success {
     color: var(--accent-success);
-    background: rgba(0, 184, 148, 0.1);
-    border: 1px solid rgba(0, 184, 148, 0.25);
 }
 
 .key-validate-status.status-error {
     color: var(--accent-error);
-    background: rgba(225, 112, 85, 0.1);
-    border: 1px solid rgba(225, 112, 85, 0.28);
 }
 
 .key-validate-status.status-checking {
     color: var(--text-secondary);
-    background: var(--bg-glass);
-    border: 1px solid var(--border-color);
 }
+
 
 /* Multi-key labels + API key guide */
 .multi-key-label {

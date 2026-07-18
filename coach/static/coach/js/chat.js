@@ -592,11 +592,42 @@
     // partial response, feedback, history, or stats are ever saved.
     function stopGeneration() {
         if (!state.isSending) return;
+        console.log('[StopGen] STOP_CLICKED isSending=true, aborting controller');
         state.generationCancelled = true;
         if (state.abortController) {
             try { state.abortController.abort(); } catch (e) { /* ignore */ }
         }
     }
+
+
+    // A setTimeout wrapper that reacts to the caller's abort signal immediately.
+    // The fallback engine pauses briefly between attempts to surface status
+    // messages; those pauses must NOT swallow a user pressing Stop. If the signal
+    // is (or becomes) aborted, the promise rejects with an AbortError so the send
+    // loop can bail out at once instead of waiting for the delay to elapse.
+    function _abortableDelay(ms, signal) {
+        return new Promise((resolve, reject) => {
+            const abortErr = () => {
+                const e = new Error('Aborted');
+                e.name = 'AbortError';
+                return e;
+            };
+            if (signal && signal.aborted) {
+                reject(abortErr());
+                return;
+            }
+            const timer = setTimeout(() => {
+                if (signal) signal.removeEventListener('abort', onAbort);
+                resolve();
+            }, ms);
+            function onAbort() {
+                clearTimeout(timer);
+                reject(abortErr());
+            }
+            if (signal) signal.addEventListener('abort', onAbort, { once: true });
+        });
+    }
+
 
     async function sendMessage() {
         // If a generation is in progress, the button acts as a Stop button.
@@ -708,7 +739,10 @@
         const rateLimitedKeys = new Set();   // "provider|keyIndex"
         const deadModels = new Set();        // "provider|model"
 
+        console.log('[SendMessage] FALLBACK_STARTED attempts=' + attemptList.length);
+
         for (let i = 0; i < attemptList.length; i++) {
+
             const { provider, model, key, keyIndex } = attemptList[i];
             const displayProvider = PROVIDER_DISPLAY[provider] || provider;
             const displayModel = MODEL_DISPLAY_NAMES[model] || model;
@@ -732,18 +766,30 @@
                 if (!firstAttemptStarted) {
                     firstAttemptStarted = true;
                     thinkingTextEl.textContent = `Analyzing your English...`;
-                    // Brief pause then show model info
-                    await new Promise(r => setTimeout(r, 300));
+                    // Brief pause then show model info. Abortable so pressing Stop
+                    // during the pause cancels immediately.
+                    await _abortableDelay(300, abortSignal);
                     thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
                 } else {
                     // Accurate reason based on WHY the previous attempt failed.
                     thinkingTextEl.textContent = _fallbackReasonMessage(lastErrorType, { providerChanged, modelChanged });
-                    await new Promise(r => setTimeout(r, providerChanged ? 1000 : 800));
+                    await _abortableDelay(providerChanged ? 1000 : 800, abortSignal);
                     thinkingTextEl.textContent = `Using ${displayProvider} • ${displayModel}...`;
                 }
 
                 const aiProvider = ProviderFactory.create(provider, key, model, state.settings.explanation_language);
+                console.log(`[SendMessage] REQUEST_STARTED ${displayProvider} • ${displayModel} (key ${keyIndex + 1})`);
                 aiResponse = await aiProvider.sendMessage(text, state.currentMessages, { signal: abortSignal });
+                console.log('[SendMessage] PROVIDER_RESPONSE_RECEIVED ABORT_SIGNAL_STATE=' + abortSignal.aborted);
+
+                // The provider request resolved, but the user may have pressed Stop
+                // while the response body was still downloading. Honour cancellation
+                // here so a late-arriving success is discarded, not saved/rendered.
+                if (state.generationCancelled || abortSignal.aborted) {
+                    console.log('[SendMessage] REQUEST_ABORTED response arrived after cancel — discarding');
+                    break;
+                }
+
 
                 finalProvider = provider;
                 finalModel = model;
@@ -752,9 +798,11 @@
             } catch (err) {
                 // User pressed Stop — abort the whole flow immediately, no fallback.
                 if (state.generationCancelled || err.name === 'AbortError' || abortSignal.aborted) {
+                    console.log('[SendMessage] REQUEST_ABORTED FALLBACK_CANCELLED — stopping loop');
                     lastError = err;
                     break;
                 }
+
                 lastError = err;
                 lastErrorType = (err && err.type) ? err.type : 'unknown';
                 console.error(`[Fallback] ${displayProvider} • ${displayModel} (key ${keyIndex + 1}) failed [${lastErrorType}]:`, err.message);
@@ -798,9 +846,12 @@
         }
 
 
-        // If the user cancelled, discard everything: no partial response, no save,
-        // no feedback, no stats/history. Clean the UI back to a normal state.
-        if (state.generationCancelled) {
+        // Discard everything on cancel: no partial response, no save, no feedback,
+        // no stats/history. Clean the UI back to a normal state. Extracted into a
+        // local so both this point AND the later save phase can reuse it — a Stop
+        // pressed during the DB save must be honoured just like one pressed during
+        // the AI request.
+        const cleanupCancelledGeneration = () => {
             thinkingEl.remove();
             userMsgEl.remove();
             if (state.currentMessages.length === 0) {
@@ -812,8 +863,17 @@
             setGeneratingUI(false);
             DOM.chatInput.focus();
             updateScrollToBottomButton();
+            console.log('[SendMessage] GENERATION_CLEANUP_COMPLETED');
+        };
+
+        // If the user cancelled during the AI request/fallback loop, bail now.
+        if (state.generationCancelled) {
+            console.log('[SendMessage] UI_UPDATE_SKIPPED_AFTER_CANCEL (pre-save)');
+            cleanupCancelledGeneration();
             return;
         }
+
+        console.log('[SendMessage] POST_PROCESSING_STARTED ABORT_SIGNAL_STATE=' + abortSignal.aborted);
 
         // Save last successful combination
         if (aiResponse && finalProvider) {
@@ -824,6 +884,8 @@
             if (!aiResponse) {
                 throw lastError || new Error("All configured providers failed.");
             }
+
+
 
             // If a fallback occurred, update settings and inform user
             if (finalProvider !== state.settings.ai_provider) {
@@ -847,8 +909,11 @@
                 scores.overall = Number(((scores.grammar * 0.30) + (scores.vocabulary * 0.20) + (scores.naturalness * 0.15) + ((scores.expression || 0) * 0.30) + ((scores.mechanics || 0) * 0.05)).toFixed(1));
             }
 
-            // Save to server
+            // Save to server. Pass the abort signal so pressing Stop while the
+            // save is in flight cancels the request instead of persisting it.
+            console.log('[SendMessage] SAVE_STARTED ABORT_SIGNAL_STATE=' + abortSignal.aborted);
             const savedMsg = await api(
+
                 `/api/conversations/${state.currentConversation.id}/messages/`,
                 'POST',
                 {
@@ -857,14 +922,26 @@
                     scores: scores,
                     ai_provider_name: finalProvider,
                     ai_model_name: finalModel || ''
-                }
+                },
+                { signal: abortSignal }
             );
+
+            // Final cancellation checkpoint: the save resolved, but the user may
+            // have pressed Stop while it was in flight. Discard the result so no
+            // feedback card renders and no state/stats are updated.
+            if (state.generationCancelled || abortSignal.aborted) {
+                console.log('[SendMessage] UI_UPDATE_SKIPPED_AFTER_CANCEL (post-save)');
+                cleanupCancelledGeneration();
+                return;
+            }
 
             // Remove thinking indicator
             thinkingEl.remove();
 
             // Build and show AI feedback
+            console.log('[SendMessage] RENDER_STARTED');
             const aiMsgEl = document.createElement('div');
+
             aiMsgEl.className = 'ai-message';
             aiMsgEl.style.animation = 'messageSlideIn 0.35s ease-out';
             aiMsgEl.appendChild(buildFeedbackCard(aiResponse, scores, state.previousScores, finalProvider, finalModel));
@@ -888,12 +965,21 @@
             scrollLatestMessageIntoView(userMsgEl);
 
         } catch (err) {
+            // A Stop pressed during the save aborts the fetch — treat that as a
+            // clean cancellation (discard everything), NOT an error to surface.
+            if (state.generationCancelled || err.name === 'AbortError' || abortSignal.aborted) {
+                console.log('[SendMessage] UI_UPDATE_SKIPPED_AFTER_CANCEL (save aborted)');
+                cleanupCancelledGeneration();
+                return;
+            }
+
             thinkingEl.remove();
             const errEl = document.createElement('div');
             errEl.className = 'ai-thinking';
             errEl.style.borderLeft = '3px solid var(--accent-error)';
-            
+
             let displayMsg = err.message;
+
             if (displayMsg.includes('Failed to fetch') || displayMsg.includes('NetworkError') || displayMsg.includes('fetch failed')) {
                 displayMsg = 'Network Error: Unable to reach the API. Please check your internet connection or if an ad blocker/firewall is blocking the request.';
             }

@@ -279,7 +279,7 @@
         return cookie ? cookie.split('=')[1] : '';
     }
 
-    async function api(url, method = 'GET', body = null) {
+    async function api(url, method = 'GET', body = null, options = {}) {
         const opts = {
             method,
             headers: {
@@ -289,11 +289,15 @@
             credentials: 'same-origin'
         };
         if (body) opts.body = JSON.stringify(body);
+        // Allow callers (e.g. the cancellable AI generation flow) to pass an
+        // AbortSignal so an in-flight request can be aborted mid-save.
+        if (options.signal) opts.signal = options.signal;
         const res = await fetch(url, opts);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Request failed');
         return data;
     }
+
 
     function showToast(message, type = 'info') {
         const toast = document.createElement('div');

@@ -296,6 +296,15 @@
         padding-right: 40px;
     }
 
+    /* Keep room for the show/hide (eye) icon so masked/visible characters
+       never render underneath it. The tappable-input rule above uses the
+       `padding` shorthand which would otherwise reset the right padding set
+       in settings.css, causing the last key characters to overlap the icon. */
+    .key-input-wrapper input {
+        padding-right: 44px;
+    }
+
+
     /* Validate button — full width under input on very narrow screens */
     .key-validate-row {
         gap: 6px;
