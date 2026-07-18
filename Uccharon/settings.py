@@ -171,10 +171,31 @@ STORAGES = {
     },
 }
 
+# Cache — backs the rate limiter (coach/ratelimit.py).
+# Defaults to a local per-process cache, which enforces limits per worker. For
+# strict global limits across multiple workers/instances set REDIS_URL (or swap
+# in another shared backend) so all workers share one counter store.
+REDIS_URL = os.getenv("REDIS_URL")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "uccharon-ratelimit",
+        }
+    }
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # Session settings
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days

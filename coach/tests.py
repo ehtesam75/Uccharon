@@ -2,9 +2,12 @@ import json
 
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
+from django.core.cache import cache
 from django.contrib.auth.models import User
 
 from .models import UserProfile, Conversation, Message, DailyProgress
+from .ratelimit import DEFAULT_MESSAGE
+
 
 
 
@@ -223,5 +226,232 @@ class CsrfProtectionTests(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(User.objects.filter(username='alice').exists())
+
+
+class RateLimitTests(TestCase):
+    """Verify throttling on auth and AI-usage endpoints.
+
+    Confirms three things for each protected endpoint:
+      • requests within the limit succeed,
+      • excessive requests are blocked with HTTP 429 and a generic message,
+      • normal usage volumes are never blocked.
+
+    The default test client is used (CSRF is bypassed) because rate limiting is
+    orthogonal to CSRF. The cache — which backs the limiter — is cleared before
+    each test so counters never leak between tests.
+    """
+
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(
+            username='alice', email='alice@example.com', password='pw-123456'
+        )
+        self.convo = Conversation.objects.create(user=self.user, title='Chat 1')
+
+    def tearDown(self):
+        cache.clear()
+
+    # ── Login: per-IP brute-force limit (10 / 5 min) ─────────────────────
+
+    def test_login_within_ip_limit_allowed(self):
+        """The first 10 attempts from one IP are processed (401 for bad creds),
+        not throttled. Username is varied so the per-username limit isn't hit."""
+        url = reverse('coach:api-login')
+        for i in range(10):
+            resp = self.client.post(
+                url,
+                data=json.dumps({'username': f'nobody{i}', 'password': 'wrong'}),
+                content_type='application/json',
+            )
+            self.assertEqual(resp.status_code, 401, f'attempt {i} should be processed')
+
+    def test_login_excessive_from_ip_blocked(self):
+        """The 11th attempt from one IP is blocked with a generic 429."""
+        url = reverse('coach:api-login')
+        for i in range(10):
+            self.client.post(
+                url,
+                data=json.dumps({'username': f'nobody{i}', 'password': 'wrong'}),
+                content_type='application/json',
+            )
+        resp = self.client.post(
+            url,
+            data=json.dumps({'username': 'nobody-final', 'password': 'wrong'}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 429)
+        self.assertEqual(resp.json().get('error'), DEFAULT_MESSAGE)
+
+    # ── Login: per-username limit must NOT reveal account existence ──────
+
+    def test_login_throttle_does_not_reveal_account_existence(self):
+        """Hammering a real vs. a fake username yields the SAME generic 429, so
+        throttling can't be used to enumerate accounts.
+
+        Each uses its own IP (via X-Forwarded-For) so the per-username limit (5)
+        is what trips, not the per-IP limit (10)."""
+        url = reverse('coach:api-login')
+
+        def hammer(username, ip):
+            last = None
+            for _ in range(6):  # limit is 5, so the 6th trips it
+                last = self.client.post(
+                    url,
+                    data=json.dumps({'username': username, 'password': 'wrong'}),
+                    content_type='application/json',
+                    HTTP_X_FORWARDED_FOR=ip,
+                )
+            return last
+
+        real = hammer('alice', '10.0.0.1')          # existing account
+        fake = hammer('ghost', '10.0.0.2')          # non-existent account
+
+        self.assertEqual(real.status_code, 429)
+        self.assertEqual(fake.status_code, 429)
+        # Identical body → no signal about which account exists.
+        self.assertEqual(real.json(), fake.json())
+        self.assertEqual(real.json().get('error'), DEFAULT_MESSAGE)
+
+    def test_valid_login_not_blocked_by_normal_use(self):
+        """A genuine user logging in normally is never throttled."""
+        resp = self.client.post(
+            reverse('coach:api-login'),
+            data=json.dumps({'username': 'alice', 'password': 'pw-123456'}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get('success'))
+
+    # ── Signup: per-IP limit (5 / hour) ──────────────────────────────────
+
+    def test_signup_excessive_from_ip_blocked(self):
+        """After 5 signups from one IP, the 6th is blocked with a 429 — and no
+        6th user is created."""
+        url = reverse('coach:api-signup')
+        for i in range(5):
+            resp = self.client.post(
+                url,
+                data=json.dumps({
+                    'username': f'user{i}',
+                    'email': f'user{i}@example.com',
+                    'password': 'pw-123456',
+                    'ai_provider': 'gemini',
+                }),
+                content_type='application/json',
+            )
+            self.assertEqual(resp.status_code, 200)
+
+        resp = self.client.post(
+            url,
+            data=json.dumps({
+                'username': 'user-blocked',
+                'email': 'blocked@example.com',
+                'password': 'pw-123456',
+                'ai_provider': 'gemini',
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 429)
+        self.assertEqual(resp.json().get('error'), DEFAULT_MESSAGE)
+        self.assertFalse(User.objects.filter(username='user-blocked').exists())
+
+    # ── Messages (AI usage): per-user burst limit (30 / min) ─────────────
+
+    def test_message_create_within_limit_allowed(self):
+        """A normal burst of messages (well under the cap) all succeed."""
+        self.client.force_login(self.user)
+        url = reverse('coach:api-messages', args=[self.convo.id])
+        for _ in range(10):
+            resp = self.client.post(
+                url,
+                data=json.dumps({'user_text': 'hello world', 'ai_response': {}}),
+                content_type='application/json',
+            )
+            self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 10)
+
+    def test_message_create_excessive_blocked(self):
+        """The 31st message POST in a minute is blocked (AI-cost protection),
+        and no extra Message row is created for the blocked request."""
+        self.client.force_login(self.user)
+        url = reverse('coach:api-messages', args=[self.convo.id])
+        for _ in range(30):
+            resp = self.client.post(
+                url,
+                data=json.dumps({'user_text': 'hello world', 'ai_response': {}}),
+                content_type='application/json',
+            )
+            self.assertEqual(resp.status_code, 200)
+
+        resp = self.client.post(
+            url,
+            data=json.dumps({'user_text': 'one too many', 'ai_response': {}}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 429)
+        self.assertEqual(resp.json().get('error'), DEFAULT_MESSAGE)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 30)
+
+    def test_message_read_not_throttled(self):
+        """GET (loading history) is never throttled, even past the POST cap."""
+        self.client.force_login(self.user)
+        url = reverse('coach:api-messages', args=[self.convo.id])
+        for _ in range(40):
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+
+    # ── Conversations: per-user create limit (20 / min) ──────────────────
+
+    def test_conversation_create_excessive_blocked(self):
+        """The 21st conversation created in a minute is blocked with a 429."""
+        self.client.force_login(self.user)
+        url = reverse('coach:api-conversations')
+        for _ in range(20):
+            resp = self.client.post(
+                url,
+                data=json.dumps({'title': 'New chat'}),
+                content_type='application/json',
+            )
+            self.assertEqual(resp.status_code, 200)
+
+        resp = self.client.post(
+            url,
+            data=json.dumps({'title': 'blocked chat'}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 429)
+        self.assertEqual(resp.json().get('error'), DEFAULT_MESSAGE)
+
+    def test_per_user_limits_are_isolated(self):
+        """One user hitting their message cap does NOT throttle another user."""
+        self.client.force_login(self.user)
+        url = reverse('coach:api-messages', args=[self.convo.id])
+        for _ in range(30):
+            self.client.post(
+                url,
+                data=json.dumps({'user_text': 'hi', 'ai_response': {}}),
+                content_type='application/json',
+            )
+        # alice is now capped.
+        capped = self.client.post(
+            url,
+            data=json.dumps({'user_text': 'blocked', 'ai_response': {}}),
+            content_type='application/json',
+        )
+        self.assertEqual(capped.status_code, 429)
+
+        # A different user is unaffected.
+        other = User.objects.create_user(
+            username='bob', email='bob@example.com', password='pw-123456'
+        )
+        other_convo = Conversation.objects.create(user=other, title='Bob chat')
+        self.client.force_login(other)
+        resp = self.client.post(
+            reverse('coach:api-messages', args=[other_convo.id]),
+            data=json.dumps({'user_text': 'hello', 'ai_response': {}}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 200)
+
 
 

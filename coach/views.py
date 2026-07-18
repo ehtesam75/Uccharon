@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 from .models import UserProfile, Conversation, Message, DailyProgress
+from .ratelimit import rate_limit
+
 
 
 
@@ -39,9 +41,12 @@ def validate_signup_step1_view(request):
 
     return JsonResponse({'valid': True})
 
+# Limit new-account creation per IP to curb mass/automated signups.
+@rate_limit(limit=5, window=3600, prefix="signup", by="ip")
 @require_http_methods(["POST"])
 def signup_view(request):
     """Register a new user."""
+
     data = json_body(request)
     username = data.get('username', '').strip()
     email = data.get('email', '').strip()
@@ -93,9 +98,17 @@ def signup_view(request):
     })
 
 
+# Brute-force protection. Two stacked limits, both returning the SAME generic
+# message so throttling never reveals whether an account exists:
+#   • per IP: blunt cap on total attempts from one address.
+#   • per submitted username/email (hashed): stops targeting a single account
+#     from many IPs. The value is hashed in the cache key, never stored raw.
+@rate_limit(limit=10, window=300, prefix="login", by="ip")
+@rate_limit(limit=5, window=300, prefix="login", by="field", field="username")
 @require_http_methods(["POST"])
 def login_view(request):
     """Login with username/email and password."""
+
     data = json_body(request)
     identifier = data.get('username', '').strip()  # Can be username or email
     password = data.get('password', '')
@@ -254,10 +267,14 @@ def settings_view(request):
 
 # ─── Conversation Views ────────────────────────────────────
 
+# Cap conversation creation per user. Only POST is throttled, so listing (GET)
+# is never affected. Generous for real use; blocks automated churn.
+@rate_limit(limit=20, window=60, prefix="convo_create", by="user")
 @login_required
 @require_http_methods(["GET", "POST"])
 def conversations_view(request):
     """List or create conversations."""
+
     if request.method == 'GET':
         convos = Conversation.objects.filter(user=request.user)
         return JsonResponse({
@@ -341,10 +358,19 @@ def _count_english_words(text):
 
 # ─── Message Views ──────────────────────────────────────────
 
+# AI-usage / cost protection. Each message POST drives an AI request, so this is
+# the most cost-sensitive endpoint. Two stacked per-user limits — only POST is
+# throttled, so loading existing messages (GET) is never affected:
+#   • burst: 30/minute — comfortably above natural back-and-forth chat pace.
+#   • sustained: 600/hour — blocks scripted floods and runaway cost while still
+#     allowing a very heavy legitimate practice session.
+@rate_limit(limit=30, window=60, prefix="msg_create", by="user")
+@rate_limit(limit=600, window=3600, prefix="msg_create_hourly", by="user")
 @login_required
 @require_http_methods(["GET", "POST"])
 def messages_view(request, convo_id):
     """Get or add messages for a conversation."""
+
     try:
         convo = Conversation.objects.get(id=convo_id, user=request.user)
     except Conversation.DoesNotExist:
