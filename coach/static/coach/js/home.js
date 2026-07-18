@@ -127,11 +127,43 @@
         if (y) y.textContent = new Date().getFullYear();
     }
 
+    // ─── Embedded guide close button ─────────────────────────
+    // When the guide is opened inside the app (Settings → View the
+    // Guide) with ?embedded=true, a floating close button is shown.
+    // Clicking it returns the user to the app.
+    function initEmbedClose() {
+        var btn = document.getElementById('guide-embed-close');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+            var params = new URLSearchParams(window.location.search);
+            // Opened in a fresh tab (desktop): just close the tab so the user
+            // lands back on the app tab they came from.
+            if (params.get('newtab') === '1') {
+                window.close();
+                // If the browser blocks window.close() (tab not script-opened),
+                // fall back to navigating to the app.
+                window.location.href = '/app/';
+                return;
+            }
+            // Opened in the same tab (mobile): go back if we have history,
+            // otherwise fall back to the app route.
+            if (window.history.length > 1 && document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = '/app/';
+            }
+        });
+    }
+
+
     document.addEventListener('DOMContentLoaded', function () {
         initTheme();
         initMobileMenu();
         initReveal();
         initSmoothScroll();
         initYear();
+        initEmbedClose();
     });
 })();
+
+

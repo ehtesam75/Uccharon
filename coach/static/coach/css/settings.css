@@ -168,7 +168,61 @@
     background: rgba(var(--accent-primary-rgb), 0.1);
 }
 
+/* ─── "View the Guide" link (Help & Resources) ───────────── */
+.settings-guide-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.settings-guide-link:hover {
+    border-color: var(--accent-primary);
+    background: linear-gradient(135deg,
+            rgba(var(--accent-primary-rgb), 0.12),
+            rgba(var(--accent-secondary-rgb), 0.05));
+    transform: translateY(-1px);
+}
+
+.settings-guide-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--accent-primary-rgb), 0.12);
+    color: var(--accent-primary);
+}
+
+.settings-guide-text {
+    flex: 1;
+}
+
+.settings-guide-arrow {
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.settings-guide-link:hover .settings-guide-arrow {
+    color: var(--accent-primary);
+    transform: translateX(3px);
+}
+
 /* ─── Provider Cards (AI grid + Voice list) ──────────────── */
+
 .provider-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

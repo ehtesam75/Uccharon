@@ -16,9 +16,34 @@
                 </button>
             </div>
             <div class="drawer-content">
+                <!-- Help & Resources: link to the full how-to-use Guide.
+                     On desktop this opens the guide in a new tab; on mobile it
+                     opens the guide embedded (navbar/footer hidden) in the same
+                     tab. The behavior is wired up in settings.js. -->
+                <div class="settings-section">
+                    <h3>Help &amp; Resources</h3>
+                    <p class="settings-desc">New to Uccharon or need a refresher? The complete guide walks you through
+                        setup, connecting your AI provider, and every feature.</p>
+                    <a href="/guide/" id="view-guide-link" class="settings-guide-link">
+                        <span class="settings-guide-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                            </svg>
+                        </span>
+                        <span class="settings-guide-text">View the Guide</span>
+                        <svg class="settings-guide-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                </div>
+
                 <div class="settings-section">
                     <h3>
                         Daily Word Target
+
                         <span class="info-tip"
                             title="Set a daily goal for the number of words you want to practice to build a consistent habit.">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"

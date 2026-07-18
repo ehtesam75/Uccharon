@@ -367,11 +367,36 @@
         }
     }
 
+    // "View the Guide" link in Settings.
+    // The guide always opens in embedded mode (public navbar/footer hidden,
+    // close button shown) so it reads as part of the app rather than the
+    // marketing site. Desktop: open in a new tab so the user keeps their place
+    // in the app. Mobile: no room for two tabs, so open in the same tab.
+    function initGuideLink() {
+        const link = document.getElementById('view-guide-link');
+        if (!link) return;
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isMobile = window.matchMedia('(max-width: 780px)').matches;
+            if (isMobile) {
+                window.location.href = '/guide/?embedded=true';
+            } else {
+                // newtab=1 tells the guide's close button to close this tab
+                // (rather than navigate back) since it was opened fresh.
+                window.open('/guide/?embedded=true&newtab=1', '_blank');
+            }
+
+        });
+    }
+
+
     function initSettings() {
         DOM.settingsBtn.addEventListener('click', openSettings);
         DOM.closeSettings.addEventListener('click', closeSettings);
         DOM.settingsOverlay.addEventListener('click', closeSettings);
         DOM.saveSettingsBtn.addEventListener('click', saveSettings);
+        initGuideLink();
+
 
         // Account deletion: open confirmation modal, then delete on confirm.
         if (DOM.deleteAccountBtn) {

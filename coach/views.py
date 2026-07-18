@@ -801,9 +801,17 @@ def guide_view(request):
     new users through setting up Uccharon, connecting their own AI provider,
     and getting the most out of the learning features. Always accessible,
     whether or not the visitor is signed in.
+
+    When opened with ``?embedded=true`` (e.g. from the in-app Settings drawer),
+    the page renders in an embedded mode: the public navbar, mobile menu and
+    footer are hidden and a close button is shown, so only the guide content
+    appears. The template reuses the same markup and styling — the layout is
+    just switched conditionally.
     """
     from django.shortcuts import render
-    return render(request, 'coach/guide.html')
+    embedded = request.GET.get('embedded') == 'true'
+    return render(request, 'coach/guide.html', {'embedded': embedded})
+
 
 
 

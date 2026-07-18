@@ -4,12 +4,64 @@
    footer, buttons and reveal animations for a consistent look.
    ═══════════════════════════════════════════════════════════ */
 
+/* ─── Embedded mode (opened from in-app Settings) ─────────────
+   Reuses the exact same guide markup/styling, just without the
+   public navbar, mobile menu and footer. A floating close button
+   is shown top-right so the user can return to where they came
+   from. Because the navbar is gone, the hero no longer needs the
+   large top offset that clears the fixed header. */
+.guide-embedded .guide-hero {
+    padding-top: 72px;
+}
+
+.guide-embed-close {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    transition: border-color var(--transition-fast), background var(--transition-fast),
+        color var(--transition-fast), transform var(--transition-fast);
+}
+
+.guide-embed-close:hover {
+    border-color: rgba(var(--accent-primary-rgb), 0.5);
+    background: rgba(var(--accent-primary-rgb), 0.12);
+    color: var(--accent-primary);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 560px) {
+    .guide-embed-close {
+        top: 12px;
+        right: 12px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .guide-embedded .guide-hero {
+        padding-top: 64px;
+    }
+}
+
 /* ─── Hero ────────────────────────────────────────────────── */
 .guide-hero {
     text-align: center;
     padding-top: 104px;
     padding-bottom: 24px;
 }
+
 
 .guide-title {
     font-size: clamp(2.1rem, 5.4vw, 3.4rem);
