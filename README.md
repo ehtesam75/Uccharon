@@ -6,7 +6,7 @@
 
 ### Your API Key. Your AI. Your Learning.
 
-An open-source AI English speaking coach that runs on **your** AI provider, **your** models, and **your** budget — with no subscriptions and no middleman.
+An open-source AI English speaking coach that runs on your AI provider, your models, and your budget — with your API keys stored securely on your device/browser, no subscriptions, and no middleman.
 
 </div>
 
@@ -22,7 +22,7 @@ What sets it apart is the model behind it: Uccharon has **no built-in AI billing
 
 Most AI English platforms wrap a hidden API key inside a monthly subscription. You pay them, they pay the AI provider, and you never see the real cost or control the model. Uccharon flips that:
 
-- **Bring your own AI.** Use your own key from Gemini, Groq, OpenAI, or OpenRouter.
+- **Bring your own AI.** Use your own key from Gemini, Groq, OpenAI, or OpenRouter. Your API keys are stored only on your browser and are never stored on Uccharon servers.
 - **No forced subscriptions.** No paywalls between you and your practice.
 - **Full cost control.** You choose the model and pay the provider directly at their rate.
 - **You own the experience.** Swap providers or models anytime to match your budget and quality needs.
@@ -34,6 +34,7 @@ The result is transparent pricing, no vendor lock-in, and a learning tool that r
 - **Conversational coaching** — practice English naturally with an AI that responds and evaluates in real time.
 - **Five-dimension scoring** — every message is rated on grammar, vocabulary, naturalness, expression, and mechanics.
 - **Detailed corrections** — grammar fixes, natural rewrites, vocabulary upgrades, and pronunciation guidance for each turn.
+- **Learning history** — review past mistakes and improvements with detailed category filters.
 - **Bilingual explanations** — get feedback explanations in English or Bengali (বাংলা).
 - **Progress tracking** — daily word goals, learning streaks, and visual analytics across daily, weekly, and monthly views.
 - **Provider flexibility** — switch between AI providers and models directly from settings.
@@ -58,12 +59,3 @@ Uccharon is built so your credentials never leave your control:
 | OpenRouter | https://openrouter.ai/ |
 
 Add your key in the app's settings, choose a model, and start practicing — costs are billed by the provider, not by Uccharon.
-
-## Tech Stack
-
-- **Backend:** Django 5.2 (Python 3)
-- **Frontend:** HTML5, CSS, Vanilla JavaScript (SPA)
-- **Database:** SQLite (local) / PostgreSQL (production)
-- **AI Layer:** Client-side provider abstraction (Gemini, Groq, OpenAI, OpenRouter)
-- **Deployment:** Gunicorn + WhiteNoise, PaaS-ready (Railway, Heroku)
-- **Media & Storage:** Cloudinary via `django-cloudinary-storage`
