@@ -463,22 +463,38 @@
     }
 
     async function handleLogout() {
+        // Capture what we need before tearing down state.
+        const staleConversation = (state.currentConversation && state.currentMessages.length === 0)
+            ? state.currentConversation.id
+            : null;
+
+        // Clear auth state and hide the logged-in UI *before* any async work or
+        // rendering. Covering the screen with the branded splash guarantees the
+        // welcome/chat screen is never briefly visible during logout — on both
+        // desktop and mobile/PWA — while requests are in flight and while the
+        // browser navigates to the public homepage.
+        state.user = null;
+        showGlobalSplash();
+        DOM.app.style.display = 'none';
+        DOM.authScreen.style.display = 'none';
+
+        clearAllPersistedConversationIds();
+        clearAllPersistedViews();
+
         try {
-            // Delete the current conversation if it has no messages
-            if (state.currentConversation && state.currentMessages.length === 0) {
-                await deleteConversationById(state.currentConversation.id);
+            // Delete the current conversation if it had no messages.
+            if (staleConversation) {
+                await deleteConversationById(staleConversation);
             }
 
             await api('/api/auth/logout/', 'POST');
-            clearAllPersistedConversationIds();
-            clearAllPersistedViews();
-            resetChatState();
-            state.user = null;
-            // Redirect to the public homepage instead of the login screen.
-            window.location.href = '/';
         } catch (err) {
-            showToast('Logout failed', 'error');
+            // Even if the network cleanup fails, still send the user home — the
+            // session is being abandoned and the UI is already torn down.
+        } finally {
+            // Redirect to the public homepage instead of the login screen.
+            window.location.replace('/');
         }
-
     }
+
 

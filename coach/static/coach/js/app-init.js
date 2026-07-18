@@ -40,9 +40,21 @@
         const splash = document.getElementById('global-splash');
         if (splash && !splash.classList.contains('hidden')) {
             splash.classList.add('hidden');
-            setTimeout(() => splash.remove(), 400); // Remove from DOM after fade out
+        }
+        // Keep the element in the DOM (hidden) so it can be reused to cover the
+        // screen instantly during logout, avoiding a flash of the logged-in UI.
+    }
+
+    // Instantly cover the whole screen with the branded splash. Used on logout
+    // so the logged-in UI is never visible while auth requests are in flight or
+    // during navigation to the public homepage.
+    function showGlobalSplash() {
+        const splash = document.getElementById('global-splash');
+        if (splash) {
+            splash.classList.remove('hidden');
         }
     }
+
 
     async function loadUserData(skipAutoSelect = false) {
         try {
