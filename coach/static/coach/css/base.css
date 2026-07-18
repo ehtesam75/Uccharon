@@ -95,7 +95,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Remove the grey/blue rectangular flash mobile browsers paint over
+       tapped buttons, links and other interactive elements. */
+    -webkit-tap-highlight-color: transparent;
 }
+
 
 html {
     font-size: 16px;
@@ -146,6 +150,25 @@ button {
     font-family: inherit;
     color: inherit;
 }
+
+/* Don't paint a lingering focus ring when a control is focused by a tap or
+   mouse click (common on mobile PWAs). Keyboard users still get a clear,
+   accessible outline via :focus-visible below. */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible),
+.icon-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+.icon-btn:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
 
 input,
 textarea,
