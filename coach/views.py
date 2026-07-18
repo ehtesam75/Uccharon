@@ -14,6 +14,20 @@ from .models import UserProfile, Conversation, Message, DailyProgress
 from .ratelimit import rate_limit
 
 
+# ─── Payload size limits (server-side input validation) ─────
+# These cap the size of client-supplied data before it is persisted. They are
+# deliberately generous so normal AI practice conversations are never affected,
+# while still rejecting abusive or malformed oversized payloads that could bloat
+# the database, exhaust memory, or be used for a denial-of-service. All limits
+# are enforced server-side because the client is untrusted.
+MAX_USER_TEXT_LENGTH = 10_000        # characters — far above any real message
+MAX_AI_RESPONSE_BYTES = 100_000      # serialized feedback JSON (~100 KB)
+MAX_TITLE_LENGTH = 255               # matches Conversation.title max_length
+MAX_PROVIDER_NAME_LENGTH = 50        # matches Message.ai_provider_name max_length
+MAX_MODEL_NAME_LENGTH = 100          # matches Message.ai_model_name max_length
+# Overall raw-body cap for the message endpoint: the AI-response cap plus room
+# for the user text and metadata, bounded so a single request can't be huge.
+MAX_MESSAGE_REQUEST_BYTES = 200_000
 
 
 def json_body(request):
@@ -22,6 +36,19 @@ def json_body(request):
         return json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         return {}
+
+
+def _json_byte_size(value):
+    """Return the UTF-8 byte size of ``value`` serialized as JSON.
+
+    Used to bound stored JSON (the AI feedback payload) before saving. Returns
+    None if the value can't be serialized, so callers can reject it.
+    """
+    try:
+        return len(json.dumps(value).encode('utf-8'))
+    except (TypeError, ValueError):
+        return None
+
 
 
 # ─── Auth Views ─────────────────────────────────────────────
@@ -291,7 +318,19 @@ def conversations_view(request):
 
     data = json_body(request)
     title = data.get('title', 'New Conversation')
+    # Validate the title before saving: must be text and within the column
+    # width. An empty/blank title falls back to the default rather than erroring,
+    # matching how the SPA creates untitled conversations.
+    if not isinstance(title, str):
+        return JsonResponse({'error': 'Title must be text.'}, status=400)
+    title = title.strip() or 'New Conversation'
+    if len(title) > MAX_TITLE_LENGTH:
+        return JsonResponse(
+            {'error': f'Title is too long (max {MAX_TITLE_LENGTH} characters).'},
+            status=400,
+        )
     convo = Conversation.objects.create(user=request.user, title=title)
+
     return JsonResponse({
         'id': convo.id,
         'title': convo.title,
@@ -311,13 +350,24 @@ def conversation_delete_view(request, convo_id):
 
     if request.method == 'PUT':
         data = json_body(request)
-        title = data.get('title', '').strip()
+        title = data.get('title', '')
+        if not isinstance(title, str):
+            return JsonResponse({'error': 'Title must be text.'}, status=400)
+        title = title.strip()
 
         if not title:
             return JsonResponse({'error': 'Title is required.'}, status=400)
 
+        # Enforce the column width so an oversized title can't reach the database.
+        if len(title) > MAX_TITLE_LENGTH:
+            return JsonResponse(
+                {'error': f'Title is too long (max {MAX_TITLE_LENGTH} characters).'},
+                status=400,
+            )
+
         convo.title = title
         convo.save()
+
         return JsonResponse({
             'id': convo.id,
             'title': convo.title,
@@ -400,6 +450,14 @@ def messages_view(request, convo_id):
             ]
         })
 
+    # Reject oversized raw request bodies before doing any parsing/work. This is
+    # a cheap first line of defense against a huge payload exhausting memory.
+    if len(request.body) > MAX_MESSAGE_REQUEST_BYTES:
+        return JsonResponse(
+            {'error': 'Request too large. Please shorten your message.'},
+            status=413,
+        )
+
     data = json_body(request)
     user_text = data.get('user_text', '')
     ai_response = data.get('ai_response', {})
@@ -409,6 +467,33 @@ def messages_view(request, convo_id):
 
     if not user_text:
         return JsonResponse({'error': 'User text is required.'}, status=400)
+
+    # ── Per-field size validation (server-side; client is untrusted) ─────
+    # Enforced before saving so oversized data never reaches the database.
+    if not isinstance(user_text, str):
+        return JsonResponse({'error': 'User text must be text.'}, status=400)
+    if len(user_text) > MAX_USER_TEXT_LENGTH:
+        return JsonResponse(
+            {'error': f'Message is too long (max {MAX_USER_TEXT_LENGTH} characters).'},
+            status=400,
+        )
+
+    # The AI response is stored as JSON; bound its serialized size and ensure
+    # it's an object so downstream code that calls .get() on it stays safe.
+    if not isinstance(ai_response, dict):
+        return JsonResponse({'error': 'Invalid AI response format.'}, status=400)
+    ai_response_size = _json_byte_size(ai_response)
+    if ai_response_size is None:
+        return JsonResponse({'error': 'Invalid AI response format.'}, status=400)
+    if ai_response_size > MAX_AI_RESPONSE_BYTES:
+        return JsonResponse({'error': 'AI response payload is too large.'}, status=400)
+
+    # Provider/model attribution strings are bounded to their column widths.
+    if not isinstance(ai_provider_name, str) or len(ai_provider_name) > MAX_PROVIDER_NAME_LENGTH:
+        return JsonResponse({'error': 'Invalid AI provider name.'}, status=400)
+    if not isinstance(ai_model_name, str) or len(ai_model_name) > MAX_MODEL_NAME_LENGTH:
+        return JsonResponse({'error': 'Invalid AI model name.'}, status=400)
+
 
     # ── Input status classification ──────────────────────────
     # The AI classifies each message; backend uses this to gate stats.

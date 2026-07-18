@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 
 from .models import UserProfile, Conversation, Message, DailyProgress
 from .ratelimit import DEFAULT_MESSAGE
+from . import views
+
 
 
 
@@ -539,6 +541,157 @@ class ContentSecurityPolicyTests(TestCase):
         n1 = p1.split("'nonce-", 1)[1].split("'", 1)[0]
         n2 = p2.split("'nonce-", 1)[1].split("'", 1)[0]
         self.assertNotEqual(n1, n2)
+
+
+class InputValidationTests(TestCase):
+    """Verify server-side payload size limits on the write endpoints.
+
+    The client is untrusted, so every size/format constraint is enforced in the
+    view before anything is persisted. These tests confirm three things per
+    endpoint: normal-sized input is accepted and saved, oversized/malformed
+    input is rejected with a clear 4xx error, and nothing is written to the DB
+    when a request is rejected.
+
+    The default test client is used (CSRF is bypassed); input validation is
+    orthogonal to CSRF, which is covered by CsrfProtectionTests.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='alice', email='alice@example.com', password='pw-123456'
+        )
+        self.convo = Conversation.objects.create(user=self.user, title='Chat 1')
+        self.client.force_login(self.user)
+        self.msg_url = reverse('coach:api-messages', args=[self.convo.id])
+        self.convos_url = reverse('coach:api-conversations')
+        self.convo_edit_url = reverse('coach:api-conversation-delete', args=[self.convo.id])
+
+    def _post_message(self, payload):
+        return self.client.post(
+            self.msg_url, data=json.dumps(payload), content_type='application/json'
+        )
+
+    # ── Normal input is accepted (existing chat still works) ─────────────
+
+    def test_normal_message_accepted(self):
+        """A realistic message with a full AI feedback payload is saved."""
+        ai_response = {
+            'reply': 'That sounds great! Tell me more about your trip.',
+            'input_status': 'valid',
+            'grammar_corrections': [
+                {'original': 'I go store', 'corrected': 'I went to the store',
+                 'explanation': 'Use past tense and an article.'}
+            ],
+            'vocabulary_improvements': [
+                {'original': 'good', 'suggestion': 'wonderful', 'synonyms': ['great', 'fantastic']}
+            ],
+        }
+        resp = self._post_message({
+            'user_text': 'Yesterday I go store and buy some good food.',
+            'ai_response': ai_response,
+            'scores': {'grammar': 7.5, 'vocabulary': 8, 'naturalness': 7,
+                       'expression': 7, 'mechanics': 8, 'overall': 7.4},
+            'ai_provider_name': 'gemini',
+            'ai_model_name': 'gemini-2.0-flash',
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 1)
+        saved = Message.objects.get(conversation=self.convo)
+        self.assertEqual(saved.ai_response['reply'], ai_response['reply'])
+        self.assertEqual(saved.ai_provider_name, 'gemini')
+
+    def test_message_at_max_length_accepted(self):
+        """User text exactly at the limit is still accepted (boundary case)."""
+        text = 'a' * views.MAX_USER_TEXT_LENGTH
+        resp = self._post_message({'user_text': text, 'ai_response': {}})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 1)
+
+    # ── Oversized / malformed message input is rejected ──────────────────
+
+    def test_oversized_user_text_rejected(self):
+        """User text longer than the cap is rejected and nothing is saved."""
+        text = 'a' * (views.MAX_USER_TEXT_LENGTH + 1)
+        resp = self._post_message({'user_text': text, 'ai_response': {}})
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('too long', resp.json().get('error', '').lower())
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 0)
+
+    def test_oversized_ai_response_rejected(self):
+        """An AI-response JSON blob over the byte cap is rejected before saving."""
+        big_blob = {'reply': 'x' * (views.MAX_AI_RESPONSE_BYTES + 100)}
+        resp = self._post_message({'user_text': 'hello', 'ai_response': big_blob})
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 0)
+
+    def test_oversized_raw_body_rejected(self):
+        """A raw request body beyond the overall cap is rejected with 413 and
+        no message is persisted."""
+        huge_text = 'a' * (views.MAX_MESSAGE_REQUEST_BYTES + 1000)
+        resp = self._post_message({'user_text': huge_text, 'ai_response': {}})
+        self.assertEqual(resp.status_code, 413)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 0)
+
+    def test_non_dict_ai_response_rejected(self):
+        """A non-object ai_response (e.g. a string) is rejected."""
+        resp = self._post_message({'user_text': 'hello', 'ai_response': 'not-a-dict'})
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 0)
+
+    def test_oversized_provider_name_rejected(self):
+        """An over-length provider name (past the column width) is rejected."""
+        resp = self._post_message({
+            'user_text': 'hello',
+            'ai_response': {},
+            'ai_provider_name': 'p' * (views.MAX_PROVIDER_NAME_LENGTH + 1),
+        })
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(Message.objects.filter(conversation=self.convo).count(), 0)
+
+    # ── Conversation title validation (create + rename) ──────────────────
+
+    def test_normal_title_create_accepted(self):
+        resp = self.client.post(
+            self.convos_url,
+            data=json.dumps({'title': 'My interview practice'}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()['title'], 'My interview practice')
+
+    def test_oversized_title_create_rejected(self):
+        """A title longer than the column width is rejected; no convo created."""
+        before = Conversation.objects.filter(user=self.user).count()
+        resp = self.client.post(
+            self.convos_url,
+            data=json.dumps({'title': 'T' * (views.MAX_TITLE_LENGTH + 1)}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('too long', resp.json().get('error', '').lower())
+        self.assertEqual(Conversation.objects.filter(user=self.user).count(), before)
+
+    def test_normal_title_rename_accepted(self):
+        resp = self.client.put(
+            self.convo_edit_url,
+            data=json.dumps({'title': 'Renamed chat'}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.convo.refresh_from_db()
+        self.assertEqual(self.convo.title, 'Renamed chat')
+
+    def test_oversized_title_rename_rejected(self):
+        """An over-length rename is rejected and the title is left unchanged."""
+        resp = self.client.put(
+            self.convo_edit_url,
+            data=json.dumps({'title': 'T' * (views.MAX_TITLE_LENGTH + 1)}),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.convo.refresh_from_db()
+        self.assertEqual(self.convo.title, 'Chat 1')
+
 
 
 
