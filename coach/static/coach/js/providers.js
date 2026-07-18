@@ -93,18 +93,16 @@ PERFORMANCE METRIC DEFINITIONS (score each from 0-10 based strictly on its own d
 Grammar: Evaluate only structural correctness: tense, articles, prepositions, subject–verb agreement, word forms, pronouns, conjunctions, modifiers, parallelism, and quantifiers. Do not evaluate word choice or naturalness.
 Vocabulary: Evaluate word choice: accuracy, appropriateness, sophistication, and range. Do not evaluate collocations or phrasing.
 Naturalness: Evaluate how naturally the message sounds in everyday English, including collocations, idioms, sentence patterns, and avoiding awkward/literal translations.
-Expression: Evaluate how effectively the user communicates ideas. Focus on completeness, clarity of ideas, level of detail, and ability to express thoughts. Do not penalize simple but clear communication.
-Mechanics: Evaluate spelling, capitalization, punctuation, and readability. Ignore casual chat style unless it affects understanding.
+Expression: Evaluate how effectively the user communicates ideas. Focus on completeness, clarity of ideas, level of detail, and ability to express thoughts.
+Mechanics: Evaluate spelling, capitalization, punctuation, and readability.
 
 RULES:
 0. CRITICALLY IMPORTANT: grammar_corrections must contain ONLY structural grammar errors. If a sentence is grammatically correct but merely awkward or unnatural, it must NEVER appear in grammar_corrections; include it ONLY in sentence_improvements.
-1. All scores must be integers from 0-10. Give honest rating.
-2. Grammar score MUST be based ONLY on grammatical correctness. Any issue that is not a structural grammar error (tense, articles, subject–verb agreement, prepositions, word forms) must NOT influence the grammar score under any circumstances.
-3. Awkward, unnatural English, and literal translations ONLY affect the naturalness score. They must ONLY be included in sentence_improvements and must not affect any other score.
-4. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, vocabulary_improvements, and mechanics_corrections.
-5. For pronunciation and vocabulary improvements, you MUST identify and recommend improvements for ALL relevant words and phrases in the user's entire message.
-6. Score each of the five performance metrics (grammar, vocabulary, naturalness, expression, mechanics) independently and strictly according to its own definition above. Do not let one metric influence another.
-7. mechanics_corrections must contain ONLY spelling, capitalization, and punctuation fixes, derived from the Mechanics metric. Keep it SEPARATE from grammar_corrections — never put grammar errors here and never put mechanics errors in grammar_corrections. Ignore casual chat style (e.g., lowercase "i", missing end punctuation) UNLESS it significantly reduces readability or understanding. If there are no mechanics issues, leave mechanics_corrections as [].
+1. All scores must be integers from 0–10. Rate honestly. Do not sugarcoat the evaluation.
+2. If there are NO grammar mistakes, leave grammar_corrections as []. Same for sentence_improvements, pronunciation_guidance, vocabulary_improvements, and mechanics_corrections.
+3. For pronunciation and vocabulary improvements, you MUST identify and recommend improvements for ALL relevant words and phrases in the user's entire message.
+4. Score each of the five performance metrics (grammar, vocabulary, naturalness, expression, mechanics) independently and strictly according to its own definition above. Do not let one metric influence another.
+5. mechanics_corrections must contain ONLY spelling, capitalization, and punctuation fixes, derived from the Mechanics metric. Keep it SEPARATE from grammar_corrections — never put grammar errors here and never put mechanics errors in grammar_corrections. If there are no mechanics issues, leave mechanics_corrections as [].
 
 REMEMBER: Output ONLY the JSON object. No markdown code fences, no extra text before or after.`;
 
