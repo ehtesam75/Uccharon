@@ -1,7 +1,14 @@
 db.sqlite3
 venv/
 __pycache__/
+*.pyc
 project_overview.txt
 .env
 _fix_voice_ui.py
 db.sqlite3.bak-pre-apikey-removal-20260717-231304.bak
+
+# Scratch / debug files
+scratch.py
+scratch2.py
+
+
