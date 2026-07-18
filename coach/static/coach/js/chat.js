@@ -599,6 +599,30 @@
         }
     }
 
+    // Cancel any in-flight generation triggered by NAVIGATION (switching chats,
+    // opening Stats/History, creating a new chat, logout, etc.) rather than the
+    // Stop button. Unlike stopGeneration(), this also resets the send-button UI
+    // and generation state SYNCHRONOUSLY, so the button flips back to Send the
+    // instant the user navigates — it never lingers as a Stop button on the new
+    // view. The aborted send's own async continuation is neutralised by the
+    // generationToken bump: because it no longer owns the current token, its
+    // late-arriving cleanup/render is skipped (see sendMessage).
+    function cancelActiveGeneration() {
+        if (!state.isSending) return;
+        console.log('[CancelGen] navigation cancelled active generation');
+        state.generationCancelled = true;
+        if (state.abortController) {
+            try { state.abortController.abort(); } catch (e) { /* ignore */ }
+        }
+        // Invalidate the in-flight send so its continuation can't touch the UI.
+        state.generationToken++;
+        state.isSending = false;
+        state.abortController = null;
+        state.generationCancelled = false;
+        setGeneratingUI(false);   // Immediately restore the Send button
+    }
+
+
 
     // A setTimeout wrapper that reacts to the caller's abort signal immediately.
     // The fallback engine pauses briefly between attempts to surface status
@@ -678,7 +702,14 @@
         state.generationCancelled = false;
         state.abortController = new AbortController();
         const abortSignal = state.abortController.signal;
+        // Claim ownership of the generation UI for this send. If navigation
+        // (chat switch, Stats/History, new chat) cancels us, it bumps this token
+        // so our async continuation knows it no longer owns the UI and must not
+        // render, save-render, or reset the button (the navigation already did).
+        const myToken = ++state.generationToken;
+        const ownsGeneration = () => state.generationToken === myToken;
         DOM.chatInput.value = '';
+
         // The message is now sent — clear any saved draft for this conversation.
         if (state.currentConversation) {
             delete state.chatDrafts[state.currentConversation.id];
@@ -852,6 +883,14 @@
         // pressed during the DB save must be honoured just like one pressed during
         // the AI request.
         const cleanupCancelledGeneration = () => {
+            // If navigation (chat switch / Stats / History / new chat) already
+            // cancelled this send, it reset the UI and possibly started a NEW
+            // send. Do nothing here so we never stomp that newer generation's
+            // button state or DOM.
+            if (!ownsGeneration()) {
+                console.log('[SendMessage] cleanup skipped — no longer owns generation');
+                return;
+            }
             thinkingEl.remove();
             userMsgEl.remove();
             if (state.currentMessages.length === 0) {
@@ -866,12 +905,21 @@
             console.log('[SendMessage] GENERATION_CLEANUP_COMPLETED');
         };
 
+        // Navigation cancelled this send (chat switch / Stats / History / new
+        // chat). It already reset the UI synchronously, so bail out silently and
+        // let whatever owns the UI now proceed untouched.
+        if (!ownsGeneration()) {
+            console.log('[SendMessage] UI_UPDATE_SKIPPED_AFTER_CANCEL (navigation, post-loop)');
+            return;
+        }
+
         // If the user cancelled during the AI request/fallback loop, bail now.
         if (state.generationCancelled) {
             console.log('[SendMessage] UI_UPDATE_SKIPPED_AFTER_CANCEL (pre-save)');
             cleanupCancelledGeneration();
             return;
         }
+
 
         console.log('[SendMessage] POST_PROCESSING_STARTED ABORT_SIGNAL_STATE=' + abortSignal.aborted);
 
@@ -988,12 +1036,19 @@
             DOM.chatMessages.appendChild(errEl);
             scrollLatestMessageIntoView(errEl);
         } finally {
-            state.isSending = false;
-            state.abortController = null;
-            state.generationCancelled = false;
-            setGeneratingUI(false);   // Restore the Send button
+            // Only reset shared generation state if THIS send still owns it.
+            // Navigation (chat switch / Stats / History / new chat) may have
+            // cancelled us and started a newer send — in that case leave the
+            // newer send's state and button untouched.
+            if (ownsGeneration()) {
+                state.isSending = false;
+                state.abortController = null;
+                state.generationCancelled = false;
+                setGeneratingUI(false);   // Restore the Send button
+            }
         }
     }
+
 
     function scrollToBottom() {
         requestAnimationFrame(() => {

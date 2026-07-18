@@ -15,10 +15,15 @@
     // ═══════════════════════════════════════════════════════
 
     async function showDashboard() {
+        // Navigating to Stats cancels any in-flight AI generation and restores
+        // the Send button immediately so it never lingers as a Stop button.
+        cancelActiveGeneration();
+
         // Delete empty conversation before navigating away
         if (state.currentConversation && state.currentMessages.length === 0) {
             void deleteConversationById(state.currentConversation.id);
         }
+
 
         DOM.welcomeScreen.style.display = 'none';
         DOM.chatArea.style.display = 'none';

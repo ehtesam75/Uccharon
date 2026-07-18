@@ -53,6 +53,8 @@
         isSending: false,
         abortController: null,   // AbortController for the in-flight AI generation
         generationCancelled: false,
+        generationToken: 0,      // increments per send; lets a stale send detect it no longer owns the UI
+
         recognition: null,       // Web Speech API instance
         mediaRecorder: null,     // MediaRecorder for Whisper / Gemini audio
         activeStream: null,      // active microphone MediaStream
@@ -574,8 +576,13 @@
     }
 
     function resetChatState() {
+        // Cancel any in-flight AI generation (e.g. on logout / account switch)
+        // and reset the send button so no stale Stop state survives the reset.
+        if (typeof cancelActiveGeneration === 'function') cancelActiveGeneration();
+
         state.conversationLoadToken++;
         state.conversations = [];
+
         state.currentConversation = null;
         state.currentMessages = [];
         state.chatDrafts = {};

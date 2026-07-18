@@ -88,11 +88,17 @@
 
         finishConversationRename(true);
 
+        // Switching chats cancels any in-flight AI generation and immediately
+        // restores the Send button so it never lingers as a Stop button on the
+        // chat we're navigating into.
+        cancelActiveGeneration();
+
         // Switching chats: turn off any active speaker/audio playback.
         stopSpeaker();
 
         // Switching chats: stop any active microphone recording and release the mic.
         stopRecordingIfActive();
+
 
         if (state.currentConversation && state.currentConversation.id !== convo.id) {
             // Preserve whatever the user had typed in the outgoing chat so it can
