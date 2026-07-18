@@ -1,0 +1,963 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="home-root">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide – Uccharon</title>
+    <meta name="description"
+        content="Learn how to set up Uccharon, connect your own AI provider, practice English with AI chat and voice, and get the most out of every feature — a complete, beginner-friendly guide.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="manifest" href="{% static 'coach/manifest.json' %}">
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" type="image/x-icon" href="{% static 'coach/icon/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'coach/icon/apple-touch-icon.png' %}">
+
+    <link rel="stylesheet" href="{% static 'coach/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'coach/css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'coach/css/guide.css' %}">
+
+    <!-- Apply persisted theme immediately to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('uccharon_theme');
+                if (t !== 'light' && t !== 'dark') t = 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="home-orbs" aria-hidden="true">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="orb orb-c"></div>
+    </div>
+
+    <div class="home">
+
+        <!-- ═══════════════ NAVBAR ═══════════════ -->
+        <header class="home-nav">
+            <div class="container home-nav-inner">
+                <a href="/" class="nav-brand">
+                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                    <span>Uccharon</span>
+                </a>
+
+                <nav aria-label="Primary">
+                    <ul class="nav-links">
+                        <li><a href="/#features">Features</a></li>
+                        <li><a href="/about/">About</a></li>
+                        <li><a href="/guide/" class="is-active">Guide</a></li>
+                        <li><a href="/privacy/">Privacy</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-actions">
+                    <button class="nav-theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme"
+                        title="Toggle theme">
+                        <svg class="theme-icon-dark" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg class="theme-icon-light" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="display:none">
+                            <circle cx="12" cy="12" r="5" />
+                            <path
+                                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                        </svg>
+                    </button>
+                    <a href="/app/" class="nav-signin">Sign in</a>
+                    <a href="/app/?auth=signup" class="nav-getstarted">Get started
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                    <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu"
+                        aria-expanded="false">
+                        <svg class="burger-open" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                        <svg class="burger-close" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile menu -->
+        <div class="mobile-backdrop" id="mobile-backdrop" aria-hidden="true"></div>
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-menu-inner">
+
+                <p class="mobile-menu-label">Menu</p>
+                <nav class="mobile-menu-nav" aria-label="Mobile">
+                    <a href="/#features" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.5L5.7 21l2.3-7-6-4.6h7.6z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Features</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/about/" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 16v-4M12 8h.01" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">About</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/guide/" class="mobile-link is-active">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Guide</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/privacy/" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Privacy</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                </nav>
+                <div class="mobile-menu-divider"></div>
+                <div class="mobile-menu-actions">
+                    <a href="/app/" class="btn btn-ghost">Sign In</a>
+                    <a href="/app/?auth=signup" class="btn btn-primary">Get Started
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <main>
+
+            <!-- ═══════════════ HERO ═══════════════ -->
+            <section class="section guide-hero">
+                <div class="container">
+                    <span class="hero-badge reveal"><span class="dot"></span> Beginner-friendly walkthrough</span>
+                    <h1 class="guide-title reveal">The complete <span class="grad">Uccharon guide</span></h1>
+                    <p class="guide-lead reveal">
+                        Everything you need to set up Uccharon, connect your own AI provider, and get the best English
+                        learning experience. Follow along from the top, or jump straight to the section you need.
+                    </p>
+
+                    <!-- Quick jump links -->
+                    <nav class="guide-toc reveal" aria-label="Guide contents">
+                        <a href="#getting-started">Getting Started</a>
+                        <a href="#connect-ai">Connect Your AI</a>
+                        <a href="#chat-practice">AI Chat Practice</a>
+                        <a href="#feedback">AI Feedback</a>
+                        <a href="#scoring">How Your Score Is Calculated</a>
+                        <a href="#voice">Voice Practice</a>
+
+                        <a href="#history">Learning History</a>
+                        <a href="#stats">Statistics</a>
+                        <a href="#models">Choosing Models</a>
+                        <a href="#tips">Tips</a>
+                        <a href="#troubleshooting">Troubleshooting</a>
+                    </nav>
+                </div>
+            </section>
+
+            <!-- ═══════════════ GETTING STARTED ═══════════════ -->
+            <section class="section section-tight" id="getting-started">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Step one</p>
+                        <h2 class="section-title">Getting started</h2>
+                        <p class="section-sub">Create your account and get comfortable with the basics. It only takes a
+                            couple of minutes.</p>
+                    </div>
+
+                    <div class="guide-step-grid">
+                        <article class="guide-step reveal">
+                            <span class="guide-step-num">1</span>
+                            <div class="guide-step-body">
+                                <h3>Create an account</h3>
+                                <p>Sign up with a username, email, and password. During signup you'll also pick your
+                                    first AI provider — you can always change it later in Settings.</p>
+                            </div>
+                        </article>
+                        <article class="guide-step reveal">
+                            <span class="guide-step-num">2</span>
+                            <div class="guide-step-body">
+                                <h3>Complete initial setup</h3>
+                                <p>Add your AI provider API key so Uccharon can start giving feedback. Your key stays on
+                                    your device — it's never sent to our servers.</p>
+                            </div>
+                        </article>
+                        <article class="guide-step reveal">
+                            <span class="guide-step-num">3</span>
+                            <div class="guide-step-body">
+                                <h3>Choose your learning goals</h3>
+                                <p>Set a daily word goal that fits your schedule. Uccharon tracks it to keep you
+                                    consistent and build a practice streak.</p>
+                            </div>
+                        </article>
+                        <article class="guide-step reveal">
+                            <span class="guide-step-num">4</span>
+                            <div class="guide-step-body">
+                                <h3>Understand the dashboard</h3>
+                                <p>The sidebar holds your conversations, learning history, and statistics. The main area
+                                    is where you chat. Settings live behind the gear icon.</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ CONNECT YOUR AI PROVIDER ═══════════════ -->
+            <section class="section section-tight" id="connect-ai">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Bring your own AI</p>
+                        <h2 class="section-title">Connect your AI provider</h2>
+                        <p class="section-sub">Uccharon runs on your own API key. You choose the provider, you control
+                            the cost, and your key never leaves your device.</p>
+                    </div>
+
+                    <div class="guide-provider-grid">
+                        <div class="guide-provider reveal">
+                            <span class="guide-provider-name">Google Gemini</span>
+                            <span class="guide-provider-note">Generous free tier</span>
+                        </div>
+                        <div class="guide-provider reveal">
+                            <span class="guide-provider-name">Groq</span>
+                            <span class="guide-provider-note">Very fast responses</span>
+                        </div>
+                        <div class="guide-provider reveal">
+                            <span class="guide-provider-name">OpenRouter</span>
+                            <span class="guide-provider-note">Many models, one key</span>
+                        </div>
+                        <div class="guide-provider reveal">
+                            <span class="guide-provider-name">OpenAI</span>
+                            <span class="guide-provider-note">Advanced quality</span>
+                        </div>
+                    </div>
+
+                    <div class="guide-flow reveal">
+                        <div class="guide-flow-item">
+                            <div class="guide-flow-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3" />
+                                </svg>
+                            </div>
+                            <h4>Add an API key</h4>
+                            <p>Open Settings, pick your provider, and paste the key you generated on the provider's
+                                dashboard. Each provider tile links straight to where you get your key.</p>
+                        </div>
+                        <div class="guide-flow-item">
+                            <div class="guide-flow-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <path d="M22 4L12 14.01l-3-3" />
+                                </svg>
+                            </div>
+                            <h4>Validate the key</h4>
+                            <p>Hit validate and Uccharon runs a quick test call. A green check means you're ready; an
+                                error tells you if the key is wrong or the provider is unavailable.</p>
+                        </div>
+                        <div class="guide-flow-item">
+                            <div class="guide-flow-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h16v4H4z" />
+                                </svg>
+                            </div>
+                            <h4>Choose an AI model</h4>
+                            <p>Once the key is valid, pick a model from the list. Different models balance speed, depth,
+                                and cost — see <a href="#models">choosing models</a> below.</p>
+                        </div>
+                        <div class="guide-flow-item">
+                            <div class="guide-flow-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 4v6h-6M1 20v-6h6" />
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                                </svg>
+                            </div>
+                            <h4>Change providers later</h4>
+                            <p>Switch providers or models any time in Settings. Add multiple keys and jump between them
+                                depending on what you're practicing.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ AI CHAT PRACTICE ═══════════════ -->
+            <section class="section section-tight" id="chat-practice">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Everyday practice</p>
+                        <h2 class="section-title">AI chat practice</h2>
+                        <p class="section-sub">The heart of Uccharon — natural conversations that quietly teach you as
+                            you go.</p>
+                    </div>
+
+                    <ul class="guide-list-cards">
+                        <li class="guide-list-card reveal">
+                            <h3>Have real conversations</h3>
+                            <p>Chat about anything — your day, your work, a topic you love. The more naturally you write,
+                                the more useful the feedback.</p>
+                        </li>
+                        <li class="guide-list-card reveal">
+                            <h3>Ask questions freely</h3>
+                            <p>Not sure why something is wrong? Ask. You can request grammar explanations, better
+                                phrasing, or examples right in the chat.</p>
+                        </li>
+                        <li class="guide-list-card reveal">
+                            <h3>Receive instant AI feedback</h3>
+                            <p>Every message you send comes back with structured corrections and suggestions alongside
+                                the reply, so you learn in context.</p>
+                        </li>
+                        <li class="guide-list-card reveal">
+                            <h3>Improve with regular practice</h3>
+                            <p>Short, frequent sessions beat rare long ones. Keep the conversation going and watch your
+                                scores climb over time.</p>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ═══════════════ UNDERSTANDING AI FEEDBACK ═══════════════ -->
+            <section class="section section-tight" id="feedback">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Reading your results</p>
+                        <h2 class="section-title">Understanding AI feedback</h2>
+                        <p class="section-sub">Feedback is broken into clear sections so you always know exactly what to
+                            work on.</p>
+                    </div>
+
+                    <div class="guide-feedback-grid">
+                        <article class="guide-feedback reveal">
+                            <div class="guide-feedback-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                            </div>
+                            <h3>Grammar corrections</h3>
+                            <p>Fixes tense, agreement, articles, and structure — with a short explanation of the rule
+                                behind each change.</p>
+                        </article>
+                        <article class="guide-feedback reveal">
+                            <div class="guide-feedback-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                </svg>
+                            </div>
+                            <h3>Vocabulary improvements</h3>
+                            <p>Suggests stronger or more precise word choices, often with synonyms so you can expand your
+                                active vocabulary.</p>
+                        </article>
+                        <article class="guide-feedback reveal">
+                            <div class="guide-feedback-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                </svg>
+                            </div>
+                            <h3>Naturalness suggestions</h3>
+                            <p>Shows how a native speaker would phrase something, so your English sounds fluent rather
+                                than merely correct.</p>
+                        </article>
+                        <article class="guide-feedback reveal">
+                            <div class="guide-feedback-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                            </div>
+                            <h3>Sentence improvements</h3>
+                            <p>Rewrites whole sentences for clarity and flow, giving you a polished version to learn
+                                from and reuse.</p>
+                        </article>
+                        <article class="guide-feedback reveal">
+                            <div class="guide-feedback-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                                </svg>
+                            </div>
+                            <h3>Pronunciation suggestions</h3>
+                            <p>Highlights tricky words with phonetic hints and tips, especially helpful during voice
+                                practice.</p>
+                        </article>
+                        <article class="guide-feedback reveal">
+                            <div class="guide-feedback-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                </svg>
+                            </div>
+                            <h3>Mechanics corrections</h3>
+                            <p>Catches spelling, punctuation, and capitalization slips — the small details that make
+                                writing look sharp.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ HOW YOUR SCORE IS CALCULATED ═══════════════ -->
+            <section class="section section-tight" id="scoring">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Transparent scoring</p>
+                        <h2 class="section-title">How your score is calculated</h2>
+                        <p class="section-sub">Every message you send is rated across five categories. Here's exactly
+                            what each one measures and how they combine into your overall score.</p>
+                    </div>
+
+                    <!-- The five scoring categories -->
+                    <div class="guide-score-grid">
+                        <article class="guide-score-card reveal">
+                            <div class="guide-score-head">
+                                <div class="guide-score-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 6L9 17l-5-5" />
+                                    </svg>
+                                </div>
+                                <h3>Grammar</h3>
+                                <span class="guide-score-weight">30%</span>
+                            </div>
+                            <p>Looks only at structural correctness: tense, articles, prepositions, subject–verb
+                                agreement, word forms, pronouns, conjunctions, modifiers, parallelism, and quantifiers.
+                                It does not judge your word choice or how natural you sound.</p>
+                        </article>
+                        <article class="guide-score-card reveal">
+                            <div class="guide-score-head">
+                                <div class="guide-score-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                    </svg>
+                                </div>
+                                <h3>Vocabulary</h3>
+                                <span class="guide-score-weight">20%</span>
+                            </div>
+                            <p>Focuses on your word choice — how accurate, appropriate, sophisticated, and varied it is.
+                                It does not evaluate collocations or overall phrasing (that's naturalness).</p>
+                        </article>
+                        <article class="guide-score-card reveal">
+                            <div class="guide-score-head">
+                                <div class="guide-score-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                    </svg>
+                                </div>
+                                <h3>Naturalness</h3>
+                                <span class="guide-score-weight">15%</span>
+                            </div>
+                            <p>Measures how natural your message sounds in everyday English — collocations, idioms, and
+                                common sentence patterns — while avoiding awkward or overly literal translations.</p>
+                        </article>
+                        <article class="guide-score-card reveal">
+                            <div class="guide-score-head">
+                                <div class="guide-score-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                    </svg>
+                                </div>
+                                <h3>Expression</h3>
+                                <span class="guide-score-weight">30%</span>
+                            </div>
+                            <p>Rates how effectively you communicate your ideas — completeness, clarity, and level of
+                                detail. Simple but clear communication is not penalized; you don't need long or complex
+                                sentences to score well.</p>
+                        </article>
+                        <article class="guide-score-card reveal">
+                            <div class="guide-score-head">
+                                <div class="guide-score-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="3" />
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                    </svg>
+                                </div>
+                                <h3>Mechanics</h3>
+                                <span class="guide-score-weight">5%</span>
+                            </div>
+                            <p>Checks spelling, capitalization, punctuation, and readability. Casual chat style is fine
+                                and won't cost you points unless it actually gets in the way of understanding.</p>
+                        </article>
+                        <article class="guide-score-card reveal">
+                            <div class="guide-score-head">
+                                <div class="guide-score-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.5L5.7 21l2.3-7-6-4.6h7.6z" />
+                                    </svg>
+                                </div>
+                                <h3>Overall score</h3>
+                                <span class="guide-score-weight">100%</span>
+                            </div>
+                            <p>Each category is scored from 0 to 100. Your overall score is a weighted average — some
+                                categories count more than others, so the final number reflects what matters most for
+                                clear, correct English.</p>
+                        </article>
+                    </div>
+
+                    <!-- Formula -->
+                    <div class="guide-formula reveal">
+                        <div class="guide-formula-head">
+                            <span class="guide-formula-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16M4 20h6M9 4l-3 16M20 12h-8M20 12l-3-4M20 12l-3 4" />
+                                </svg>
+                            </span>
+                            <div>
+                                <p class="guide-formula-label">The overall score formula</p>
+                                <p class="guide-formula-sub">Each category score (0–100) is multiplied by its weight,
+                                    then added together.</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-formula-eq">
+                            <span class="guide-eq-result">Overall</span>
+                            <span class="guide-eq-op">=</span>
+                            <span class="guide-eq-term">
+                                <span class="guide-eq-name">Grammar</span>
+                                <span class="guide-eq-mul">×</span>
+                                <span class="guide-eq-weight">0.30</span>
+                            </span>
+                            <span class="guide-eq-op">+</span>
+                            <span class="guide-eq-term">
+                                <span class="guide-eq-name">Expression</span>
+                                <span class="guide-eq-mul">×</span>
+                                <span class="guide-eq-weight">0.30</span>
+                            </span>
+                            <span class="guide-eq-op">+</span>
+                            <span class="guide-eq-term">
+                                <span class="guide-eq-name">Vocabulary</span>
+                                <span class="guide-eq-mul">×</span>
+                                <span class="guide-eq-weight">0.20</span>
+                            </span>
+                            <span class="guide-eq-op">+</span>
+                            <span class="guide-eq-term">
+                                <span class="guide-eq-name">Naturalness</span>
+                                <span class="guide-eq-mul">×</span>
+                                <span class="guide-eq-weight">0.15</span>
+                            </span>
+                            <span class="guide-eq-op">+</span>
+                            <span class="guide-eq-term">
+                                <span class="guide-eq-name">Mechanics</span>
+                                <span class="guide-eq-mul">×</span>
+                                <span class="guide-eq-weight">0.05</span>
+                            </span>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </section>
+
+            <!-- ═══════════════ VOICE PRACTICE ═══════════════ -->
+            <section class="section section-tight" id="voice">
+
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Speak with confidence</p>
+                        <h2 class="section-title">Voice practice</h2>
+                        <p class="section-sub">Speak instead of type. Voice practice builds real speaking confidence and
+                            sharpens pronunciation.</p>
+                    </div>
+
+                    <div class="guide-two-col">
+                        <div class="guide-panel reveal">
+                            <h3>How it works</h3>
+                            <ul class="guide-bullets">
+                                <li><strong>Enable microphone access.</strong> Tap the mic and allow your browser's
+                                    permission prompt. You can revoke it any time in your browser settings.</li>
+                                <li><strong>Pick a speech-to-text option.</strong> Choose how your speech is transcribed
+                                    in Settings, depending on the provider you prefer.</li>
+                                <li><strong>Practice speaking naturally.</strong> Talk as you would in a real
+                                    conversation. Regular voice sessions build fluency and reduce hesitation.</li>
+                            </ul>
+                        </div>
+                        <div class="guide-panel reveal">
+                            <h3>Supported voice providers</h3>
+                            <div class="guide-chip-row">
+                                <span class="guide-chip">Browser Speech Recognition</span>
+                                <span class="guide-chip">OpenAI Whisper</span>
+                                <span class="guide-chip">Groq Whisper</span>
+                                <span class="guide-chip">Gemini Audio</span>
+                            </div>
+                            <p class="guide-panel-note">Browser Speech Recognition converts your voice to text
+                                in real time as you speak and needs no key, while Groq or OpenAI Whisper transcribe your
+                                whole speech to text after you finish speaking, using your API key for higher-accuracy
+                                results.</p>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ LEARNING HISTORY ═══════════════ -->
+            <section class="section section-tight" id="history">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Look back to move forward</p>
+                        <h2 class="section-title">Learning history</h2>
+                        <p class="section-sub">Every correction and suggestion is saved so you can revisit and reinforce
+                            what you've learned.</p>
+                    </div>
+
+                    <ul class="guide-list-cards">
+                        <li class="guide-list-card reveal">
+                            <h3>Review previous corrections</h3>
+                            <p>Browse all your past grammar, vocabulary, and sentence fixes in one place, grouped by
+                                type.</p>
+                        </li>
+                        <li class="guide-list-card reveal">
+                            <h3>Track your improvement</h3>
+                            <p>See how the same mistakes fade over time — proof that your practice is paying off.</p>
+                        </li>
+                        <li class="guide-list-card reveal">
+                            <h3>Revisit vocabulary &amp; suggestions</h3>
+                            <p>Return to suggested words, synonyms, and phrasing so they stick and become part of how you
+                                naturally write and speak.</p>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ═══════════════ STATISTICS DASHBOARD ═══════════════ -->
+            <section class="section section-tight" id="stats">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Measure your progress</p>
+                        <h2 class="section-title">Statistics dashboard</h2>
+                        <p class="section-sub">Turn your practice into clear, motivating insights.</p>
+                    </div>
+
+                    <div class="guide-step-grid">
+                        <article class="guide-step reveal">
+                            <span class="guide-step-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 3v18h18" />
+                                    <path d="M18 17V9M13 17V5M8 17v-3" />
+                                </svg>
+                            </span>
+                            <div class="guide-step-body">
+                                <h3>Progress tracking</h3>
+                                <p>Follow your daily word goal, completed days, and current and best streaks at a
+                                    glance.</p>
+                            </div>
+                        </article>
+                        <article class="guide-step reveal">
+                            <span class="guide-step-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 6l-9.5 9.5-5-5L1 18" />
+                                    <path d="M17 6h6v6" />
+                                </svg>
+                            </span>
+                            <div class="guide-step-body">
+                                <h3>Performance trends</h3>
+                                <p>Charts show how your scores move day by day, week by week, so you can spot patterns.</p>
+                            </div>
+                        </article>
+                        <article class="guide-step reveal">
+                            <span class="guide-step-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <path d="M22 4L12 14.01l-3-3" />
+                                </svg>
+                            </span>
+                            <div class="guide-step-body">
+                                <h3>Grammar, vocabulary &amp; naturalness scores</h3>
+                                <p>Break down your averages and best scores across every feedback category to see your
+                                    strengths and weak spots.</p>
+                            </div>
+                        </article>
+                        <article class="guide-step reveal">
+                            <span class="guide-step-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                            </span>
+                            <div class="guide-step-body">
+                                <h3>Learning activity insights</h3>
+                                <p>Filter by time range or AI model to understand how, when, and with which model you
+                                    learn best.</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ CHOOSING AI MODELS ═══════════════ -->
+            <section class="section section-tight" id="models">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Speed vs. depth</p>
+                        <h2 class="section-title">Choosing AI models</h2>
+                        <p class="section-sub">Different models suit different moments. Match the model to what you're
+                            doing.</p>
+                    </div>
+
+                    <div class="guide-two-col">
+                        <div class="guide-panel reveal">
+                            <div class="guide-panel-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                            </div>
+                            <h3>Faster models</h3>
+                            <p>Great for quick, flowing conversations where you want instant replies and a natural back
+                                and forth. Ideal for casual daily practice.</p>
+                        </div>
+                        <div class="guide-panel reveal">
+                            <div class="guide-panel-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2a7 7 0 0 0-4 12.7V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.3A7 7 0 0 0 12 2z" />
+                                    <path d="M9 21h6" />
+                                </svg>
+                            </div>
+                            <h3>Advanced models</h3>
+                            <p>Better for detailed explanations, nuanced corrections, and tricky grammar. Reach for these
+                                when you want to really understand the "why".</p>
+                        </div>
+                    </div>
+                    <p class="guide-center-note reveal">You can switch models any time in Settings based on your needs —
+                        no commitment, no lock-in.</p>
+                </div>
+            </section>
+
+            <!-- ═══════════════ TIPS FOR BETTER RESULTS ═══════════════ -->
+            <section class="section section-tight" id="tips">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Get more out of it</p>
+                        <h2 class="section-title">Tips for better results</h2>
+                        <p class="section-sub">A few habits that make a big difference over time.</p>
+                    </div>
+
+                    <ul class="guide-tips">
+                        <li class="guide-tip reveal">
+                            <span class="guide-tip-dot"></span>
+                            <div>
+                                <h4>Practice consistently</h4>
+                                <p>A little every day beats occasional marathons. Short sessions keep momentum and your
+                                    streak alive.</p>
+                            </div>
+                        </li>
+                        <li class="guide-tip reveal">
+                            <span class="guide-tip-dot"></span>
+                            <div>
+                                <h4>Write naturally</h4>
+                                <p>Don't over-edit before you send. Real, unpolished input gives the AI the best chance
+                                    to help you improve.</p>
+                            </div>
+                        </li>
+                        <li class="guide-tip reveal">
+                            <span class="guide-tip-dot"></span>
+                            <div>
+                                <h4>Review your mistakes</h4>
+                                <p>Revisit your learning history regularly so corrections turn into lasting habits.</p>
+                            </div>
+                        </li>
+                        <li class="guide-tip reveal">
+                            <span class="guide-tip-dot"></span>
+                            <div>
+                                <h4>Use voice mode regularly</h4>
+                                <p>Speaking out loud builds confidence and pronunciation in a way typing can't.</p>
+                            </div>
+                        </li>
+                        <li class="guide-tip reveal">
+                            <span class="guide-tip-dot"></span>
+                            <div>
+                                <h4>Experiment with different models</h4>
+                                <p>Try a fast model for chatting and an advanced one for deep feedback. Find the mix that
+                                    works for you.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ═══════════════ TROUBLESHOOTING ═══════════════ -->
+            <section class="section section-tight" id="troubleshooting">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">When something goes wrong</p>
+                        <h2 class="section-title">Troubleshooting</h2>
+                        <p class="section-sub">Common hiccups and quick ways to fix them.</p>
+                    </div>
+
+                    <div class="guide-faq">
+                        <details class="guide-faq-item reveal">
+                            <summary>
+                                <span>Invalid API key</span>
+                                <svg class="guide-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </summary>
+                            <p>Double-check for extra spaces or missing characters when pasting. Make sure the key
+                                belongs to the provider you've selected, and that it hasn't been revoked. Generate a
+                                fresh key from the provider's dashboard if in doubt, then validate it again.</p>
+                        </details>
+                        <details class="guide-faq-item reveal">
+                            <summary>
+                                <span>Rate limit reached</span>
+                                <svg class="guide-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </summary>
+                            <p>You've sent requests faster than your provider's free or paid tier allows. Wait a moment
+                                and try again, switch to a different provider or model, or upgrade your plan with the
+                                provider for higher limits.</p>
+                        </details>
+                        <details class="guide-faq-item reveal">
+                            <summary>
+                                <span>Provider errors</span>
+                                <svg class="guide-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </summary>
+                            <p>Occasionally a provider has an outage or a model is temporarily unavailable. Try again in
+                                a few minutes, pick another model, or switch to a different provider you've set up.</p>
+                        </details>
+                        <details class="guide-faq-item reveal">
+                            <summary>
+                                <span>Microphone permission issues</span>
+                                <svg class="guide-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </summary>
+                            <p>If voice practice can't hear you, check that your browser has microphone permission for
+                                Uccharon and that the right input device is selected. Reload the page after granting
+                                access, and make sure no other app is holding the microphone.</p>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+
+        <!-- ═══════════════ FOOTER ═══════════════ -->
+        <footer class="home-footer">
+            <div class="container">
+                <div class="footer-inner">
+                    <div class="footer-brand">
+                        <div class="nav-brand">
+                            <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                            <span>Uccharon</span>
+                        </div>
+                        <p>The AI English speaking coach that runs on your own API key. Your AI, your cost, your
+                            journey.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="footer-col">
+                            <h5>Product</h5>
+                            <a href="/#features">Features</a>
+                            <a href="/#how">How It Works</a>
+                            <a href="/#providers">Providers</a>
+                        </div>
+                        <div class="footer-col">
+                            <h5>Company</h5>
+                            <a href="/about/">About</a>
+                            <a href="/guide/">Guide</a>
+                            <a href="/privacy/">Privacy</a>
+                        </div>
+                        <div class="footer-col footer-col-cta">
+                            <h5>Get Started</h5>
+                            <a href="/app/">Sign In</a>
+                            <a href="/app/?auth=signup">Create Account</a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <span class="footer-copy-left">&copy; <span id="year"></span> Uccharon. All rights
+                        reserved.</span>
+                    <span class="footer-copy-right">Your API Key. Your AI. Your Learning.</span>
+                    <span class="footer-copy-mobile">&copy; 2026 Uccharon. All rights reserved.</span>
+
+                </div>
+
+            </div>
+        </footer>
+    </div>
+
+    <script src="{% static 'coach/js/home.js' %}?v=2"></script>
+
+</body>
+
+</html>

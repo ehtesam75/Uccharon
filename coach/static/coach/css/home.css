@@ -1027,15 +1027,20 @@ html.home-root body {
     margin-top: 40px;
     padding-top: 24px;
     border-top: 1px solid var(--border-color);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     color: var(--text-tertiary);
     font-size: 0.85rem;
 }
 
-/* Task 1: show the full tagline copyright on desktop, the short
-   "All rights reserved." variant only on mobile */
-.footer-copy-desktop { display: inline; }
+/* Desktop: copyright on the left, tagline on the right.
+   Mobile: single centered "All rights reserved." line. */
+.footer-copy-left { display: inline; }
+.footer-copy-right { display: inline; }
 .footer-copy-mobile { display: none; }
+
 
 
 /* ─── Reveal on scroll ───────────────────────────────────── */
@@ -1324,9 +1329,12 @@ html.home-root body {
     /* Task 4: hide the footer Get Started (Sign In / Create Account) column */
     .footer-col-cta { display: none; }
 
-    /* Task 1: on mobile swap the long tagline for the short copyright line */
-    .footer-copy-desktop { display: none; }
+    /* Task 1: on mobile show only the short centered copyright line */
+    .footer-bottom { justify-content: center; text-align: center; }
+    .footer-copy-left { display: none; }
+    .footer-copy-right { display: none; }
     .footer-copy-mobile { display: inline; }
+
 
 
     /* ─── Task 5: Compact mobile "How it works" timeline ───── */

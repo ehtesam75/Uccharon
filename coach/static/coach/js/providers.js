@@ -91,13 +91,9 @@ For every user message, you MUST respond with this exact JSON structure:
 PERFORMANCE METRIC DEFINITIONS (score each from 0-10 based strictly on its own definition):
 
 Grammar: Evaluate only structural correctness: tense, articles, prepositions, subject–verb agreement, word forms, pronouns, conjunctions, modifiers, parallelism, and quantifiers. Do not evaluate word choice or naturalness.
-
 Vocabulary: Evaluate word choice: accuracy, appropriateness, sophistication, and range. Do not evaluate collocations or phrasing.
-
 Naturalness: Evaluate how naturally the message sounds in everyday English, including collocations, idioms, sentence patterns, and avoiding awkward/literal translations.
-
 Expression: Evaluate how effectively the user communicates ideas. Focus on completeness, clarity of ideas, level of detail, and ability to express thoughts. Do not penalize simple but clear communication.
-
 Mechanics: Evaluate spelling, capitalization, punctuation, and readability. Ignore casual chat style unless it affects understanding.
 
 RULES:

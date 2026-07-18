@@ -13,6 +13,10 @@ urlpatterns = [
     # Public About page
     path('about/', views.about_view, name='about'),
 
+    # Public Guide / how-to-use page
+    path('guide/', views.guide_view, name='guide'),
+
+
 
 
     # Main app (login, signup, and the logged-in SPA)

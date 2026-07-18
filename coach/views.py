@@ -794,6 +794,19 @@ def about_view(request):
     return render(request, 'coach/about.html')
 
 
+def guide_view(request):
+    """Serve the public Guide / how-to-use page.
+
+    A standalone marketing-style page (same shell as the homepage) that walks
+    new users through setting up Uccharon, connecting their own AI provider,
+    and getting the most out of the learning features. Always accessible,
+    whether or not the visitor is signed in.
+    """
+    from django.shortcuts import render
+    return render(request, 'coach/guide.html')
+
+
+
 
 
 
