@@ -1,0 +1,596 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="home-root">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About – Uccharon</title>
+    <meta name="description"
+        content="The story, mission, and philosophy behind Uccharon — a privacy-first, open-source, bring-your-own-AI English speaking coach built to make learning affordable and transparent.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="manifest" href="{% static 'coach/manifest.json' %}">
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" type="image/x-icon" href="{% static 'coach/icon/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'coach/icon/apple-touch-icon.png' %}">
+
+    <link rel="stylesheet" href="{% static 'coach/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'coach/css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'coach/css/about.css' %}">
+
+    <!-- Apply persisted theme immediately to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('uccharon_theme');
+                if (t !== 'light' && t !== 'dark') t = 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="home-orbs" aria-hidden="true">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="orb orb-c"></div>
+    </div>
+
+    <div class="home">
+
+        <!-- ═══════════════ NAVBAR ═══════════════ -->
+        <header class="home-nav">
+            <div class="container home-nav-inner">
+                <a href="/" class="nav-brand">
+                    <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                    <span>Uccharon</span>
+                </a>
+
+                <nav aria-label="Primary">
+                    <ul class="nav-links">
+                        <li><a href="/#features">Features</a></li>
+                        <li><a href="/about/" class="is-active">About</a></li>
+                        <li><a href="/#guide">Guide</a></li>
+                        <li><a href="/privacy/">Privacy</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-actions">
+                    <button class="nav-theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme"
+                        title="Toggle theme">
+                        <svg class="theme-icon-dark" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg class="theme-icon-light" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="display:none">
+                            <circle cx="12" cy="12" r="5" />
+                            <path
+                                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                        </svg>
+                    </button>
+                    <a href="/app/" class="nav-signin">Sign in</a>
+                    <a href="/app/?auth=signup" class="nav-getstarted">Get started
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                    <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu"
+                        aria-expanded="false">
+                        <svg class="burger-open" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                        <svg class="burger-close" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile menu -->
+        <div class="mobile-backdrop" id="mobile-backdrop" aria-hidden="true"></div>
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-menu-inner">
+
+                <p class="mobile-menu-label">Menu</p>
+                <nav class="mobile-menu-nav" aria-label="Mobile">
+                    <a href="/#features" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.5L5.7 21l2.3-7-6-4.6h7.6z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Features</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/about/" class="mobile-link is-active">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 16v-4M12 8h.01" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">About</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/#guide" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Guide</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                    <a href="/privacy/" class="mobile-link">
+                        <span class="mi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </span>
+                        <span class="mi-text">Privacy</span>
+                        <svg class="mi-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </a>
+                </nav>
+                <div class="mobile-menu-divider"></div>
+                <div class="mobile-menu-actions">
+                    <a href="/app/" class="btn btn-ghost">Sign In</a>
+                    <a href="/app/?auth=signup" class="btn btn-primary">Get Started
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <main>
+
+            <!-- ═══════════════ HERO ═══════════════ -->
+            <section class="section about-hero">
+                <div class="container">
+                    <span class="hero-badge reveal"><span class="dot"></span> Open source &amp; privacy-first</span>
+                    <h1 class="about-title reveal">The story behind <span class="grad">Uccharon</span></h1>
+                    <p class="about-lead reveal">
+                        Uccharon is an AI-powered English learning and speaking practice platform built on a simple
+                        belief: fluency should be affordable, transparent, and fully in your control. You bring your own
+                        AI, your own API key, and your own pace — the tool just gets out of your way.
+                    </p>
+                    <div class="about-hero-tags reveal">
+                        <span class="about-chip">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
+                            </svg>
+                            AI speaking practice
+                        </span>
+                        <span class="about-chip">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            Bring your own AI
+                        </span>
+                        <span class="about-chip">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                            </svg>
+                            Open &amp; transparent
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ WHY UCCHARON EXISTS ═══════════════ -->
+            <section class="section section-tight">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">The motivation</p>
+                        <h2 class="section-title">Why Uccharon exists</h2>
+                        <p class="section-sub">Great English practice shouldn't mean expensive subscriptions or handing
+                            over control of your data. Uccharon started as an answer to a few frustrations.</p>
+                    </div>
+
+                    <div class="about-reason-grid">
+                        <article class="about-reason reveal">
+                            <div class="about-reason-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                            </div>
+                            <h3>Learning is often expensive</h3>
+                            <p>Many English platforms lock the best practice behind pricey monthly subscriptions that add
+                                up fast — especially for students.</p>
+                        </article>
+                        <article class="about-reason reveal">
+                            <div class="about-reason-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h16v4H4z" />
+                                </svg>
+                            </div>
+                            <h3>Little control over the AI</h3>
+                            <p>Most apps decide which model you use and how much you pay, with no way to switch providers
+                                or use the free tiers you already have.</p>
+                        </article>
+                        <article class="about-reason reveal">
+                            <div class="about-reason-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                            </div>
+                            <h3>Opaque key &amp; privacy handling</h3>
+                            <p>It's rarely clear where your API keys go or how your data is handled. Trust shouldn't
+                                require guesswork.</p>
+                        </article>
+                        <article class="about-reason reveal">
+                            <div class="about-reason-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <path d="M22 4L12 14.01l-3-3" />
+                                </svg>
+                            </div>
+                            <h3>A better way to learn</h3>
+                            <p>Uccharon was built to offer an affordable, transparent, and user-controlled learning
+                                experience — with nothing hidden.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ MISSION ═══════════════ -->
+            <section class="section section-tight">
+                <div class="container">
+                    <div class="about-mission-card reveal">
+                        <p class="eyebrow">Our mission</p>
+                        <blockquote class="about-mission-quote">
+                            Make AI-powered English learning <span class="grad">accessible, transparent, and
+                                affordable</span> for everyone.
+                        </blockquote>
+                        <p class="about-mission-desc">
+                            Every decision in Uccharon is measured against that mission — from keeping API keys on your
+                            device, to supporting free provider tiers, to publishing the entire codebase in the open.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ VISION ═══════════════ -->
+            <section class="section section-tight">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Where we're headed</p>
+                        <h2 class="section-title">Our vision</h2>
+                        <p class="section-sub">A learning companion that keeps getting better, shaped by the people who
+                            use it.</p>
+                    </div>
+
+                    <ul class="about-vision-grid">
+                        <li class="about-vision reveal">
+                            <span class="about-vision-dot"></span>
+                            Deeper, more realistic speaking practice
+                        </li>
+                        <li class="about-vision reveal">
+                            <span class="about-vision-dot"></span>
+                            Support for more AI providers and models
+                        </li>
+                        <li class="about-vision reveal">
+                            <span class="about-vision-dot"></span>
+                            More personalized learning insights
+                        </li>
+                        <li class="about-vision reveal">
+                            <span class="about-vision-dot"></span>
+                            Community-driven improvements
+                        </li>
+                        <li class="about-vision reveal">
+                            <span class="about-vision-dot"></span>
+                            Continuous enhancement of the learning experience
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ═══════════════ OUR PHILOSOPHY ═══════════════ -->
+            <section class="section">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">What guides us</p>
+                        <h2 class="section-title">Our philosophy</h2>
+                        <p class="section-sub">Four principles that shape how Uccharon is built and how it treats you.</p>
+                    </div>
+
+                    <div class="about-philosophy-grid">
+                        <article class="about-principle reveal">
+                            <div class="about-principle-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                </svg>
+                            </div>
+                            <h3>User Control First</h3>
+                            <p>You choose your own AI providers and models. No forced defaults, no lock-in — your setup,
+                                your call.</p>
+                        </article>
+                        <article class="about-principle reveal">
+                            <div class="about-principle-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                            </div>
+                            <h3>Privacy by Design</h3>
+                            <p>API keys stay on your device and never touch our servers. We store as little as possible,
+                                on purpose.</p>
+                        </article>
+                        <article class="about-principle reveal">
+                            <div class="about-principle-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                                </svg>
+                            </div>
+                            <h3>Open &amp; Transparent</h3>
+                            <p>The project is open source and publicly auditable. Anyone can read the code and verify how
+                                it works.</p>
+                        </article>
+                        <article class="about-principle reveal">
+                            <div class="about-principle-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                </svg>
+                            </div>
+                            <h3>Learning Focused</h3>
+                            <p>Designed specifically for English improvement and long-term progress — not endless chatter
+                                or vanity metrics.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ OPEN SOURCE ═══════════════ -->
+            <section class="section section-tight">
+                <div class="container">
+                    <div class="about-oss-card reveal">
+                        <div class="about-oss-icon" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 .5C5.73.5.9 5.33.9 11.6c0 4.9 3.18 9.06 7.6 10.53.56.1.76-.24.76-.53v-1.9c-3.09.67-3.74-1.32-3.74-1.32-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.67.08-.67 1.11.08 1.7 1.14 1.7 1.14.99 1.7 2.6 1.2 3.23.92.1-.72.39-1.2.7-1.48-2.47-.28-5.06-1.24-5.06-5.5 0-1.22.43-2.21 1.14-2.99-.11-.28-.49-1.42.11-2.95 0 0 .93-.3 3.05 1.14a10.6 10.6 0 0 1 5.56 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.53.22 2.67.11 2.95.71.78 1.14 1.77 1.14 2.99 0 4.27-2.6 5.21-5.08 5.49.4.35.76 1.03.76 2.08v3.08c0 .3.2.64.77.53a11.11 11.11 0 0 0 7.59-10.53C23.1 5.33 18.27.5 12 .5z" />
+                            </svg>
+                        </div>
+                        <p class="eyebrow">Open source</p>
+                        <h2 class="section-title">Nothing hidden</h2>
+                        <p class="about-oss-lead">
+                            Uccharon is open source. Anyone can inspect exactly how the project works and verify our
+                            privacy claims for themselves — because trust should be earned in code, not marketing.
+                        </p>
+                        <a class="about-repo-link" href="https://github.com/ehtesam75/Uccharon" target="_blank"
+                            rel="noopener noreferrer">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M12 .5C5.73.5.9 5.33.9 11.6c0 4.9 3.18 9.06 7.6 10.53.56.1.76-.24.76-.53v-1.9c-3.09.67-3.74-1.32-3.74-1.32-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.67.08-.67 1.11.08 1.7 1.14 1.7 1.14.99 1.7 2.6 1.2 3.23.92.1-.72.39-1.2.7-1.48-2.47-.28-5.06-1.24-5.06-5.5 0-1.22.43-2.21 1.14-2.99-.11-.28-.49-1.42.11-2.95 0 0 .93-.3 3.05 1.14a10.6 10.6 0 0 1 5.56 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.53.22 2.67.11 2.95.71.78 1.14 1.77 1.14 2.99 0 4.27-2.6 5.21-5.08 5.49.4.35.76 1.03.76 2.08v3.08c0 .3.2.64.77.53a11.11 11.11 0 0 0 7.59-10.53C23.1 5.33 18.27.5 12 .5z" />
+                            </svg>
+                            View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ TECHNOLOGY STACK ═══════════════ -->
+            <section class="section">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">Under the hood</p>
+                        <h2 class="section-title">Technology stack</h2>
+                        <p class="section-sub">Built with dependable, well-supported tools that keep the project fast,
+                            secure, and easy to maintain.</p>
+                    </div>
+
+                    <div class="about-tech-grid">
+                        <span class="about-tech-badge reveal">Python</span>
+                        <span class="about-tech-badge reveal">Django</span>
+                        <span class="about-tech-badge reveal">JavaScript</span>
+                        <span class="about-tech-badge reveal">HTML5</span>
+                        <span class="about-tech-badge reveal">CSS3</span>
+                        <span class="about-tech-badge reveal">SQLite</span>
+                        <span class="about-tech-badge reveal">Chart.js</span>
+                        <span class="about-tech-badge reveal">Web Speech API</span>
+                        <span class="about-tech-badge reveal">REST APIs</span>
+                        <span class="about-tech-badge reveal">Gemini</span>
+                        <span class="about-tech-badge reveal">OpenAI</span>
+                        <span class="about-tech-badge reveal">Groq</span>
+                        <span class="about-tech-badge reveal">OpenRouter</span>
+                        <span class="about-tech-badge reveal">PWA</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ ROADMAP / FUTURE PLANS ═══════════════ -->
+
+            <section class="section">
+                <div class="container">
+                    <div class="section-head">
+                        <p class="eyebrow">What's next</p>
+                        <h2 class="section-title">Roadmap &amp; future plans</h2>
+                        <p class="section-sub">A living list of where Uccharon is going. Priorities shift as the
+                            community weighs in.</p>
+                    </div>
+
+                    <div class="about-roadmap">
+                        <div class="about-roadmap-item reveal">
+                            <div class="about-roadmap-marker">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14M13 6l6 6-6 6" />
+                                </svg>
+                            </div>
+                            <div class="about-roadmap-text">
+                                <h4>More AI providers</h4>
+                                <p>Broaden the range of chat and voice providers you can connect.</p>
+                            </div>
+                        </div>
+                        <div class="about-roadmap-item reveal">
+                            <div class="about-roadmap-marker">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
+                                </svg>
+                            </div>
+                            <div class="about-roadmap-text">
+                                <h4>Improved voice features</h4>
+                                <p>Smoother speaking practice with richer pronunciation feedback.</p>
+                            </div>
+                        </div>
+                        <div class="about-roadmap-item reveal">
+                            <div class="about-roadmap-marker">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 3v18h18" />
+                                    <path d="M18 17V9M13 17V5M8 17v-3" />
+                                </svg>
+                            </div>
+                            <div class="about-roadmap-text">
+                                <h4>Deeper analytics</h4>
+                                <p>More in-depth insights into your strengths and weak spots over time.</p>
+                            </div>
+                        </div>
+                        <div class="about-roadmap-item reveal">
+                            <div class="about-roadmap-marker">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9.663 17h4.673M12 3v1M3 12h1M20 12h1M5.6 5.6l.7.7M18.4 5.6l-.7.7" />
+                                    <path d="M9 21h6M12 17a5 5 0 0 0 3-9 5 5 0 1 0-6 8" />
+                                </svg>
+                            </div>
+                            <div class="about-roadmap-text">
+                                <h4>Personalized recommendations</h4>
+                                <p>Guidance tailored to what you personally need to work on next.</p>
+                            </div>
+                        </div>
+                        <div class="about-roadmap-item reveal">
+                            <div class="about-roadmap-marker">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                            </div>
+                            <div class="about-roadmap-text">
+                                <h4>Community features</h4>
+                                <p>Ways to learn together and shape the project's direction.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════ FINAL CTA ═══════════════ -->
+            <section class="section section-tight">
+                <div class="container">
+                    <div class="cta-band reveal">
+                        <h2>Ready when you are</h2>
+                        <p>Start practicing English with the AI you trust, explore the open-source project, or dig deeper
+                            into how Uccharon works.</p>
+                        <div class="hero-cta">
+                            <a href="/app/?auth=signup" class="btn btn-primary btn-lg">Start Practicing Free</a>
+                            <a href="https://github.com/ehtesam75/Uccharon" class="btn btn-ghost btn-lg" target="_blank"
+                                rel="noopener noreferrer">Explore the Project</a>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <!-- ═══════════════ FOOTER ═══════════════ -->
+        <footer class="home-footer">
+            <div class="container">
+                <div class="footer-inner">
+                    <div class="footer-brand">
+                        <div class="nav-brand">
+                            <img src="{% static 'coach/icon/uccharon-circle-icon.png' %}" alt="Uccharon logo">
+                            <span>Uccharon</span>
+                        </div>
+                        <p>The AI English speaking coach that runs on your own API key. Your AI, your cost, your
+                            journey.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="footer-col">
+                            <h5>Product</h5>
+                            <a href="/#features">Features</a>
+                            <a href="/#how">How It Works</a>
+                            <a href="/#providers">Providers</a>
+                        </div>
+                        <div class="footer-col">
+                            <h5>Company</h5>
+                            <a href="/about/">About</a>
+                            <a href="/#guide">Guide</a>
+                            <a href="/privacy/">Privacy</a>
+                        </div>
+                        <div class="footer-col footer-col-cta">
+                            <h5>Get Started</h5>
+                            <a href="/app/">Sign In</a>
+                            <a href="/app/?auth=signup">Create Account</a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <span class="footer-copy-desktop">&copy; <span id="year"></span> Uccharon. Your API Key. Your
+                        AI. Your Learning.</span>
+                    <span class="footer-copy-mobile">&copy; 2026 Uccharon. All rights reserved.</span>
+                </div>
+
+            </div>
+        </footer>
+    </div>
+
+    <script src="{% static 'coach/js/home.js' %}?v=2"></script>
+
+</body>
+
+</html>

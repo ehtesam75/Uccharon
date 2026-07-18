@@ -783,6 +783,18 @@ def privacy_view(request):
     return render(request, 'coach/privacy.html')
 
 
+def about_view(request):
+    """Serve the public About page.
+
+    A standalone marketing-style page (same shell as the homepage) that tells
+    the story, mission, philosophy and vision behind Uccharon. Always
+    accessible, whether or not the visitor is signed in.
+    """
+    from django.shortcuts import render
+    return render(request, 'coach/about.html')
+
+
+
 
 
 @ensure_csrf_cookie

@@ -10,6 +10,10 @@ urlpatterns = [
     # Public Privacy Policy page
     path('privacy/', views.privacy_view, name='privacy'),
 
+    # Public About page
+    path('about/', views.about_view, name='about'),
+
+
 
     # Main app (login, signup, and the logged-in SPA)
     path('app/', views.index_view, name='index'),
