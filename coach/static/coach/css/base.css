@@ -114,7 +114,13 @@ body {
     min-height: 100dvh;
     overflow: hidden;
     line-height: 1.6;
+    /* Disable double-tap-to-zoom (and other non-standard touch gestures)
+       while keeping normal scrolling/panning. Only affects touch devices,
+       so desktop browsers are unaffected. Combined with the app's
+       user-scalable=no viewport, this removes accidental zooming in the PWA. */
+    touch-action: manipulation;
 }
+
 
 ::-webkit-scrollbar {
     width: 6px;

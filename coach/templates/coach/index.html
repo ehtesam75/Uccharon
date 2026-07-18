@@ -4,8 +4,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Lock zoom so the app behaves like a native mobile app inside the PWA.
+         maximum-scale=1 + user-scalable=no disable pinch-to-zoom; touch-action
+         in CSS handles double-tap zoom. Desktop browsers are unaffected (they
+         zoom via the browser UI, not the viewport). -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Uccharon – AI English Speaking Coach</title>
+
     <meta name="description"
         content="Practice spoken English with an AI coach. Get grammar corrections, vocabulary tips, pronunciation guidance, and performance tracking.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
