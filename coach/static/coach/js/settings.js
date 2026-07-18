@@ -367,27 +367,38 @@
         }
     }
 
-    // "View the Guide" link in Settings.
-    // The guide always opens in embedded mode (public navbar/footer hidden,
+    // Help & Resources links in Settings (Guide, Privacy, About).
+    // Each page always opens in embedded mode (public navbar/footer hidden,
     // close button shown) so it reads as part of the app rather than the
     // marketing site. Desktop: open in a new tab so the user keeps their place
     // in the app. Mobile: no room for two tabs, so open in the same tab.
-    function initGuideLink() {
-        const link = document.getElementById('view-guide-link');
-        if (!link) return;
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const isMobile = window.matchMedia('(max-width: 780px)').matches;
-            if (isMobile) {
-                window.location.href = '/guide/?embedded=true';
-            } else {
-                // newtab=1 tells the guide's close button to close this tab
-                // (rather than navigate back) since it was opened fresh.
-                window.open('/guide/?embedded=true&newtab=1', '_blank');
-            }
+    function openEmbeddedPage(path) {
+        const isMobile = window.matchMedia('(max-width: 780px)').matches;
+        if (isMobile) {
+            window.location.href = `${path}?embedded=true`;
+        } else {
+            // newtab=1 tells the page's close button to close this tab
+            // (rather than navigate back) since it was opened fresh.
+            window.open(`${path}?embedded=true&newtab=1`, '_blank');
+        }
+    }
 
+    function initGuideLink() {
+        const links = [
+            { id: 'view-guide-link', path: '/guide/' },
+            { id: 'view-privacy-link', path: '/privacy/' },
+            { id: 'view-about-link', path: '/about/' },
+        ];
+        links.forEach(({ id, path }) => {
+            const link = document.getElementById(id);
+            if (!link) return;
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                openEmbeddedPage(path);
+            });
         });
     }
+
 
 
     function initSettings() {

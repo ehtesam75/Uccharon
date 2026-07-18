@@ -127,13 +127,17 @@
         if (y) y.textContent = new Date().getFullYear();
     }
 
-    // ─── Embedded guide close button ─────────────────────────
-    // When the guide is opened inside the app (Settings → View the
-    // Guide) with ?embedded=true, a floating close button is shown.
-    // Clicking it returns the user to the app.
+    // ─── Embedded close button ───────────────────────────────
+    // When a public info page (Guide, Privacy, About) is opened
+    // inside the app (Settings → Help & Resources) with
+    // ?embedded=true, a floating close button is shown. Clicking it
+    // returns the user to the app. All three pages share the same
+    // #guide-embed-close button.
     function initEmbedClose() {
         var btn = document.getElementById('guide-embed-close');
         if (!btn) return;
+
+
         btn.addEventListener('click', function () {
             var params = new URLSearchParams(window.location.search);
             // Opened in a fresh tab (desktop): just close the tab so the user

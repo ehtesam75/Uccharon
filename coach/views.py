@@ -941,7 +941,9 @@ def privacy_view(request):
     always accessible, whether or not the visitor is signed in.
     """
     from django.shortcuts import render
-    return render(request, 'coach/privacy.html')
+    embedded = request.GET.get('embedded') == 'true'
+    return render(request, 'coach/privacy.html', {'embedded': embedded})
+
 
 
 def about_view(request):
@@ -952,7 +954,9 @@ def about_view(request):
     accessible, whether or not the visitor is signed in.
     """
     from django.shortcuts import render
-    return render(request, 'coach/about.html')
+    embedded = request.GET.get('embedded') == 'true'
+    return render(request, 'coach/about.html', {'embedded': embedded})
+
 
 
 def guide_view(request):

@@ -168,8 +168,16 @@
     background: rgba(var(--accent-primary-rgb), 0.1);
 }
 
+/* ─── Help & Resources links (Guide / Privacy / About) ───── */
+.settings-resource-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 /* ─── "View the Guide" link (Help & Resources) ───────────── */
 .settings-guide-link {
+
     display: flex;
     align-items: center;
     gap: 12px;
