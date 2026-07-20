@@ -716,43 +716,24 @@
 .guide-formula {
     max-width: 860px;
     margin: 22px auto 0;
-    padding: 26px 28px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-    background: var(--gradient-card);
+    padding: 24px 0 0;
+    border-top: 1px solid var(--border-color);
 }
 
 .guide-formula-head {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.guide-formula-icon {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    border-radius: var(--radius-md);
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    color: var(--accent-secondary);
+    margin-bottom: 16px;
 }
 
 .guide-formula-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--accent-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .guide-formula-sub {
     color: var(--text-secondary);
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     line-height: 1.55;
 }
 
@@ -761,60 +742,39 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px 10px;
-    padding: 20px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    background: var(--bg-glass);
+    gap: 6px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.8;
 }
 
 .guide-eq-result {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.95rem;
     font-weight: 600;
-    color: var(--accent-primary);
-    padding: 8px 14px;
-    border-radius: var(--radius-full);
-    border: 1px solid rgba(var(--accent-primary-rgb), 0.4);
-    background: rgba(var(--accent-primary-rgb), 0.1);
+    color: var(--text-primary);
 }
 
 .guide-eq-op {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.05rem;
-    font-weight: 600;
     color: var(--text-tertiary);
-    padding: 0 2px;
 }
 
 .guide-eq-term {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    background: var(--bg-card);
+    gap: 5px;
 }
 
 .guide-eq-name {
-    font-size: 0.86rem;
-    font-weight: 600;
     color: var(--text-primary);
 }
 
 .guide-eq-mul {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
     color: var(--text-tertiary);
 }
 
 .guide-eq-weight {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--accent-secondary);
+    color: var(--text-secondary);
 }
+
 
 
 /* ─── Active nav state (desktop + mobile) ─────────────────── */
@@ -876,15 +836,8 @@
         grid-template-columns: 1fr;
     }
 
-    .guide-formula {
-        padding: 22px 18px;
-    }
-
-    .guide-formula-eq {
-        padding: 14px;
-    }
-
     .guide-step {
+
         padding: 22px 18px;
         gap: 14px;
     }
